@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>PARASITE</title>
+        <link rel="stylesheet" href="style.css" />
+        <script>
+            onerror = function(event, source, lineno, colno, error) {
+                try {
+                    var err = ("" +
+                        "\nline: " + (lineno || "unknown") +
+                        "\ncolumn: " + (colno || "unknown") + 
+                        "\nfile: " + (source || "unknown") + 
+                        "\ntraceback: " + (error == null ? "not available (" + event + " ??)" : error.stack)
+                    );
+                    fetch("/report_error/" + encodeURIComponent(err));
+                    document.documentElement.innerHTML = "Fatal error: please copy and <a href=\"https://github.com/dragoncoder047/langton-music/issues\">report</a>: <pre>" + err + "</pre>";
+                }
+                catch(e) {
+                    document.documentElement.innerHTML = "Double fatal error: please copy and <a href=\"https://github.com/dragoncoder047/langton-music/issues\">report</a>: <pre>" + e.stack + "</pre>";
+                    throw e;
+                }
+                throw error;
+            }
+        </script>
+    </head>
+
+    <body>
+        <main>
+            <canvas></canvas>
+            
+            <p>foobar</p>
+        </main>
+        <dialog id="help">
+            <h1>PARASITE</h1>
+            <p>The game that doesn't exist yet.</p>
+        </dialog>
+    </body>
+
+</html>

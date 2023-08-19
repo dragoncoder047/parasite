@@ -1,0 +1,23 @@
+:root {
+    color-scheme: light dark;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: none;
+    padding: none;
+}
+
+dialog {
+    width: 80%;
+    height: 80%;
+    z-index: 99999999999;
+}
+
+dialog::backdrop {
+    color: #0005;
+}
