@@ -15,9 +15,9 @@ main {
 dialog {
     width: 80%;
     height: 80%;
-    z-index: 99999999999;
+    overflow: scroll;
 }
 
 dialog::backdrop {
-    color: #0005;
+    background: #0005;
 }
