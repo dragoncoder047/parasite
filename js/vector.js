@@ -61,4 +61,13 @@ class Vector {
     scale(k) {
         return new Vector(this.x * k, this.y * k);
     }
+    /**
+     * rotate around origin
+     * @param {number} theta Angle in radians
+     * @returns {Vector}
+     */
+    rotate(theta) {
+        var cosine = Math.cos(theta), sine = Math.sin(theta);
+        return new Vector(this.x * cosine - this.y * sine, this.x * sine + this.y * cosine);
+    }
 }
