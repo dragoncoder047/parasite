@@ -8,6 +8,7 @@ class Snake {
     static headWidth = 10;
     static tailWidth = 5;
     static circleSize = (Snake.headWidth + Snake.tailWidth) / 2;
+    static depthOfVision = 25;
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
@@ -28,7 +29,14 @@ class Snake {
         Matter.Composite.addBody(this.segments, Matter.Bodies.circle(headPos.x, headPos.y, Snake.circleSize, { collisionFilter: this.collisionFilter }));
         this.head.plugin.snake = this;
         this.growBy(Snake.initialLength);
+        /**
+         * @type {number}
+         */
+        this.depthOfVision = Snake.depthOfVision;
     }
+    /**
+     * @param {number} amount number of segments to add
+     */
     growBy(amount) {
         for (var i = 0; i < amount; i++) this.addSegment();
     }
