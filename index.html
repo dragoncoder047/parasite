@@ -11,7 +11,7 @@
                         "\nline: " + (lineno || "unknown") +
                         "\ncolumn: " + (colno || "unknown") + 
                         "\nfile: " + (source || "unknown") + 
-                        "\ntraceback: " + (error == null ? "not available (" + event + " ??)" : error.stack)
+                        "\ntraceback: " + (!error ? "not available (" + event + " ??)" : error.stack)
                     );
                     fetch("/report_error/" + encodeURIComponent(err));
                     document.documentElement.innerHTML = "Fatal error: please copy and <a href=\"https://github.com/dragoncoder047/langton-music/issues\">report</a>: <pre>" + err + "</pre>";
@@ -21,20 +21,22 @@
                     throw e;
                 }
                 throw error;
-            }
+            };
+            onunhandledrejection = function(error) {
+                onerror(error, error.reason.source, error.reason.lineno, error.reason.colno, error.reason);
+            };
         </script>
     </head>
 
     <body>
         <main>
-            <canvas></canvas>
-            
-            <p>foobar</p>
         </main>
         <dialog id="help">
             <h1>PARASITE</h1>
             <p>The game that doesn't exist yet.</p>
         </dialog>
     </body>
+    <script src="js/toast.js"></script>
+    <script src="js/game.js"></script>
     <script src="js/main.js"></script>
 </html>

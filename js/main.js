@@ -4,11 +4,22 @@ function safe$(selector) {
     return elem;
 }
 
+const game = new ParasiteGame({
+    main: safe$("main"),
+    popovers: {
+        help: safe$("#help"),
+    }
+});
+
 const helpDialog = safe$("#help");
 
 async function main() {
-    helpDialog.close();
-    helpDialog.showModal();
+    game.toast("hello!");
+    await game.sleep(1000);
+    game.showPopover("help");
+    game.showPopover("help");
+    await game.mainloop();
+    //throw new Error("unreachable");
 }
 
 main();
