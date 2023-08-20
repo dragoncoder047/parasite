@@ -22,7 +22,7 @@ class Brain {
         var binCenterAngle = Math.PI / 4 * (bin - 2);
         var forward = new Vector(0, this.snake.depthOfVision).rotate(binCenterAngle);
         var hits = [];
-        for (var theta = 0; theta < Math.PI / 4; theta += 0.001) {
+        for (var theta = -Math.PI / 8; theta < Math.PI / 8; theta += 0.001) {
             // TODO
         }
     }
