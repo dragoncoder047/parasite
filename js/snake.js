@@ -37,6 +37,7 @@ class Snake {
             pointA: Matter.Vector.create(0, Snake.circleSize / 2),
             pointB: Matter.Vector.create(0, -Snake.circleSize / 2),
             stiffness: 0.25,
+            length: 0,
         });
         Matter.Composite.addConstraint(this.segments, constraint);
     }
