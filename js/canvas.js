@@ -8,7 +8,7 @@ function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     var reportedXY;
     if (evt.touches) {
-        reportedXY = vScale([].map.call(evt.touches, t => ({ x: t.clientX, y: t.clientY })).reduce(vPlus), 1 / evt.touches.length);
+        reportedXY = [].map.call(evt.touches, t => new Vector(t.clientX, t.clientY)).reduce((a, b) => a.plus(b)).scale(1 / evt.touches.length);
     }
     else {
         reportedXY = { x: evt.clientX, y: evt.clientY };
@@ -83,36 +83,36 @@ class Canvas extends XEventEmitter {
             this.mouseDown = true;
             this.timeDown = +new Date();
             this.downxy = getMousePos(canvas, e);
-            this.lastxy = vClone(this.downxy);
+            this.lastxy = new Vector(this.downxy);
             this.emit('mousedown', this.downxy);
         });
         canvas.addEventListener('touchstart', e => {
             this.mouseDown = true;
             this.timeDown = +new Date();
             this.downxy = getMousePos(canvas, e);
-            this.lastxy = vClone(this.downxy);
+            this.lastxy = new Vector(this.downxy);
             this.emit('mousedown', this.downxy);
         });
         canvas.addEventListener('mouseup', e => {
             this.mouseDown = false;
             this.emit('mouseup', this.lastxy);
-            if (vRelMag(this.lastxy, this.downxy) < 16 && +new Date() - this.timeDown < 250) this.emit('click', this.downxy);
+            if (this.lastxy.distanceTo(this.downxy) < 16 && +new Date() - this.timeDown < 250) this.emit('click', this.downxy);
         });
         canvas.addEventListener('touchend', e => {
             this.mouseDown = false;
             this.emit(e, 'mouseup', this.lastxy);
-            if (vRelMag(this.lastxy, this.downxy) < 16 && +new Date() - this.timeDown < 250) this.emit('click', this.downxy);
+            if (this.lastxy.distanceTo(this.downxy) < 16 && +new Date() - this.timeDown < 250) this.emit('click', this.downxy);
         });
         canvas.addEventListener('touchmove', e => {
             var xy = getMousePos(canvas, e);
             if (!this.mouseDown) {
                 this.mouseDown = true;
-                this.downxy = vClone(xy);
+                this.downxy = new Vector(xy);
                 this.emit('mousedown', this.downxy);
             } else {
-                this.emit('drag', vMinus(xy, this.lastxy));
+                this.emit('drag', xy.minus(this.lastxy));
             }
-            this.lastxy = vClone(xy);
+            this.lastxy = new Vector(xy);
         });
         canvas.addEventListener('mousemove', e => {
             var xy = getMousePos(canvas, e);
@@ -120,9 +120,9 @@ class Canvas extends XEventEmitter {
                 this.emit('mouseover', xy);
             }
             else {
-                this.emit('drag', vMinus(xy, this.lastxy));
+                this.emit('drag', xy.minus(this.lastxy));
             }
-            this.lastxy = vClone(xy);
+            this.lastxy = new Vector(xy);
         });
         canvas.addEventListener('wheel', e => {
             this.emit('scroll', { x: e.deltaX, y: e.deltaY });
@@ -152,16 +152,16 @@ class Canvas extends XEventEmitter {
      * @param {Vector} [center]
      */
     zoomBy(factor, center) {
-        if (!center) center = vScale({ x: this.canvas.width, y: this.canvas.height }, 0.5);
+        if (!center) center = this.center;
         this.zoom *= factor;
-        this.panxy = vPlus(vMinus(vScale(this.panxy, factor), vScale(center, factor)), center);
+        this.panxy = this.panxy.scale(factor).minus(center.scale(factor)).plus(center);
     }
     /**
      * Pans the canvas by the specified offset.
      * @param {Vector} xy
      */
     panBy(xy) {
-        this.panxy = vPlus(this.panxy, xy);
+        this.panxy = this.panxy.plus(xy);
     }
     /**
      * Saves the current canvas state and translates by x and y and zooms.
@@ -200,13 +200,13 @@ class Canvas extends XEventEmitter {
      * @returns {Vector} Trasformed point
      */
     transformMousePoint(pt) {
-        return vScale(vMinus(pt, this.panxy), 1 / this.zoom);
+        return pt.minus(this.panxy).scale(1 / this.zoom);
     }
     /**
      * @type {Vector}
      * @readonly
      */
     get center() {
-        return { x: this.canvas.width / 2, y: this.canvas.height / 2 };
+        return new Vector(this.canvas.width / 2, this.canvas.height / 2);
     }
 }

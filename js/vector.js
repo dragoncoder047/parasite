@@ -1,72 +1,64 @@
-/**
- * @typedef {Object} Vector
- * @property {number} x
- * @property {number} y
- */
-
-/**
- * Applies the function to the vector's x- and y-coordinates.
- * @param {Function} fun
- * @param {Vector[]} vectors
- */
-function vApply(fun, ...vectors) {
-    return Object.freeze({ x: fun(...vectors.map(v => v.x)), y: fun(...vectors.map(v => v.y)) });
-}
-
-/**
- * Distance between two points.
- * @param {Vector} p1 
- * @param {Vector} p2 
- * @returns {number}
- */
-function vRelMag(p1, p2) {
-    return vMagnitude(vMinus(p1, p2));
-}
-
-/**
- * Length of the vector.
- * @param {Vector} d 
- * @returns {number}
- */
-function vMagnitude(d) {
-    return Math.sqrt((d.x * d.x) + (d.y * d.y));
-}
-
-/**
- * p1-p2
- * @param {Vector} p1 
- * @param {Vector} p2 
- * @returns {Vector}
- */
-function vMinus(p1, p2) {
-    return Object.freeze({ x: p1.x - p2.x, y: p1.y - p2.y });
-}
-
-/**
-* p1+p2
-* @param {Vector} p1 
-* @param {Vector} p2 
-* @returns {Vector}
-*/
-function vPlus(p1, p2) {
-    return Object.freeze({ x: p1.x + p2.x, y: p1.y + p2.y });
-}
-
-/**
-* p1*k
-* @param {Vector} p1 
-* @param {number} k 
-* @returns {Vector}
-*/
-function vScale(p1, k) {
-    return Object.freeze({ x: p1.x * k, y: p1.y * k });
-}
-
-/**
- * Clone a vector
- * @param {Vector} p1
- * @returns {Vector}
- */
-function vClone(p1) {
-    return Object.freeze({ x: p1.x, y: p1.y });
+class Vector {
+    constructor(x, y) {
+        if (!y) {
+            /**
+             * @type {number}
+             */
+            this.y = x.y;
+            /**
+             * @type {number}
+             */
+            this.x = x.x;
+        } else {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    /**
+     * Applies the function to the vector's x- and y-coordinates.
+     * @param {Function} fun
+     * @param {Vector[]} vectors
+     */
+    static apply(fun, ...vectors) {
+        return new Vector(fun(...vectors.map(v => v.x)), fun(...vectors.map(v => v.y)));
+    }
+    /**
+     * Distance between two points.
+     * @param {Vector} other
+     * @returns {number}
+     */
+    distanceTo(other) {
+        return this.minus(other).length();
+    }
+    /**
+     * Length of the vector.
+     * @returns {number}
+     */
+    length() {
+        return Math.sqrt((this.x * this.x) + (this.y * this.y));
+    }
+    /**
+     * this-other
+     * @param {Vector} other
+     * @returns {Vector}
+     */
+    minus(other) {
+        return new Vector(this.x - other.x, this.y - other.y);
+    }
+    /**
+     * this+other
+     * @param {Vector} other
+     * @returns {Vector}
+     */
+    plus(other) {
+        return new Vector(this.x + other.x, this.y + other.y);
+    }
+    /**
+    * this*k
+    * @param {number} k 
+    * @returns {Vector}
+    */
+    scale(k) {
+        return new Vector(this.x * k, this.y * k);
+    }
 }
