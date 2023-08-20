@@ -21,20 +21,20 @@ class ParasiteGame {
          */
         this.canvas = new Canvas(this.mainElement);
         /**
-         * @type {Matter.Engine}
+         * @type {Level[]}
          */
-        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+        this.levels = opts.levels;
         /**
-         * @type {Matter.World}
+         * @type {number}
          */
-        this.physicsWorld = this.physicsEngine.world;
+        this.level = 0;
     }
     //////////////////////////////////////////////////////
     /**
      * @param {string} message
      * @param {"info" | "warning" | "error" | "success" | false} [type=false] The dialog type
      */
-    toast(message, type) {
+    message(message, type) {
         this.toaster.toast(message, type);
     }
     /**
@@ -59,6 +59,14 @@ class ParasiteGame {
         }
     }
     /////////////////////////////////////////////////////////
+    showLevelCompleteToast() {
+        var span = document.createElement("span");
+        var button = document.createElement("button");
+        button.addEventListener("click", () => this.nextLevel());
+        button.textContent = "Next level \u21d2";
+        span.append("Level complete!\u2001", button);
+        this.toaster.toast(span, "success", true);
+    }
     /**
      * run the main loop. does not return.
      * @return {Promise<never>}

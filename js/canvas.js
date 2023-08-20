@@ -202,4 +202,11 @@ class Canvas extends XEventEmitter {
     transformMousePoint(pt) {
         return vScale(vMinus(pt, this.panxy), 1 / this.zoom);
     }
+    /**
+     * @type {Vector}
+     * @readonly
+     */
+    get center() {
+        return { x: this.canvas.width / 2, y: this.canvas.height / 2 };
+    }
 }

@@ -10,7 +10,6 @@ main {
     left: 0;
     margin: none;
     padding: none;
-    background: white;
 }
 
 dialog {
@@ -56,8 +55,7 @@ dialog:focus {
 }
 
 canvas {
+    margin: auto auto auto auto;
     background: transparent;
-    margin: auto;
-    background: black;
-    display: inline-block;
+    display: block;
 }

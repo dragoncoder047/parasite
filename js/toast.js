@@ -20,20 +20,27 @@ class Toast {
         this.delay = delay;
     }
     /**
-     * @param {string} message
-     * @param {"info" | "warning" | "error" | "success" | false} [type=false] The dialog type
+     * @param {string | HTMLElement} message
+     * @param {"info" | "warning" | "error" | "success" | false} type The dialog type
+     * @param {boolean} permanent Don't auto-close
      */
-    toast(message, type = false) {
-        this.dialog.textContent = message;
+    toast(message, type = false, permanent = false) {
+        this.dialog.innerHTML = "";
+        this.dialog.append(message);
         if (type) this.dialog.dataset.information = type;
         else delete this.dialog.dataset.information;
         if (this.timeout) clearTimeout(this.timeout);
         this.dialog.show();
-        this.timeout = setTimeout(() => {
-            this.dialog.close();
-            this.timeout = null;
-        }, this.delay);
+        if (!permanent) {
+            this.timeout = setTimeout(() => {
+                this.dialog.close();
+                this.timeout = null;
+            }, this.delay);
+        }
     }
+    /**
+     * Hide a permanent toast.
+     */
     close() {
         if (this.timeout) {
             clearTimeout(this.timeout);
