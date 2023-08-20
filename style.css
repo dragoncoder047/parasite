@@ -10,6 +10,7 @@ main {
     left: 0;
     margin: none;
     padding: none;
+    background: white;
 }
 
 dialog {
@@ -30,6 +31,33 @@ dialog.toast {
     z-index: 9999;
 }
 
+dialog[data-information=warning] {
+    border-color: yellow;
+}
+
+dialog[data-information=info] {
+    border-color: blue;
+}
+
+dialog[data-information=error] {
+    border-color: red;
+}
+
+dialog[data-information=success] {
+    border-color: lime;
+}
+
 dialog::backdrop {
     background: #0005;
+}
+
+dialog:focus {
+    outline: none;
+}
+
+canvas {
+    background: transparent;
+    margin: auto;
+    background: black;
+    display: inline-block;
 }

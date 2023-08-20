@@ -21,9 +21,12 @@ class Toast {
     }
     /**
      * @param {string} message
+     * @param {"info" | "warning" | "error" | "success" | false} [type=false] The dialog type
      */
-    toast(message) {
+    toast(message, type = false) {
         this.dialog.textContent = message;
+        if (type) this.dialog.dataset.information = type;
+        else delete this.dialog.dataset.information;
         if (this.timeout) clearTimeout(this.timeout);
         this.dialog.show();
         this.timeout = setTimeout(() => {

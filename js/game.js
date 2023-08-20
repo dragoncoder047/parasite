@@ -16,15 +16,21 @@ class ParasiteGame {
          * @type {Toast}
          */
         this.toaster = new Toast();
+        /**
+         * @type {Canvas}
+         */
+        this.canvas = new Canvas(this.mainElement);
     }
     //////////////////////////////////////////////////////
     /**
      * @param {string} message
+     * @param {"info" | "warning" | "error" | "success" | false} [type=false] The dialog type
      */
-    toast(message) {
-        this.toaster.toast(message);
+    toast(message, type) {
+        this.toaster.toast(message, type);
     }
     /**
+     * utility function
      * @param {number} delay
      * @returns {Promise<void>}
      */
