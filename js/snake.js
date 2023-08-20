@@ -26,7 +26,7 @@ class Snake {
          */
         this.collisionFilter = { group: Body.nextGroup(true), category: CollisionLayer.ALL, mask: CollisionLayer.ALL };
         Matter.Composite.addBody(this.segments, Matter.Bodies.circle(headPos.x, headPos.y, Snake.circleSize, { collisionFilter: this.collisionFilter }));
-        this.head.snake = this;
+        this.head.plugin.snake = this;
         this.growBy(Snake.initialLength);
     }
     growBy(amount) {
@@ -36,7 +36,7 @@ class Snake {
         var last = this.segments.bodies[this.segments.length - 1];
         var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.circleSize, { collisionFilter: this.collisionFilter });
         Matter.Composite.addBody(this.segments, newBody);
-        newBody.snake = this;
+        newBody.plugin.snake = this;
         var constraint = Matter.Constraint.create({
             bodyA: last,
             bodyB: newBody,
