@@ -20,6 +20,14 @@ class ParasiteGame {
          * @type {Canvas}
          */
         this.canvas = new Canvas(this.mainElement);
+        /**
+         * @type {Matter.Engine}
+         */
+        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+        /**
+         * @type {Matter.World}
+         */
+        this.physicsWorld = this.physicsEngine.world;
     }
     //////////////////////////////////////////////////////
     /**
