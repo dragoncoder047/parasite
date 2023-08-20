@@ -3,10 +3,7 @@
  */
 
 class Level {
-    /**
-     * @param {Goal} goal
-     */
-    constructor(goal) {
+    constructor(options) {
         /**
          * @type {Matter.Engine}
          */
@@ -18,7 +15,21 @@ class Level {
         /**
          * @type {Goal}
          */
-        this.goal = goal;
+        this.goal = options.goal;
+        /**
+         * @type {Snake[]}
+         */
+        this.snakes = options.snakes || [];
+        this.snakes.forEach(snake => {
+            Matter.World.add(this.physicsWorld, snake.segments);
+        });
+        /**
+         * @type {TBD[]}
+         */
+        this.blocks = options.blocks || [];
+        this.blocks.forEach(block => {
+            Matter.World.add(this.physicsWorld, block.body);
+        });
     }
     /**
      * @param {CanvasRenderingContext2D} ctx

@@ -1,9 +1,13 @@
+/**
+ * @type {Matter.Body}
+ * @property {Snake} snake
+ */
+
 class Snake {
     static initialLength = 10;
     static headWidth = 10;
     static tailWidth = 5;
     static circleSize = (Snake.headWidth + Snake.tailWidth) / 2;
-    static segmentLength = 2;
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
@@ -18,10 +22,11 @@ class Snake {
          */
         this.segments = Matter.Composite.create();
         /**
-         * @type {number}
+         * @type {Object}
          */
-        this.group = Body.nextGroup(true);
-        Matter.Composite.addBody(this.segments, Matter.Bodies.circle(headPos.x, headPos.y, Snake.circleSize, { collisionFilter: { group: this.group } }));
+        this.collisionFilter = { group: Body.nextGroup(true), category: CollisionLayer.ALL, mask: CollisionLayer.ALL };
+        Matter.Composite.addBody(this.segments, Matter.Bodies.circle(headPos.x, headPos.y, Snake.circleSize, { collisionFilter: this.collisionFilter }));
+        this.head.snake = this;
         this.growBy(Snake.initialLength);
     }
     growBy(amount) {
@@ -29,19 +34,24 @@ class Snake {
     }
     addSegment() {
         var last = this.segments.bodies[this.segments.length - 1];
-        var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.circleSize, { collisionFilter: { group: this.group } });
+        var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.circleSize, { collisionFilter: this.collisionFilter });
         Matter.Composite.addBody(this.segments, newBody);
+        newBody.snake = this;
         var constraint = Matter.Constraint.create({
             bodyA: last,
             bodyB: newBody,
             pointA: Matter.Vector.create(0, Snake.circleSize / 2),
             pointB: Matter.Vector.create(0, -Snake.circleSize / 2),
-            stiffness: 0.25,
+            stiffness: 0.8,
             length: 0,
         });
         Matter.Composite.addConstraint(this.segments, constraint);
     }
+    /**
+     * @type {Matter.Body}
+     * @readonly
+     */
     get head() {
-        return this.segments[0];
+        return this.segments.bodies[0];
     }
 }
