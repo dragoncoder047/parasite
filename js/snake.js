@@ -133,6 +133,7 @@ class Snake {
      * @param {CanvasRenderingContext2D} ctx
      */
     renderTo(ctx) {
+        ctx.save();
         var forward = new Vector(0, 1).rotate(this.head.angle);
         // draw body
         for (var c of this.segments.bodies.reverse()) dotAt(ctx, c.position, c.circleRadius, c.render.fillStyle);
@@ -151,5 +152,6 @@ class Snake {
         ctx.lineTo(tongueP2.x, tongueP2.y);
         ctx.closePath();
         ctx.stroke();
+        ctx.restore();
     }
 }

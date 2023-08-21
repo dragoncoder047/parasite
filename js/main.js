@@ -22,7 +22,8 @@ const game = new ParasiteGame({
             title: "Foo Bar",
             objective: "Spam, spam, spam, sausage, eggs, and spam! ".repeat(200),
         }),
-    ]
+    ],
+    player: new Snake(new Brain(), new Vector(0, 0)),
 });
 
 async function main() {

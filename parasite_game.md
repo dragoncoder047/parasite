@@ -32,7 +32,6 @@ They have 4 layer (2 hidden) neural network w/loopback memory neurons
 * internal energy
 * self length
 * self age
-* 6 loopback
 
 ### Outputs
 
@@ -43,7 +42,8 @@ They have 4 layer (2 hidden) neural network w/loopback memory neurons
 * Grow amount
 * 2 hue/saturation colors
 * Frequency and volume of sound (composite method is pan=sin of angle to source, volume is exponential decay based on distance)
-* 6 loopback
+
+**monkey patch here** <https://github.com/karpathy/reinforcejs/blob/master/lib/rl.js#L1060>
 
 ### Behavior
 
@@ -133,3 +133,4 @@ Player has limited resources available to build the world, some are already popu
 
 * Other reinforcement learning: <https://github.com/karpathy/reinforcejs/blob/master/lib/rl.js#L982>
 * Use Matter.js <https://github.com/liabru/matter-js/blob/master/examples/chains.js> for physics and motion
+* use <https://github.com/markedjs/marked> for Markdown parsing
