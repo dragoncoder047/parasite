@@ -16,12 +16,13 @@ dialog {
     max-width: 80%;
     max-height: 80%;
     overflow: scroll;
-    padding: 0.5em;
+    padding: 1em;
 }
 
 dialog.big {
     width: 80%;
     height: 80%;
+    padding: 2em;
 }
 
 dialog.toast {
@@ -46,10 +47,6 @@ dialog[data-information=success] {
     border-color: lime;
 }
 
-dialog::backdrop {
-    background: #0005;
-}
-
 dialog:focus {
     outline: none;
 }
@@ -58,4 +55,10 @@ canvas {
     margin: auto auto auto auto;
     background: transparent;
     display: block;
+}
+
+form[method=dialog] {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
 }

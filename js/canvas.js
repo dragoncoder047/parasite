@@ -70,7 +70,7 @@ class Canvas extends XEventEmitter {
         /**
          * @type {Vector}
          */
-        this.panxy = new Vector(0, 0);
+        this.panxy = new Vector(this.center);
         /**
          * @type {Vector}
          */

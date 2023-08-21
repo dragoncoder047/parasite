@@ -30,6 +30,14 @@ class Level {
         this.blocks.forEach(block => {
             Matter.World.add(this.physicsWorld, block.body);
         });
+        /**
+         * @type {string}
+         */
+        this.title = options.title || "";
+        /**
+         * @type {string}
+         */
+        this.objective = options.objective || "";
     }
     tickWorld() {
         Matter.Engine.update(this.physicsEngine);
@@ -37,6 +45,14 @@ class Level {
         this.blocks.forEach(block => block.tickWorld());
         this.snakes.forEach(snake => {
             snake.head.force = new Vector(0.0005, 0.001).rotate(snake.head.angle).plus(snake.head.force);
-        })
+        });
+    }
+    /**
+     * @type {boolean}
+     * @readonly
+     */
+    get complete() {
+        if (this.goal) return this.goal.complete;
+        return false;
     }
 }

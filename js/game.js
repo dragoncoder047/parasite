@@ -1,5 +1,6 @@
-class ParasiteGame {
+class ParasiteGame extends XEventEmitter {
     constructor(opts) {
+        super();
         /**
          * @type {HTMLElement}
          */
@@ -12,6 +13,13 @@ class ParasiteGame {
          * @type {string[]}
          */
         this.popoverNames = Object.keys(opts.popovers);
+        this.popoverNames.forEach(name => {
+            var pop = this.popovers[name];
+            pop.addEventListener("close", () => {
+                this.emit("popover-" + name + "-closed");
+                this.emit("popoverclosed");
+            });
+        });
         /**
          * @type {Toast}
          */
@@ -32,6 +40,7 @@ class ParasiteGame {
          * @type {Snake}
          */
         this.playerSnake = new Snake(new Brain(), new Vector(0, 0));
+        this.playerSnake.brain.mood[0] = { r: 255, g: 127, b: 0 };
     }
     //////////////////////////////////////////////////////
     /**
@@ -56,11 +65,22 @@ class ParasiteGame {
         for (var pop of this.popoverNames) {
             var elem = this.popovers[pop];
             if (pop == name) {
-                if (!elem.hasAttribute("open")) elem.showModal();
+                if (!elem.open) {
+                    elem.inert = true;
+                    elem.show();
+                    elem.inert = false;
+                }
             } else {
-                if (elem.hasAttribute("open")) elem.close();
+                if (elem.open) elem.close();
             }
         }
+    }
+    /**
+     * @type {boolean}
+     * @readonly
+     */
+    get popoverActive() {
+        return this.popoverNames.some(name => this.popovers[name].open);
     }
     /////////////////////////////////////////////////////////
     /**
@@ -70,7 +90,6 @@ class ParasiteGame {
     get currentLevel() {
         return this.levels[this.currentLevelIndex];
     }
-    /////////////////////////////////////////////////////////
     showLevelCompleteToast() {
         var span = document.createElement("span");
         var button = document.createElement("button");
@@ -79,10 +98,32 @@ class ParasiteGame {
         span.append("Level complete!\u2001", button);
         this.toaster.toast(span, "success", true);
     }
+    nextLevel() {
+        this.openLevel(this.currentLevelIndex + 1);
+    }
+    /**
+     * @param {number} index
+     */
+    openLevel(index) {
+        // remove player snake from current level
+        Matter.Composite.removeComposite(this.currentLevel.physicsWorld, this.playerSnake.segments);
+        this.currentLevelIndex = index;
+        Matter.Composite.addComposite(this.currentLevel.physicsWorld, this.playerSnake.segments);
+        var cl = this.currentLevel;
+        this.popovers.levelInfo.innerHTML = `
+        <h1>Level ${this.currentLevelIndex}${": ".repeat(!!cl.title)}${cl.title}</h1>
+        <div>${cl.objective}</div>
+        <form method="dialog">
+        <input type="submit" value="Play" autofocus="false" />
+        </form>
+        `;
+        this.showPopover("levelInfo");
+    }
+    /////////////////////////////////////////////////////////
     /**
      * start the main loop
      */
-    startMainLoop() {
+    async mainLoop() {
         var render = Matter.Render.create({
             canvas: this.canvas.canvas,
             engine: this.currentLevel.physicsEngine,
@@ -95,13 +136,16 @@ class ParasiteGame {
         });
         Matter.Render.run(render);
         Matter.Events.on(render, "afterRender", () => Matter.Render.lookAt(render, Matter.Composite.allBodies(this.currentLevel.physicsWorld)));
-        setInterval(() => this.tickWorld(), 1000 / 60);
+        this.tickWorld();
     }
     /**
      * Called after each step
      */
     tickWorld() {
-        this.message("postStep " + this.currentLevel.physicsEngine.timing.timestamp.toFixed());
         this.currentLevel.tickWorld();
+        if (this.currentLevel.complete) this.showLevelCompleteToast();
+        // Don't run the level if a popover is open
+        if (!this.popoverActive) setTimeout(() => this.tickWorld(), 1000 / 60);
+        else this.waitFor("popoverclosed").then(() => this.tickWorld());
     }
 }
