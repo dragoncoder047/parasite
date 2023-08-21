@@ -70,7 +70,7 @@ class Canvas extends XEventEmitter {
         /**
          * @type {Vector}
          */
-        this.panxy = new Vector(this.center);
+        this.panxy = this.center;
         /**
          * @type {Vector}
          */
@@ -79,6 +79,10 @@ class Canvas extends XEventEmitter {
          * @type {Vector}
          */
         this.lastxy = new Vector(0, 0);
+        /**
+         * @type {number}
+         */
+        this.zoom = 1;
         canvas.addEventListener('mousedown', e => {
             this.mouseDown = true;
             this.timeDown = +new Date();
@@ -137,8 +141,8 @@ class Canvas extends XEventEmitter {
         window.addEventListener('resize', () => {
             canvas.width = main.clientWidth * ratio;
             canvas.height = main.clientHeight * ratio;
-            canvas.style.width = CSS.px(main.clientWidth - 8);
-            canvas.style.height = CSS.px(main.clientHeight - 8);
+            canvas.style.width = CSS.px(main.clientWidth - 1);
+            canvas.style.height = CSS.px(main.clientHeight - 1);
             this.emit('resize', { x: main.clientWidth, y: main.clientHeight });
         });
         window.dispatchEvent(new UIEvent('resize'));

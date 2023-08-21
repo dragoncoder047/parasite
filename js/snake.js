@@ -15,20 +15,31 @@ function lerp(x, lo, hi) {
  * @returns {Color}
  */
 function lerpColor(x, c1, c2) {
-    return { r: lerp(x, c1.r, c2.r), g: lerp(x, c1.g, c2.g), b: lerp(x, c1.b, c2.b) };
+    return { r: lerp(x, c1.r, c2.r)|0, g: lerp(x, c1.g, c2.g)|0, b: lerp(x, c1.b, c2.b)|0 };
 }
 
 /**
- * @type {Matter.Body}
- * @property {Snake} snake
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Vector} position
+ * @param {number} radius
+ * @param {string} fillColor
  */
+function dotAt(ctx, position, radius, fillColor) {
+    ctx.save();
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    ctx.arc(position.x, position.y, radius, 0, Math.PI * 2, false);
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+}
 
 class Snake {
-    static initialLength = 50;
-    static headWidth = 10;
-    static tailWidth = 5;
-    static linkLength = 4;
-    static depthOfVision = 25;
+    static INITIAL_LENGTH = 30;
+    static HEAD_WIDTH = 10;
+    static TAIL_WIDTH = 5;
+    static LINK_OFFSET = 4;
+    static VISION_DEPTH = 25;
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
@@ -46,13 +57,21 @@ class Snake {
          * @type {Object}
          */
         this.collisionFilter = { group: Matter.Body.nextGroup(true), category: CollisionLayer.ALL, mask: CollisionLayer.ALL };
-        Matter.Composite.addBody(this.segments, Matter.Bodies.circle(headPos.x, headPos.y, Snake.headWidth, { collisionFilter: this.collisionFilter, frictionAir: 0.5 }));
+        /**
+         * @type {Matter.Body}
+         */
+        this.head = Matter.Bodies.circle(headPos.x, headPos.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.5 });
+        Matter.Composite.addBody(this.segments, this.head);
         this.head.plugin.snake = this;
-        this.growBy(Snake.initialLength);
+        /**
+         * @type {Matter.Body}
+         */
+        this.tail = null;
+        this.growBy(Snake.INITIAL_LENGTH);
         /**
          * @type {number}
          */
-        this.depthOfVision = Snake.depthOfVision;
+        this.depthOfVision = Snake.VISION_DEPTH;
     }
     /**
      * @param {number} amount number of segments to add
@@ -60,15 +79,15 @@ class Snake {
     growBy(amount) {
         var last = this.segments.bodies[this.segments.bodies.length - 1];
         for (var i = 0; i < amount; i++) {
-            var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.headWidth, { collisionFilter: this.collisionFilter, frictionAir: 0.5 });
+            var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.5 });
             Matter.Composite.addBody(this.segments, newBody);
             newBody.plugin.snake = this;
             var constraint = Matter.Constraint.create({
                 bodyA: last,
                 bodyB: newBody,
-                pointA: Matter.Vector.create(0, Snake.linkLength / 2),
-                pointB: Matter.Vector.create(0, -Snake.linkLength / 2),
-                stiffness: 0.8,
+                pointA: Matter.Vector.create(0, -Snake.LINK_OFFSET / 2),
+                pointB: Matter.Vector.create(0, Snake.LINK_OFFSET / 2),
+                stiffness: 1,
                 length: 0,
                 render: {
                     visible: false,
@@ -77,38 +96,15 @@ class Snake {
             Matter.Composite.addConstraint(this.segments, constraint);
             last = newBody;
         }
+        this.tail = last;
         // scale segments to linearly decrease in size
         for (var i = 0; i < this.length; i++) {
             var body = this.segments.bodies[i];
-            var targetSize = lerp(i / this.length, Snake.headWidth, Snake.tailWidth);
+            var targetSize = lerp(i / this.length, Snake.HEAD_WIDTH, Snake.TAIL_WIDTH);
             var actualSize = body.circleRadius;
             var factor = targetSize / actualSize;
             Matter.Body.scale(body, factor, factor);
         }
-    }
-    /**
-     * @type {Matter.Body}
-     * @readonly
-     */
-    get head() {
-        return this.segments.bodies[0];
-    }
-    /**
-     * @type {Matter.Body}
-     * @readonly
-     */
-    get tail() {
-        return this.segments.bodies[this.length - 1];
-    }
-    /**
-     * @type {number}
-     * @readonly
-     */
-    get length() {
-        return this.segments.bodies.length;
-    }
-    tickWorld() {
-        if (this.clean) return;
         // update display colors
         for (var i = 0; i < this.length; i++) {
             var segment = this.segments.bodies[i];
@@ -122,6 +118,38 @@ class Snake {
                 lineWidth: 0,
             };
         }
-        this.clean = true;
+    }
+    /**
+     * @type {number}
+     * @readonly
+     */
+    get length() {
+        return this.segments.bodies.length;
+    }
+    tickWorld() {
+        //noop;
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    renderTo(ctx) {
+        var forward = new Vector(0, 1).rotate(this.head.angle);
+        // draw body
+        for (var c of this.segments.bodies.reverse()) dotAt(ctx, c.position, c.circleRadius, c.render.fillStyle);
+        // draw eyes
+        dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black");
+        dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black");
+        // draw tongue
+        var tongueAngle = forward.rotate(this.brain.tongueAngle);
+        var tongueP1 = tongueAngle.scale(Snake.HEAD_WIDTH).plus(this.head.position);
+        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + this.brain.tongueLength).plus(this.head.position);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = Snake.HEAD_WIDTH / 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(tongueP1.x, tongueP1.y);
+        ctx.lineTo(tongueP2.x, tongueP2.y);
+        ctx.closePath();
+        ctx.stroke();
     }
 }

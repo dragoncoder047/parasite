@@ -14,9 +14,9 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new Brain(), new Vector(0, 1)),
-                new Snake(new Brain(), new Vector(0, 2)),
-                new Snake(new Brain(), new Vector(0, 3)),
+                new Snake(new Brain(), new Vector(0, 100)),
+                new Snake(new Brain(), new Vector(0, 200)),
+                new Snake(new Brain(), new Vector(0, 300)),
             ],
             goal: null,
             title: "Foo Bar",
@@ -29,7 +29,7 @@ async function main() {
     game.showPopover("welcome");
     await game.waitFor("popover-welcome-closed");
     game.openLevel(0);
-    await game.mainLoop();
+    game.mainLoop();
 }
 
 main();

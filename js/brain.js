@@ -32,7 +32,15 @@ class Brain {
         /**
          * @type {Color[]}
          */
-        this.mood = [{ r: 255, g: 0, b: 0 }, { r: 0, g: 0, b: 255 }];
+        this.mood = [{ r: 0, g: 255, b: 0 }, { r: 0, g: 0, b: 255 }];
+        /**
+         * @type {number}
+         */
+        this.tongueAngle = 0;
+        /**
+         * @type {number}
+         */
+        this.tongueLength = 10;
     }
     /**
      * @abstract

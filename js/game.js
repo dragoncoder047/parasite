@@ -40,7 +40,11 @@ class ParasiteGame extends XEventEmitter {
          * @type {Snake}
          */
         this.playerSnake = new Snake(new Brain(), new Vector(0, 0));
-        this.playerSnake.brain.mood[0] = { r: 255, g: 127, b: 0 };
+        this.playerSnake.brain.mood[0] = { r: 255, g: 255, b: 255 };
+        // Set up scrolling controls
+        this.canvas.on("scroll", e => {
+            this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);
+        });
     }
     //////////////////////////////////////////////////////
     /**
@@ -123,19 +127,8 @@ class ParasiteGame extends XEventEmitter {
     /**
      * start the main loop
      */
-    async mainLoop() {
-        var render = Matter.Render.create({
-            canvas: this.canvas.canvas,
-            engine: this.currentLevel.physicsEngine,
-            options: {
-                width: undefined,
-                height: undefined,
-                wireframes: false,
-                showSleeping: false,
-            }
-        });
-        Matter.Render.run(render);
-        Matter.Events.on(render, "afterRender", () => Matter.Render.lookAt(render, Matter.Composite.allBodies(this.currentLevel.physicsWorld)));
+    mainLoop() {
+        this.render();
         this.tickWorld();
     }
     /**
@@ -143,9 +136,23 @@ class ParasiteGame extends XEventEmitter {
      */
     tickWorld() {
         this.currentLevel.tickWorld();
+        this.playerSnake.tickWorld();
         if (this.currentLevel.complete) this.showLevelCompleteToast();
         // Don't run the level if a popover is open
         if (!this.popoverActive) setTimeout(() => this.tickWorld(), 1000 / 60);
         else this.waitFor("popoverclosed").then(() => this.tickWorld());
+    }
+    /**
+     * Render
+     */
+    render() {
+        this.canvas.clear();
+        this.canvas.drawTransformed(() => {
+            this.currentLevel.renderTo(this.canvas.ctx);
+            this.canvas.ctx.shadowColor = "white";
+            this.canvas.ctx.shadowBlur = 3;
+            this.playerSnake.renderTo(this.canvas.ctx);
+        });
+        requestAnimationFrame(() => this.render());
     }
 }

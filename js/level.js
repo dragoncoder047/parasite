@@ -39,14 +39,6 @@ class Level {
          */
         this.objective = options.objective || "";
     }
-    tickWorld() {
-        Matter.Engine.update(this.physicsEngine);
-        this.snakes.forEach(snake => snake.tickWorld());
-        this.blocks.forEach(block => block.tickWorld());
-        this.snakes.forEach(snake => {
-            snake.head.force = new Vector(0.0005, 0.001).rotate(snake.head.angle).plus(snake.head.force);
-        });
-    }
     /**
      * @type {boolean}
      * @readonly
@@ -54,5 +46,21 @@ class Level {
     get complete() {
         if (this.goal) return this.goal.complete;
         return false;
+    }
+    tickWorld() {
+        Matter.Engine.update(this.physicsEngine);
+        this.snakes.forEach(snake => snake.tickWorld());
+        this.blocks.forEach(block => block.tickWorld());
+        this.snakes.forEach(snake => {
+            snake.head.force = new Vector(0, 0.01).rotate(snake.head.angle).plus(snake.head.force);
+            snake.head.torque += 0.001;
+        });
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    renderTo(ctx) {
+        this.snakes.forEach(snake => snake.renderTo(ctx));
+        this.blocks.forEach(block => block.renderTo(ctx));
     }
 }
