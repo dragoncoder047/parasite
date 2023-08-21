@@ -10,20 +10,18 @@ const game = new ParasiteGame({
         help: safe$("#help"),
     },
     levels: [
-        new Level(null),
+        new Level({
+            snakes: [
+                new Snake(new Brain(), new Vector(100, 300)),
+                new Snake(new Brain(), new Vector(100, 400)),
+                new Snake(new Brain(), new Vector(100, 500)),
+            ]
+        }),
     ]
 });
 
 async function main() {
-    game.message("hello!", "success");
-    await game.sleep(1000);
-    game.showPopover("help");
-    game.message("bye!", "error");
-    await game.sleep(2000);
-    game.showPopover(false);
-    game.showLevelCompleteToast();
-    await game.mainloop();
-    //throw new Error("unreachable");
+    game.startMainLoop();
 }
 
 main();

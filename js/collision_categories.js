@@ -1,3 +1,14 @@
+/*
+
+side view
+
+SNAKESNAKESNAKE                              WALL       GRATE
+              TONGUE        FOOD   SMELL     WALL
+              TONGUE                         WALL       GRATE
+
+
+*/
+
 class CollisionLayer {
     static EDIBLE = 1;
     static WALL = 2;

@@ -27,7 +27,11 @@ class ParasiteGame {
         /**
          * @type {number}
          */
-        this.level = 0;
+        this.currentLevelIndex = 0;
+        /**
+         * @type {Snake}
+         */
+        this.playerSnake = new Snake(new Brain(), new Vector(0, 0));
     }
     //////////////////////////////////////////////////////
     /**
@@ -59,6 +63,14 @@ class ParasiteGame {
         }
     }
     /////////////////////////////////////////////////////////
+    /**
+     * @type {Level}
+     * @readonly
+     */
+    get currentLevel() {
+        return this.levels[this.currentLevelIndex];
+    }
+    /////////////////////////////////////////////////////////
     showLevelCompleteToast() {
         var span = document.createElement("span");
         var button = document.createElement("button");
@@ -68,10 +80,28 @@ class ParasiteGame {
         this.toaster.toast(span, "success", true);
     }
     /**
-     * run the main loop. does not return.
-     * @return {Promise<never>}
+     * start the main loop
      */
-    async mainloop() {
-
+    startMainLoop() {
+        var render = Matter.Render.create({
+            canvas: this.canvas.canvas,
+            engine: this.currentLevel.physicsEngine,
+            options: {
+                width: undefined,
+                height: undefined,
+                wireframes: false,
+                showSleeping: false,
+            }
+        });
+        Matter.Render.run(render);
+        Matter.Events.on(render, "afterRender", () => Matter.Render.lookAt(render, Matter.Composite.allBodies(this.currentLevel.physicsWorld)));
+        setInterval(() => this.tickWorld(), 1000 / 60);
+    }
+    /**
+     * Called after each step
+     */
+    tickWorld() {
+        this.message("postStep " + this.currentLevel.physicsEngine.timing.timestamp.toFixed());
+        this.currentLevel.tickWorld();
     }
 }

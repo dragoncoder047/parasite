@@ -13,10 +13,10 @@ function getMousePos(canvas, evt) {
     else {
         reportedXY = { x: evt.clientX, y: evt.clientY };
     }
-    return {
-        x: (reportedXY.x - rect.left) / (rect.right - rect.left) * canvas.width,
-        y: (reportedXY.y - rect.top) / (rect.bottom - rect.top) * canvas.height
-    };
+    return new Vector(
+        (reportedXY.x - rect.left) / (rect.right - rect.left) * canvas.width,
+        (reportedXY.y - rect.top) / (rect.bottom - rect.top) * canvas.height
+    );
 }
 
 
@@ -70,15 +70,15 @@ class Canvas extends XEventEmitter {
         /**
          * @type {Vector}
          */
-        this.panxy = { x: 0, y: 0 };
+        this.panxy = new Vector(0, 0);
         /**
          * @type {Vector}
          */
-        this.downxy = { x: 0, y: 0 };
+        this.downxy = new Vector(0, 0);
         /**
          * @type {Vector}
          */
-        this.lastxy = { x: 0, y: 0 };
+        this.lastxy = new Vector(0, 0);
         canvas.addEventListener('mousedown', e => {
             this.mouseDown = true;
             this.timeDown = +new Date();

@@ -1,3 +1,15 @@
+/**
+ * @typedef Bin
+ * @property {Snake[]} snakes
+ */
+
+/**
+ * @typedef Color
+ * @property {number} r
+ * @property {number} g
+ * @property {number} b
+ */
+
 class Brain {
     /**
      * @param {Snake} snake
@@ -7,7 +19,20 @@ class Brain {
          * @type {Snake}
          */
         this.snake = snake;
-        // TODO: bins for memory
+        // The input state
+        /**
+         * @type {Bin[]}
+         */
+        this.bins = [{}, {}, {}, {}, {}];
+        // The output state
+        /**
+         * @type {Vector}
+         */
+        this.thrust = new Vector(0, 0);
+        /**
+         * @type {Color[]}
+         */
+        this.mood = [{ r: 255, g: 0, b: 0 }, { r: 0, g: 0, b: 255 }];
     }
     /**
      * @abstract
@@ -21,9 +46,12 @@ class Brain {
     scanBin(bin, world) {
         var binCenterAngle = Math.PI / 4 * (bin - 2);
         var forward = new Vector(0, this.snake.depthOfVision).rotate(binCenterAngle);
-        var hits = [];
-        for (var theta = -Math.PI / 8; theta < Math.PI / 8; theta += 0.001) {
-            // TODO
-        }
+        var triangle = Matter.Bodies.fromVertices(this.snake.head.position.x, this.snake.head.position.y, [[
+            new Vector(0, 0),
+            forward.rotate(-Math.PI / 8),
+            forward,
+            forward.rotate(Math.PI / 8),
+        ]]);
+        var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
     }
 }

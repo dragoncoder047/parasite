@@ -7,7 +7,7 @@ class Level {
         /**
          * @type {Matter.Engine}
          */
-        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 }, enableSleeping: true });
         /**
          * @type {Matter.World}
          */
@@ -31,10 +31,12 @@ class Level {
             Matter.World.add(this.physicsWorld, block.body);
         });
     }
-    /**
-     * @param {CanvasRenderingContext2D} ctx
-     */
-    renderTo(ctx) {
-        throw new Error("Not implemented");
+    tickWorld() {
+        Matter.Engine.update(this.physicsEngine);
+        this.snakes.forEach(snake => snake.tickWorld());
+        this.blocks.forEach(block => block.tickWorld());
+        this.snakes.forEach(snake => {
+            snake.head.force = new Vector(0.0005, 0.001).rotate(snake.head.angle).plus(snake.head.force);
+        })
     }
 }
