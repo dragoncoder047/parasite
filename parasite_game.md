@@ -131,5 +131,5 @@ Player has limited resources available to build the world, some are already popu
 
 # Stuff
 
-* Use Synaptic <https://github.com/cazala/synaptic> for neural networks -- HOW TO EDIT WEIGHTS AND STUFF?
+* Other reinforcement learning: <https://github.com/karpathy/reinforcejs/blob/master/lib/rl.js#L982>
 * Use Matter.js <https://github.com/liabru/matter-js/blob/master/examples/chains.js> for physics and motion
