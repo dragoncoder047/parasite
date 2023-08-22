@@ -88,6 +88,9 @@ class Brain {
         var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
         throw new Error("Todo scanBin()");
     }
+    /**
+     * @return {never}
+     */
     notImplemented() {
         throw new Error("Not Implemented");
     }
@@ -118,5 +121,53 @@ class Brain {
      */
     get tongueLength() {
         this.notImplemented();
+    }
+    /**
+     * @type {number}
+     * @readonly
+     */
+    get hunger() {
+        this.notImplemented();
+    }
+    /**
+     * @type {[number, number]}
+     * @readonly
+     */
+    get mateInstinct() {
+        this.notImplemented();
+    }
+    /**
+     * @type {number}
+     * @readonly
+     */
+    get growth() {
+        this.notImplemented();
+    }
+    /**
+     * @type {Color}
+     * @readonly
+     */
+    get pheremoneColor() {
+        this.notImplemented();
+    }
+    /**
+     * @type {number}
+     * @readonly
+     */
+    get pheremoneAmount() {
+        this.notImplemented();
+    }
+    /**
+     * @type {{freq: number, vol: number}}
+     * @readonly
+     */
+    get sound() {
+        this.notImplemented();
+    }
+}
+
+class NeuralNetBrain extends Brain {
+    constructor() {
+        super();
     }
 }
