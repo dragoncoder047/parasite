@@ -44,24 +44,47 @@ Output vector: total 20
  */
 
 class Brain {
-    /**
-     * @param {Snake} snake
-     */
-    constructor(snake) {
+    constructor() {
         /**
          * @type {Snake}
          */
-        this.snake = snake;
+        this.snake = null;
         // The input state
         /**
          * @type {Bin[]}
          */
         this.bins = [{}, {}, {}, {}, {}];
+        /**
+         * @type {number[]}
+         */
+        this.inputVector = [];
+        /**
+         * @type {number[]}
+         */
+        this.outputVector = [];
+    }
+    /**
+     * @param {Snake} snake
+     */
+    setOwnerSnake(snake) {
+        this.snake = snake;
     }
     /**
      * @abstract
      */
     think() {
+        throw new Error("abstract method called");
+    }
+    /**
+     * @abstract
+     */
+    goodIdea() {
+        throw new Error("abstract method called");
+    }
+    /**
+     * @abstract
+     */
+    badIdea() {
         throw new Error("abstract method called");
     }
     /**
@@ -83,7 +106,7 @@ class Brain {
             forward,
             forward.rotate(Math.PI / 8),
         ]], {
-            collisionFilter: {/* TODO */},
+            collisionFilter: {/* TODO */ },
         });
         var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
         throw new Error("Todo scanBin()");
@@ -95,79 +118,126 @@ class Brain {
         throw new Error("Not Implemented");
     }
     /**
-     * @type {Vector}
+     * @type {{thrust: number, torque: number}}
      * @readonly
      */
-    get thrust() {
-        this.notImplemented();
+    get motion() {
+        return { thrust: this.outputVector[0], torque: this.outputVector[1] };
     }
     /**
      * @type {[Color, Color]}
      * @readonly
      */
     get mood() {
-        this.notImplemented();
+        return [
+            hsv2rgb(this.outputVector[2], this.outputVector[3], this.outputVector[4]),
+            hsv2rgb(this.outputVector[5], this.outputVector[6], this.outputVector[7]),
+        ];
     }
     /**
      * @type {number}
      * @readonly
      */
     get tongueAngle() {
-        this.notImplemented();
+        return lerpClamp(this.outputVector[8], 0, Math.PI / 2);
     }
     /**
      * @type {number}
      * @readonly
      */
     get tongueLength() {
-        this.notImplemented();
+        return lerpClamp(this.outputVector[9], 0, this.snake.depthOfVision);
     }
     /**
      * @type {number}
      * @readonly
      */
     get hunger() {
-        this.notImplemented();
+        return this.outputVector[10];
     }
     /**
      * @type {[number, number]}
      * @readonly
      */
     get mateInstinct() {
-        this.notImplemented();
+        return [this.outputVector[11], this.outputVector[12]];
     }
     /**
      * @type {number}
      * @readonly
      */
     get growth() {
-        this.notImplemented();
+        return this.outputVector[13];
     }
     /**
-     * @type {Color}
+     * @type {{color: Color, amount: number}}
      * @readonly
      */
-    get pheremoneColor() {
-        this.notImplemented();
-    }
-    /**
-     * @type {number}
-     * @readonly
-     */
-    get pheremoneAmount() {
-        this.notImplemented();
+    get pheremones() {
+        return { color: hsv2rgb(this.outputVector[14], this.outputVector[15], this.outputVector[16]), amount: this.outputVector[17] };
     }
     /**
      * @type {{freq: number, vol: number}}
      * @readonly
      */
     get sound() {
-        this.notImplemented();
+        return { freq: this.outputVector[18], vol: this.outputVector[19] };
     }
 }
 
 class NeuralNetBrain extends Brain {
     constructor() {
         super();
+        /**
+         * @type {RL.DQNAgent}
+         */
+        this.actor = new RL.DQNAgent({
+            getNumStates: () => 84,
+            getMaxNumActions: () => 20,
+        }, { experience_add_every: 1 });
+    }
+    /*
+        act: function(slist) {
+            // convert to a Mat column vector
+            var s = new R.Mat(this.ns, 1);
+            s.setFrom(slist);
+
+            // epsilon greedy policy
+            if(Math.random() < this.epsilon) {
+                var a = randi(0, this.na);
+            } else {
+                // greedy wrt Q function
+                var amat = this.forwardQ(this.net, s, false);
+                var a = R.maxi(amat.w); // returns index of argmax action
+            }
+
+            // shift state memory
+            this.s0 = this.s1;
+            this.a0 = this.a1;
+            this.s1 = s;
+            this.a1 = a;
+
+            return a;
+        },
+    */
+    /**
+     * Uses the input vector to update the output vector.
+     */
+    think() {
+        var s = new R.Mat(this.actor.ns, 1);
+        s.setFrom(this.inputVector);
+        var amat = this.actor.forwardQ(this.actor.net, s, false);
+        if (amat.w.length != 20) throw new Error("bad NN");
+        this.outputVector = amat.w;
+        this.actor.s0 = this.actor.s1;
+        this.actor.a0 = this.actor.a1;
+        this.actor.s1 = s;
+        this.actor.a1 = R.maxi(amat.w); // satisfy algorithm
+    }
+    goodIdea() {
+        this.actor.learn(1); // Reward
+    }
+    badIdea() {
+        this.actor.learn(-1); // Punish
     }
 }
