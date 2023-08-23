@@ -7,9 +7,8 @@ function safe$(selector) {
 const game = new ParasiteGame({
     main: safe$("main"),
     popovers: {
-        welcome: safe$("#welcome"),
-        help: safe$("#help"),
-        levelInfo: safe$("#level"),
+        welcome: new Popover(safe$("#welcome"), "Play"),
+        help: new Popover(safe$("#help")),
     },
     levels: [
         new Level({
@@ -28,7 +27,7 @@ const game = new ParasiteGame({
 
 async function main() {
     game.showPopover("welcome");
-    await game.waitFor("popover-welcome-closed");
+    await game.popovers.welcome.waitFor("close");
     game.openLevel(0);
     await game.mainLoop();
     throw new Error("Main loop returned (unreachable!!)");

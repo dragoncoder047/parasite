@@ -30,7 +30,9 @@ class Toast {
         if (type) this.dialog.dataset.information = type;
         else delete this.dialog.dataset.information;
         if (this.timeout) clearTimeout(this.timeout);
+        this.dialog.inert = true;
         this.dialog.show();
+        this.dialog.inert = false;
         if (!permanent) {
             this.timeout = setTimeout(() => {
                 this.dialog.close();

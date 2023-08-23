@@ -1,8 +1,9 @@
 class Canvas extends XEventEmitter {
     /**
      * @param {HTMLElement} main Container for canvas.
+     * @param {Object} options
      */
-    constructor(main) {
+    constructor(main, options) {
         super();
         var canvas = document.createElement("canvas");
         /**
@@ -10,6 +11,10 @@ class Canvas extends XEventEmitter {
          */
         this.canvas = canvas;
         main.append(canvas);
+        /**
+         * @type {Object}
+         */
+        this.options = options;
         /**
          * @type {CanvasRenderingContext2D}
          */
@@ -112,8 +117,10 @@ class Canvas extends XEventEmitter {
      */
     zoomBy(factor, center) {
         if (!center) center = this.center;
-        this.zoom *= factor;
-        this.panxy = this.panxy.scale(factor).minus(center.scale(factor)).plus(center);
+        var oldZoom = this.zoom;
+        this.zoom = clamp(this.zoom * factor, this.options.minZoom || 0, this.options.maxZoom || Infinity);
+        var realFactor = this.zoom / oldZoom;
+        this.panxy = this.panxy.scale(realFactor).minus(center.scale(realFactor)).plus(center);
     }
     /**
      * Pans the canvas by the specified offset.

@@ -6,20 +6,15 @@ class ParasiteGame extends XEventEmitter {
          */
         this.mainElement = opts.main;
         /**
-         * @type {Object<string, HTMLDialogElement>}
+         * @type {Object<string, Popover>}
          */
         this.popovers = opts.popovers;
+        Object.keys(this.popovers).forEach(name => this.popovers[name].pipeTo("close", this, "popoverclose"));
         /**
-         * @type {string[]}
+         * @type {Popover}
          */
-        this.popoverNames = Object.keys(opts.popovers);
-        this.popoverNames.forEach(name => {
-            var pop = this.popovers[name];
-            pop.addEventListener("close", () => {
-                this.emit("popover-" + name + "-closed");
-                this.emit("popoverclosed");
-            });
-        });
+        this.levelInfoPopover = new Popover(null, "Play");
+        this.levelInfoPopover.pipeTo("close", this, "popoverclose");
         /**
          * @type {Toast}
          */
@@ -27,7 +22,7 @@ class ParasiteGame extends XEventEmitter {
         /**
          * @type {Canvas}
          */
-        this.canvas = new Canvas(this.mainElement);
+        this.canvas = new Canvas(this.mainElement, { maxZoom: 2.5 });
         /**
          * @type {Level[]}
          */
@@ -44,6 +39,7 @@ class ParasiteGame extends XEventEmitter {
         // Set up scrolling controls
         this.canvas.on("scroll", e => {
             this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);
+            this.message("hello");
         });
     }
     //////////////////////////////////////////////////////
@@ -73,17 +69,10 @@ class ParasiteGame extends XEventEmitter {
      * @param {string|false} name
      */
     showPopover(name) {
-        for (var pop of this.popoverNames) {
-            var elem = this.popovers[pop];
-            if (pop == name) {
-                if (!elem.open) {
-                    elem.inert = true;
-                    elem.show();
-                    elem.inert = false;
-                }
-            } else {
-                if (elem.open) elem.close();
-            }
+        for (var popName in this.popovers) {
+            var pop = this.popovers[popName];
+            if (popName == name) pop.show();
+            else pop.close();
         }
     }
     /**
@@ -91,7 +80,7 @@ class ParasiteGame extends XEventEmitter {
      * @readonly
      */
     get popoverActive() {
-        return this.popoverNames.some(name => this.popovers[name].open);
+        return this.levelInfoPopover.open || Object.keys(this.popovers).some(name => this.popovers[name].open);
     }
     /////////////////////////////////////////////////////////
     /**
@@ -121,14 +110,9 @@ class ParasiteGame extends XEventEmitter {
         this.currentLevelIndex = index;
         Matter.World.add(this.currentLevel.physicsWorld, this.playerSnake.body);
         var cl = this.currentLevel;
-        this.popovers.levelInfo.innerHTML = `
-        <h1>Level ${this.currentLevelIndex}${": ".repeat(!!cl.title)}${cl.title}</h1>
-        <div>${cl.objective}</div>
-        <form method="dialog">
-        <input type="submit" value="Play" />
-        </form>
-        `;
-        this.showPopover("levelInfo");
+        var name = this.currentLevelIndex + (cl.title ? ": " + cl.title : "");
+        this.levelInfoPopover.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
+        this.levelInfoPopover.show();
     }
     /////////////////////////////////////////////////////////
     /**
@@ -137,7 +121,7 @@ class ParasiteGame extends XEventEmitter {
     async mainLoop() {
         while (true) {
             var wait = this.nextFrame();
-            if (this.popoverActive) await this.waitFor("popoverclosed");
+            if (this.popoverActive) await this.waitFor("popoverclose");
             this.render();
             this.tickWorld();
             await wait;

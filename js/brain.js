@@ -222,7 +222,7 @@ class TestBrain extends NNBrain {
     get mood() {
         return [
             Color.hsv(0.7, 1, 1),
-            Color.hsv((Date.now() / 10000) % 1, 1, 1),
+            Color.hsv(0.3, 1, 1),
         ];
     }
     get tongueLength() { return 1; }

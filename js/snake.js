@@ -133,7 +133,10 @@ class Snake {
         ctx.save();
         var forward = new Vector(0, 1).rotate(this.head.angle);
         // draw body
-        for (var c of this.body.bodies.reverse()) dotAt(ctx, c.position, c.circleRadius, c.render.fillStyle);
+        for (var i = this.length - 1; i >= 0; i--) {
+            var c = this.segments[i];
+            dotAt(ctx, c.position, c.circleRadius, c.render.fillStyle);
+        }
         // draw eyes
         dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
         dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
