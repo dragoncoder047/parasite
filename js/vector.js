@@ -1,6 +1,10 @@
 class Vector {
+    /**
+     * @param {number | {x: number, y: number}} x
+     * @param {number | undefined} y
+     */
     constructor(x, y) {
-        if (!y) {
+        if (typeof y === "undefined") {
             /**
              * @type {number}
              */
@@ -13,6 +17,7 @@ class Vector {
             this.x = x;
             this.y = y;
         }
+        if (isNaN(this.x) || isNaN(this.y)) throw new TypeError("strange NaN");
     }
     /**
      * Applies the function to the vector's x- and y-coordinates.
