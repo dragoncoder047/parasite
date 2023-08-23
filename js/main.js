@@ -31,6 +31,7 @@ async function main() {
     await game.waitFor("popover-welcome-closed");
     game.openLevel(0);
     await game.mainLoop();
+    throw new Error("Main loop returned (unreachable!!)");
 }
 
 main();
