@@ -24,7 +24,7 @@ class Toast {
      * @param {"info" | "warning" | "error" | "success" | false} type The dialog type
      * @param {boolean} permanent Don't auto-close
      */
-    toast(message, type = false, permanent = false) {
+    show(message, type = false, permanent = false) {
         this.dialog.innerHTML = "";
         this.dialog.append(message);
         if (type) this.dialog.dataset.information = type;
