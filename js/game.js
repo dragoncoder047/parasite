@@ -99,10 +99,13 @@ class ParasiteGame extends XEventEmitter {
     }
     showLevelCompleteToast() {
         var span = document.createElement("span");
-        var button = document.createElement("button");
-        button.addEventListener("click", () => this.nextLevel());
-        button.textContent = "Next level \u21d2";
-        span.append("Level complete!\u2001", button);
+        if (this.currentLevelIndex + 1 < this.levels.length) {
+            var button = document.createElement("button");
+            button.addEventListener("click", () => this.nextLevel());
+            button.textContent = "Next level \u21d2";
+            span.append("Level complete!\u2001", button);
+        }
+        else span.append("All levels complete!! (there are no more)");
         this.toaster.show(span, "success", true);
     }
     nextLevel() {
@@ -117,8 +120,9 @@ class ParasiteGame extends XEventEmitter {
         Matter.World.remove(this.currentLevel.physicsWorld, this.playerSnake.body);
         this.currentLevelIndex = index;
         Matter.World.add(this.currentLevel.physicsWorld, this.playerSnake.body);
+        this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
         var cl = this.currentLevel;
-        var name = this.currentLevelIndex + (cl.title ? ": " + cl.title : "");
+        var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
         this.levelInfoPopover.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
         this.levelInfoPopover.show();
         this.canvas.zoom = 1;
@@ -129,16 +133,13 @@ class ParasiteGame extends XEventEmitter {
      * start the main loop
      */
     async mainLoop() {
-        var foo = false;
         while (true) {
             var wait = this.nextFrame();
             await this.allPopoversClosed;
             this.render();
             this.tickWorld();
+            if (this.currentLevel.complete || true) this.showLevelCompleteToast();
             await wait;
-            if (foo) continue;
-            setTimeout(() => this.showLevelCompleteToast(), 1000);
-            foo = true;
         }
     }
     /**
@@ -147,7 +148,6 @@ class ParasiteGame extends XEventEmitter {
     tickWorld() {
         this.currentLevel.tickWorld();
         this.playerSnake.tickWorld();
-        if (this.currentLevel.complete) this.showLevelCompleteToast();
     }
     /**
      * Render

@@ -1,7 +1,3 @@
-/**
- * @typedef {TBD} Goal
- */
-
 class Level {
     constructor(options) {
         /**
@@ -24,7 +20,7 @@ class Level {
             Matter.World.add(this.physicsWorld, snake.body);
         });
         /**
-         * @type {TBD[]}
+         * @type {???[]}
          */
         this.blocks = options.blocks || [];
         this.blocks.forEach(block => {
@@ -38,6 +34,10 @@ class Level {
          * @type {string}
          */
         this.objective = options.objective || "";
+        /**
+         * @type {{position: Vector, angle: number}}
+         */
+        this.entry = options.entry || { position: new Vector(0, 0), angle: 0 };
     }
     /**
      * @type {boolean}

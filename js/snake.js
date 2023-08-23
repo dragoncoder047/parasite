@@ -133,9 +133,10 @@ class Snake {
         ctx.save();
         var forward = new Vector(0, 1).rotate(this.head.angle);
         // draw body
-        for (var i = this.length - 1; i >= 0; i--) {
+        for (var i = this.length - 1; i >= 1; i--) {
             var c = this.segments[i];
-            dotAt(ctx, c.position, c.circleRadius, c.render.fillStyle);
+            var d = this.segments[i - 1];
+            fatLine(ctx, c.position, d.position, d.circleRadius * 2, d.render.fillStyle);
         }
         // draw eyes
         dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
@@ -162,5 +163,16 @@ class Snake {
         ctx.lineWidth = 0.2;
         ctx.fillText(this.name, left, top);
         ctx.strokeText(this.name, left, top);
+    }
+    /**
+     * scrunches the snake up onto itself to expand again.
+     * @param {Vector} position
+     * @param {number} angle
+     */
+    scrunch(position, angle) {
+        for (var b of this.segments) {
+            b.position = new Vector(position);
+            b.angle = angle;
+        }
     }
 }

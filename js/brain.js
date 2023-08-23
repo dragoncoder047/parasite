@@ -225,7 +225,7 @@ class TestBrain extends NNBrain {
             Color.hsv(0.3, 1, 1),
         ];
     }
-    get tongueLength() { return 1; }
+    get tongueLength() { return 0.5; }
     get tongueAngle() { return 0; }
 }
 

@@ -20,7 +20,17 @@ const game = new ParasiteGame({
             ],
             goal: null,
             title: "Foo Bar",
-            objective: "Spam, spam, spam, sausage, eggs, and spam! ".repeat(50),
+            objective: "This is a TEST level. ".repeat(50),
+        }),
+        new Level({
+            snakes: [
+                new Snake(new TestBrain(), new Vector(100, 0), "Test snake 4"),
+                new Snake(new TestBrain(), new Vector(11, 200), "Test snake 5"),
+                new Snake(new TestBrain(), new Vector(100, 300), "Test snake 6"),
+            ],
+            goal: null,
+            title: "Bar Baz",
+            objective: "This is another TEST LEVEL. ".repeat(50),
         }),
     ],
     player: new Snake(new TestBrain(), new Vector(0, 0), "Player (you)"),

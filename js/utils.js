@@ -64,7 +64,7 @@ function clamp(x, a, b) {
  * @param {boolean} k
  * @returns {number}
  */
-function map(x, a, b, c, d, k=true) {
+function map(x, a, b, c, d, k = true) {
     if (k) x = clamp(x, a, b);
     return (x - a) * (d - c) / (b - a) + c;
 }
@@ -104,5 +104,25 @@ function dotAt(ctx, position, radius, fillColor, strokeColor = null, strokeWidth
         ctx.stroke();
     }
     ctx.closePath();
+    ctx.restore();
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Vector} p1
+ * @param {Vector} p2
+ * @param {number} radius
+ * @param {string} fillColor
+ */
+function fatLine(ctx, p1, p2, radius, fillColor) {
+    ctx.save();
+    ctx.fillStyle = fillColor;
+    ctx.beginPath();
+    ctx.strokeStyle = fillColor;
+    ctx.lineWidth = radius;
+    ctx.lineCap = "round";
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
     ctx.restore();
 }
