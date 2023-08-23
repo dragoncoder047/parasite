@@ -14,16 +14,16 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new TestBrain(), new Vector(0, 100)),
-                new Snake(new TestBrain(), new Vector(0, 200)),
-                new Snake(new TestBrain(), new Vector(0, 300)),
+                new Snake(new TestBrain(), new Vector(0, 100), Linnaeus.randomBinomial()),
+                new Snake(new TestBrain(), new Vector(0, 200), Linnaeus.randomBinomial()),
+                new Snake(new TestBrain(), new Vector(0, 300), Linnaeus.randomBinomial()),
             ],
             goal: null,
             title: "Foo Bar",
             objective: "Spam, spam, spam, sausage, eggs, and spam! ".repeat(50),
         }),
     ],
-    player: new Snake(new TestBrain(), new Vector(0, 0)),
+    player: new Snake(new TestBrain(), new Vector(0, 0), "Player (you)"),
 });
 
 async function main() {

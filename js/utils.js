@@ -100,7 +100,7 @@ function dotAt(ctx, position, radius, fillColor, strokeColor = null, strokeWidth
     ctx.fill();
     if (strokeColor) {
         ctx.strokeStyle = strokeColor;
-        ctx.strokeWidth = strokeWidth;
+        ctx.lineWidth = strokeWidth;
         ctx.stroke();
     }
     ctx.closePath();

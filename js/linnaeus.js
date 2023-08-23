@@ -30,12 +30,12 @@ class Linnaeus {
         var syllable;
         for (var i = 0; i < length; i++) {
             do {
-                syllable = Linnaeus.choose(syllable_types);
+                syllable = Linnaeus.choose(Linnaeus.syllable_types);
             } while (syllable[0].toString() == last.toString());
-            for (var group of syllable) out.push(choose(group));
+            for (var group of syllable) out.push(Linnaeus.choose(group));
             last = syllable.at(-1);
         }
-        return out.join("").replaceAll(bad_vowels_re, "$1").replaceAll(bad_rep_re, "$1$1");
+        return out.join("").replaceAll(Linnaeus.bad_vowels_re, "$1").replaceAll(Linnaeus.bad_rep_re, "$1$1");
     }
     /**
      * @returns {string}

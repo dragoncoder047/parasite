@@ -8,8 +8,9 @@ class Snake {
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
+     * @param {string} name
      */
-    constructor(brain, headPos) {
+    constructor(brain, headPos, name) {
         /**
          * @type {Brain}
          */
@@ -36,6 +37,10 @@ class Snake {
          * @type {number}
          */
         this.depthOfVision = Snake.VISION_DEPTH;
+        /**
+         * @type {string}
+         */
+        this.name = name;
     }
     /**
      * @param {number} amount number of segments to add
@@ -145,5 +150,14 @@ class Snake {
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
+        // draw name
+        var left = this.head.position.x;
+        var top = this.head.position.y - Snake.HEAD_WIDTH * 1.3;
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 0.2;
+        ctx.fillText(this.name, left, top);
+        ctx.strokeText(this.name, left, top);
     }
 }
