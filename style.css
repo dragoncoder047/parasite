@@ -58,6 +58,7 @@ canvas {
 }
 
 form[method=dialog] {
+    margin-top: 1.5em;
     display: inline-block;
     width: 100%;
     text-align: center;
