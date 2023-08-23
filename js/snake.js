@@ -3,7 +3,7 @@ class Snake {
     static HEAD_WIDTH = 10;
     static TAIL_WIDTH = 5;
     static LINK_OFFSET = 1.5;
-    static VISION_DEPTH = 25;
+    static VISION_DEPTH = 50;
     static DEFAULT_COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.SNAKE_MASK };
     /**
      * @param {Brain} brain
@@ -143,7 +143,7 @@ class Snake {
         var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + map(this.brain.tongueLength, 0, 1, 0, this.depthOfVision)).plus(this.head.position);
         ctx.strokeStyle = "red";
         ctx.lineWidth = Snake.HEAD_WIDTH / 3;
-        ctx.lineCap = "round";
+        ctx.lineCap = ctx.lineJoin = "butt";
         ctx.beginPath();
         ctx.moveTo(tongueP1.x, tongueP1.y);
         ctx.lineTo(tongueP2.x, tongueP2.y);

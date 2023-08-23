@@ -226,7 +226,7 @@ class TestBrain extends NNBrain {
         ];
     }
     get tongueLength() { return 1; }
-    get tongueAngle() { return Math.sin(Date.now() / 400) / 5; }
+    get tongueAngle() { return 0; }
 }
 
 // sanity check myself

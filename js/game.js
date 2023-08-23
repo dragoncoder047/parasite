@@ -125,7 +125,7 @@ class ParasiteGame extends XEventEmitter {
         <h1>Level ${this.currentLevelIndex}${": ".repeat(!!cl.title)}${cl.title}</h1>
         <div>${cl.objective}</div>
         <form method="dialog">
-        <input type="submit" value="Play" autofocus="false" />
+        <input type="submit" value="Play" />
         </form>
         `;
         this.showPopover("levelInfo");
