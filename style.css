@@ -53,6 +53,10 @@ dialog.toast {
     z-index: 9999;
 }
 
+dialog.toast[open] {
+    transition: opacity 0s;
+}
+
 dialog[data-information=warning] {
     border-color: yellow;
 }
