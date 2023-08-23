@@ -40,7 +40,7 @@ class Snake {
         /**
          * @type {string}
          */
-        this.name = name;
+        this.name = name || Linnaeus.randomBinomial();
     }
     /**
      * @param {number} amount number of segments to add

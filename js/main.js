@@ -14,9 +14,9 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new TestBrain(), new Vector(0, 100), Linnaeus.randomBinomial()),
-                new Snake(new TestBrain(), new Vector(0, 200), Linnaeus.randomBinomial()),
-                new Snake(new TestBrain(), new Vector(0, 300), Linnaeus.randomBinomial()),
+                new Snake(new TestBrain(), new Vector(0, 100), "Test snake 1"),
+                new Snake(new TestBrain(), new Vector(0, 200), "Test snake 2"),
+                new Snake(new TestBrain(), new Vector(0, 300), "Test snake 3"),
             ],
             goal: null,
             title: "Foo Bar",
