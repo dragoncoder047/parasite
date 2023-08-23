@@ -176,11 +176,11 @@ class Brain {
 
 class NNBrain extends Brain {
     static GRANULES = 0.1;
-    static OUTPUT_CHOICES = (function() {
+    static OUTPUT_CHOICES = (function () {
         const c01 = irange(0, 1, NNBrain.GRANULES);
         const c_11 = irange(-1, 1, NNBrain.GRANULES);
         const bool = [true, false];
-        return[
+        return [
             c01, // thrust
             c_11, // steering
             c01, c01, c01, // mood 1
