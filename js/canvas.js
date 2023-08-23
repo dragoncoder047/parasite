@@ -105,7 +105,7 @@ class Canvas extends XEventEmitter {
             canvas.style.height = CSS.px(main.clientHeight - 1);
             this.emit('resize', { x: main.clientWidth, y: main.clientHeight });
         }
-        new ResizeObserver(resize_handler).observe(main);
+        window.addEventListener("resize", resize_handler);
         resize_handler();
         // autofocus
         canvas.addEventListener('mouseover', () => canvas.focus());
