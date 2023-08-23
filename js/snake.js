@@ -2,7 +2,7 @@ class Snake {
     static INITIAL_LENGTH = 30;
     static HEAD_WIDTH = 10;
     static TAIL_WIDTH = 5;
-    static LINK_OFFSET = 4;
+    static LINK_OFFSET = 1.5;
     static VISION_DEPTH = 25;
     static DEFAULT_COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.SNAKE_MASK };
     /**
@@ -41,42 +41,37 @@ class Snake {
      * @param {number} amount number of segments to add
      */
     growBy(amount) {
-        var last = this.body.bodies[this.body.bodies.length - 1];
         for (var i = 0; i < amount; i++) {
-            var newBody = Matter.Bodies.circle(last.position.x, last.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.5 });
+            var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.1 });
             Matter.Composite.add(this.body, newBody);
             newBody.plugin.snake = this;
-            var constraint = Matter.Constraint.create({
-                bodyA: last,
+            var pin = Matter.Constraint.create({
+                bodyA: this.tail,
                 bodyB: newBody,
-                pointA: Matter.Vector.create(0, -Snake.LINK_OFFSET / 2),
-                pointB: Matter.Vector.create(0, Snake.LINK_OFFSET / 2),
+                pointA: new Vector(0, -Snake.LINK_OFFSET),
+                pointB: new Vector(0, Snake.LINK_OFFSET),
                 stiffness: 1,
                 length: 0,
             });
-            Matter.Composite.add(this.body, constraint);
-            last = newBody;
+            var spring = Matter.Constraint.create({
+                bodyA: this.tail,
+                bodyB: newBody,
+                pointA: new Vector(0, Snake.LINK_OFFSET),
+                pointB: new Vector(0, -Snake.LINK_OFFSET),
+                stiffness: 1,
+                length: Snake.LINK_OFFSET * 5, // * 4 is the nominal length but need to push to keep snake straight
+            });
+            Matter.Composite.add(this.body, pin);
+            Matter.Composite.add(this.body, spring);
+            this.segments.push(newBody);
         }
         // scale segments to linearly decrease in size
         for (var i = 0; i < this.length; i++) {
-            var body = this.body.bodies[i];
+            var body = this.segments[i];
             var targetSize = map(i, 0, this.length, Snake.HEAD_WIDTH, Snake.TAIL_WIDTH);
             var actualSize = body.circleRadius;
             var factor = targetSize / actualSize;
             Matter.Body.scale(body, factor, factor);
-        }
-        // update display colors
-        for (var i = 0; i < this.length; i++) {
-            var segment = this.body.bodies[i];
-            var color = Color.map2(i, 0, this.length, this.brain.mood[0], this.brain.mood[1], false);
-            var style = `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
-            segment.render = {
-                visible: true,
-                opacity: 1,
-                strokeStyle: null,
-                fillStyle: style,
-                lineWidth: 0,
-            };
         }
     }
     /**
@@ -108,7 +103,23 @@ class Snake {
         return this.body.bodies.length;
     }
     tickWorld() {
-        //noop;
+        // update brain
+        //todo;
+        // move self
+        //todo;
+        // update display colors
+        for (var i = 0; i < this.length; i++) {
+            var segment = this.segments[i];
+            var color = Color.map2(i, 0, this.length, this.brain.mood[0], this.brain.mood[1], false);
+            var style = `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
+            segment.render = {
+                visible: true,
+                opacity: 1,
+                strokeStyle: null,
+                fillStyle: style,
+                lineWidth: 0,
+            };
+        }
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
@@ -124,7 +135,7 @@ class Snake {
         // draw tongue
         var tongueAngle = forward.rotate(this.brain.tongueAngle);
         var tongueP1 = tongueAngle.scale(Snake.HEAD_WIDTH).plus(this.head.position);
-        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + this.brain.tongueLength).plus(this.head.position);
+        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + map(this.brain.tongueLength, 0, 1, 0, this.depthOfVision)).plus(this.head.position);
         ctx.strokeStyle = "red";
         ctx.lineWidth = Snake.HEAD_WIDTH / 3;
         ctx.lineCap = "round";

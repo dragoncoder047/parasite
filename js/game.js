@@ -63,6 +63,13 @@ class ParasiteGame extends XEventEmitter {
         return new Promise(r => setTimeout(r, delay));
     }
     /**
+     * utility function
+     * @returns {Promise<void>}
+     */
+    nextFrame() {
+        return new Promise(r => requestAnimationFrame(r));
+    }
+    /**
      * @param {string|false} name
      */
     showPopover(name) {
@@ -127,9 +134,14 @@ class ParasiteGame extends XEventEmitter {
     /**
      * start the main loop
      */
-    mainLoop() {
-        this.render();
-        this.tickWorld();
+    async mainLoop() {
+        while (true) {
+            var wait = this.nextFrame();
+            if (this.popoverActive) await this.waitFor("popoverclosed");
+            this.render();
+            this.tickWorld();
+            await wait;
+        }
     }
     /**
      * Called after each step
@@ -138,9 +150,6 @@ class ParasiteGame extends XEventEmitter {
         this.currentLevel.tickWorld();
         this.playerSnake.tickWorld();
         if (this.currentLevel.complete) this.showLevelCompleteToast();
-        // Don't run the level if a popover is open
-        if (!this.popoverActive) setTimeout(() => this.tickWorld(), 1000 / 60);
-        else this.waitFor("popoverclosed").then(() => this.tickWorld());
     }
     /**
      * Render
@@ -148,11 +157,11 @@ class ParasiteGame extends XEventEmitter {
     render() {
         this.canvas.clear();
         this.canvas.drawTransformed(() => {
+            this.canvas.ctx.globalAlpha = 1;
             this.currentLevel.renderTo(this.canvas.ctx);
             this.canvas.ctx.shadowColor = "white";
             this.canvas.ctx.shadowBlur = 3;
             this.playerSnake.renderTo(this.canvas.ctx);
         });
-        requestAnimationFrame(() => this.render());
     }
 }
