@@ -4,7 +4,7 @@ class ParasiteGame extends XEventEmitter {
         /**
          * @type {HTMLElement}
          */
-        this.mainElement = opts.main;
+        this.bottomElement = opts.bottomBar;
         /**
          * @type {Object<string, Popover>}
          */
@@ -22,7 +22,7 @@ class ParasiteGame extends XEventEmitter {
         /**
          * @type {Canvas}
          */
-        this.canvas = new Canvas(this.mainElement, { maxZoom: 2.5 });
+        this.canvas = opts.canvas;
         /**
          * @type {Level[]}
          */
