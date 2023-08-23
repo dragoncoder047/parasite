@@ -40,6 +40,7 @@ class ParasiteGame extends XEventEmitter {
          * @type {Snake}
          */
         this.playerSnake = opts.player;
+        this.playerSnake.setCollisionMask(CollisionLayer.PLAYER_MASK);
         // Set up scrolling controls
         this.canvas.on("scroll", e => {
             this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);
@@ -109,9 +110,9 @@ class ParasiteGame extends XEventEmitter {
      */
     openLevel(index) {
         // remove player snake from current level
-        Matter.Composite.removeComposite(this.currentLevel.physicsWorld, this.playerSnake.segments);
+        Matter.World.remove(this.currentLevel.physicsWorld, this.playerSnake.body);
         this.currentLevelIndex = index;
-        Matter.Composite.addComposite(this.currentLevel.physicsWorld, this.playerSnake.segments);
+        Matter.World.add(this.currentLevel.physicsWorld, this.playerSnake.body);
         var cl = this.currentLevel;
         this.popovers.levelInfo.innerHTML = `
         <h1>Level ${this.currentLevelIndex}${": ".repeat(!!cl.title)}${cl.title}</h1>

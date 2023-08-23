@@ -21,7 +21,7 @@ class Level {
          */
         this.snakes = options.snakes || [];
         this.snakes.forEach(snake => {
-            Matter.World.add(this.physicsWorld, snake.segments);
+            Matter.World.add(this.physicsWorld, snake.body);
         });
         /**
          * @type {TBD[]}
@@ -51,10 +51,6 @@ class Level {
         Matter.Engine.update(this.physicsEngine);
         this.snakes.forEach(snake => snake.tickWorld());
         this.blocks.forEach(block => block.tickWorld());
-        this.snakes.forEach(snake => {
-            snake.head.force = new Vector(0, 0.01).rotate(snake.head.angle).plus(snake.head.force);
-            snake.head.torque += 0.001;
-        });
     }
     /**
      * @param {CanvasRenderingContext2D} ctx

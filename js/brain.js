@@ -36,14 +36,9 @@ Output vector: total 20
  * @property {Block[]} walls
  */
 
-/**
- * @typedef Color
- * @property {number} r
- * @property {number} g
- * @property {number} b
- */
-
 class Brain {
+    static INPUT_DIMENSIONS = 84;
+    static OUTPUT_DIMENSIONS = 20;
     constructor() {
         /**
          * @type {Snake}
@@ -106,16 +101,10 @@ class Brain {
             forward,
             forward.rotate(Math.PI / 8),
         ]], {
-            collisionFilter: {/* TODO */ },
+            collisionFilter: this.snake.collisionFilter,
         });
         var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
         throw new Error("Todo scanBin()");
-    }
-    /**
-     * @return {never}
-     */
-    notImplemented() {
-        throw new Error("Not Implemented");
     }
     /**
      * @type {{thrust: number, torque: number}}
@@ -130,8 +119,8 @@ class Brain {
      */
     get mood() {
         return [
-            hsv2rgb(this.outputVector[2], this.outputVector[3], this.outputVector[4]),
-            hsv2rgb(this.outputVector[5], this.outputVector[6], this.outputVector[7]),
+            Color.hsv(this.outputVector[2], this.outputVector[3], this.outputVector[4]),
+            Color.hsv(this.outputVector[5], this.outputVector[6], this.outputVector[7]),
         ];
     }
     /**
@@ -139,42 +128,42 @@ class Brain {
      * @readonly
      */
     get tongueAngle() {
-        return lerpClamp(this.outputVector[8], 0, Math.PI / 2);
+        return map(this.outputVector[8], -1, 1, -Math.PI / 2, Math.PI / 2);
     }
     /**
      * @type {number}
      * @readonly
      */
     get tongueLength() {
-        return lerpClamp(this.outputVector[9], 0, this.snake.depthOfVision);
+        return map(this.outputVector[9], 0, 1, 0, this.snake.depthOfVision);
     }
     /**
-     * @type {number}
+     * @type {boolean}
      * @readonly
      */
-    get hunger() {
+    get hungry() {
         return this.outputVector[10];
     }
     /**
-     * @type {[number, number]}
+     * @type {[boolean, boolean]}
      * @readonly
      */
-    get mateInstinct() {
+    get inHeat() {
         return [this.outputVector[11], this.outputVector[12]];
     }
     /**
-     * @type {number}
+     * @type {boolean}
      * @readonly
      */
-    get growth() {
+    get wantsToGrow() {
         return this.outputVector[13];
     }
     /**
-     * @type {{color: Color, amount: number}}
+     * @type {{color: Color, release: boolean}}
      * @readonly
      */
     get pheremones() {
-        return { color: hsv2rgb(this.outputVector[14], this.outputVector[15], this.outputVector[16]), amount: this.outputVector[17] };
+        return { color: Color.hsv(this.outputVector[14], this.outputVector[15], this.outputVector[16]), release: this.outputVector[17] };
     }
     /**
      * @type {{freq: number, vol: number}}
@@ -185,59 +174,58 @@ class Brain {
     }
 }
 
-class NeuralNetBrain extends Brain {
+class NNBrain extends Brain {
+    static GRANULES = 0.1;
+    static OUTPUT_CHOICES = (function() {
+        const c01 = irange(0, 1, NNBrain.GRANULES);
+        const c_11 = irange(-1, 1, NNBrain.GRANULES);
+        const bool = [true, false];
+        return[
+            c01, // thrust
+            c_11, // steering
+            c01, c01, c01, // mood 1
+            c01, c01, c01, // mood 2
+            c_11, // tongue angle
+            c01, // tongue length
+            bool, // hungry
+            bool, bool, // mate
+            bool, // grow
+            c01, c01, c01, bool, // pheremones
+            c01, c01, // sound
+        ];
+    })();
     constructor() {
         super();
         /**
-         * @type {RL.DQNAgent}
+         * @type {???}
          */
-        this.actor = new RL.DQNAgent({
-            getNumStates: () => 84,
-            getMaxNumActions: () => 20,
-        }, { experience_add_every: 1 });
+        this.actor = /* ??? */null;
     }
-    /*
-        act: function(slist) {
-            // convert to a Mat column vector
-            var s = new R.Mat(this.ns, 1);
-            s.setFrom(slist);
-
-            // epsilon greedy policy
-            if(Math.random() < this.epsilon) {
-                var a = randi(0, this.na);
-            } else {
-                // greedy wrt Q function
-                var amat = this.forwardQ(this.net, s, false);
-                var a = R.maxi(amat.w); // returns index of argmax action
-            }
-
-            // shift state memory
-            this.s0 = this.s1;
-            this.a0 = this.a1;
-            this.s1 = s;
-            this.a1 = a;
-
-            return a;
-        },
-    */
     /**
      * Uses the input vector to update the output vector.
      */
     think() {
-        var s = new R.Mat(this.actor.ns, 1);
-        s.setFrom(this.inputVector);
-        var amat = this.actor.forwardQ(this.actor.net, s, false);
-        if (amat.w.length != 20) throw new Error("bad NN");
-        this.outputVector = amat.w;
-        this.actor.s0 = this.actor.s1;
-        this.actor.a0 = this.actor.a1;
-        this.actor.s1 = s;
-        this.actor.a1 = R.maxi(amat.w); // satisfy algorithm
+        throw new Error("TODO");
     }
     goodIdea() {
-        this.actor.learn(1); // Reward
+        //this.actor.learn(1); // Reward
     }
     badIdea() {
-        this.actor.learn(-1); // Punish
+        //this.actor.learn(-1); // Punish
     }
 }
+
+class TestBrain extends NNBrain {
+    constructor() {
+        super();
+    }
+    get mood() {
+        return [
+            Color.hsv(0, 1, 1),
+            Color.hsv(0.5, 1, 1),
+        ];
+    }
+}
+
+// sanity check myself
+if (Brain.OUTPUT_DIMENSIONS != NNBrain.OUTPUT_CHOICES.length) throw new Error("i screwed up");

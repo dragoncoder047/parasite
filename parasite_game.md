@@ -43,15 +43,12 @@ They have 4 layer (2 hidden) neural network w/loopback memory neurons
 * 2 hue/saturation colors
 * Frequency and volume of sound (composite method is pan=sin of angle to source, volume is exponential decay based on distance)
 
-**monkey patch here** <https://github.com/karpathy/reinforcejs/blob/master/lib/rl.js#L1060>
-
 ### Behavior
 
 * Move using thrust -- uses energy
 * Stick tounge out according to desire to eat, when it contacts food it counts as eaten
 * When it contacts tail of another snake, if both snakes' "desire to mate" output is high enough a new snake is created using random merge of genome -- takes energy from both
 * Desire to grow -- uses more energy than moving
-* Color of snake is based on 6 feedback neurons (3 for head color, 3 for tail color, HSV interpolation)
 
 ## World behavior
 
@@ -62,7 +59,7 @@ Snakes, food, and pheremones slow down with zero thrust.
 Glass blocks, walls, and gratings are all square blocks.
 
 * Walls cannot be moved and nothing passes through them.
-* Glass blocks can be pushed, nothing can pass through them but snakes don't see them if they can be pushed in any direction.
+* Glass blocks can be pushed, nothing can pass through them but snakes don't see them.
 * Gratings don't move, but food and pheremones can pass through them, snakes can't.
 * The player can go anywhere
 
@@ -131,6 +128,9 @@ Player has limited resources available to build the world, some are already popu
 
 # Stuff
 
-* Other reinforcement learning: <https://github.com/karpathy/reinforcejs/blob/master/lib/rl.js#L982>
 * Use Matter.js <https://github.com/liabru/matter-js/blob/master/examples/chains.js> for physics and motion
 * use <https://github.com/markedjs/marked> for Markdown parsing
+
+NEED TO FIND REINFORCEMENT LEARNING LIBRARY OR WRITE ONE
+
+* <https://spinningup.openai.com/en/latest/algorithms/ddpg.html> ??
