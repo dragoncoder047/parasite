@@ -98,14 +98,15 @@ class Canvas extends XEventEmitter {
         var bsr = this.ctx.webkitBackingStorePixelRatio || this.ctx.mozBackingStorePixelRatio || this.ctx.msBackingStorePixelRatio || this.ctx.oBackingStorePixelRatio || this.ctx.backingStorePixelRatio || 1;
         var ratio = dpr / bsr;
         this.ctx.imageSmoothingEnabled = false;
-        window.addEventListener('resize', () => {
+        const resize_handler = () => {
             canvas.width = main.clientWidth * ratio;
             canvas.height = main.clientHeight * ratio;
             canvas.style.width = CSS.px(main.clientWidth - 1);
             canvas.style.height = CSS.px(main.clientHeight - 1);
             this.emit('resize', { x: main.clientWidth, y: main.clientHeight });
-        });
-        window.dispatchEvent(new UIEvent('resize'));
+        }
+        new ResizeObserver(resize_handler).observe(main);
+        resize_handler();
         // autofocus
         canvas.addEventListener('mouseover', () => canvas.focus());
         canvas.addEventListener('mouseout', () => canvas.blur());
