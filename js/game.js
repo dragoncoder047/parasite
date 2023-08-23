@@ -39,7 +39,6 @@ class ParasiteGame extends XEventEmitter {
         // Set up scrolling controls
         this.canvas.on("scroll", e => {
             this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);
-            this.message("hello");
         });
     }
     //////////////////////////////////////////////////////
@@ -47,8 +46,8 @@ class ParasiteGame extends XEventEmitter {
      * @param {string} message
      * @param {"info" | "warning" | "error" | "success" | false} [type=false] The dialog type
      */
-    message(message, type) {
-        this.toaster.toast(message, type);
+    showToast(message, type) {
+        this.toaster.show(message, type);
     }
     /**
      * utility function
@@ -82,6 +81,14 @@ class ParasiteGame extends XEventEmitter {
     get popoverActive() {
         return this.levelInfoPopover.open || Object.keys(this.popovers).some(name => this.popovers[name].open);
     }
+    /**
+     * @type {Promise<void>}
+     * @readonly
+     */
+    get allPopoversClosed() {
+        if (this.popoverActive) return this.waitFor("popoverclose");
+        else return Promise.resolve();
+    }
     /////////////////////////////////////////////////////////
     /**
      * @type {Level}
@@ -96,9 +103,10 @@ class ParasiteGame extends XEventEmitter {
         button.addEventListener("click", () => this.nextLevel());
         button.textContent = "Next level \u21d2";
         span.append("Level complete!\u2001", button);
-        this.toaster.toast(span, "success", true);
+        this.toaster.show(span, "success", true);
     }
     nextLevel() {
+        this.toaster.close();
         this.openLevel(this.currentLevelIndex + 1);
     }
     /**
@@ -113,18 +121,24 @@ class ParasiteGame extends XEventEmitter {
         var name = this.currentLevelIndex + (cl.title ? ": " + cl.title : "");
         this.levelInfoPopover.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
         this.levelInfoPopover.show();
+        this.canvas.zoom = 1;
+        this.canvas.panxy = new Vector(this.playerSnake.head.position).plus(this.canvas.center);
     }
     /////////////////////////////////////////////////////////
     /**
      * start the main loop
      */
     async mainLoop() {
+        var foo = false;
         while (true) {
             var wait = this.nextFrame();
-            if (this.popoverActive) await this.waitFor("popoverclose");
+            await this.allPopoversClosed;
             this.render();
             this.tickWorld();
             await wait;
+            if (foo) continue;
+            setTimeout(() => this.showLevelCompleteToast(), 1000);
+            foo = true;
         }
     }
     /**
@@ -143,8 +157,6 @@ class ParasiteGame extends XEventEmitter {
         this.canvas.drawTransformed(() => {
             this.canvas.ctx.globalAlpha = 1;
             this.currentLevel.renderTo(this.canvas.ctx);
-            this.canvas.ctx.shadowColor = "white";
-            this.canvas.ctx.shadowBlur = 3;
             this.playerSnake.renderTo(this.canvas.ctx);
         });
     }
