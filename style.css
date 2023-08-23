@@ -10,6 +10,12 @@ main {
     left: 0;
     margin: none;
     padding: none;
+    display: flex;
+    flex-direction: column;
+}
+
+#canvas_container {
+    flex: 1;
 }
 
 /* some from https://stackoverflow.com/a/64708195 */
