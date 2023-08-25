@@ -132,8 +132,16 @@ class Level {
     }
     /**
      * @type {FoodParticle[]}
+     * @readonly
      */
     get foodParticles() {
         return this.particles.filter(particle => particle instanceof FoodParticle);
+    }
+    /**
+     * @type {Pheremone[]}
+     * @readonly
+     */
+    get activePheremones() {
+        return this.particles.filter(particle => particle instanceof Pheremone);
     }
 }
