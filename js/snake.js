@@ -123,9 +123,8 @@ class Snake {
      */
     growBy(amount) {
         for (var i = 0; i < amount; i++) {
-            var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.1 });
+            var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.1, plugin: { snake: this } });
             Matter.Composite.add(this.body, newBody);
-            newBody.plugin.snake = this;
             var pin = Matter.Constraint.create({
                 bodyA: this.tail,
                 bodyB: newBody,
