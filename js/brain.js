@@ -10,6 +10,7 @@
  * @typedef SoundSource
  * @property {number} angle
  * @property {number} freq
+ * @property {number} volume
  */
 
 class Brain {
@@ -48,6 +49,14 @@ class Brain {
          * @type {SoundSource[]}
          */
         this.soundSources = [];
+        /**
+         * @type {number[]}
+         */
+        this.leftTouches = [];
+        /**
+         * @type {number[]}
+         */
+        this.rightTouches = [];
         /**
          * @type {number[]}
          */
@@ -103,6 +112,15 @@ class Brain {
      */
     pushSoundSource(srcDetails) {
         this.soundSources.push(srcDetails);
+    }
+
+    /**
+     * @param {number} position
+     * @param {boolean} isLeft
+     */
+    pushTouch(position, isLeft) {
+        if (position < 0) throw new Error("strange position");
+        (isLeft ? this.leftTouches : this.rightTouches).push(position);
     }
 }
 

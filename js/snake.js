@@ -96,13 +96,25 @@ class Snake {
          */
         this.energy = 1000;
         /**
-         * @type {number}
+         * @type {number?}
          */
         this.lastAction = null;
         /**
          * @type {number}
          */
         this.rewardEffect = 0;
+        /**
+         * @type {Snake?}
+         */
+        this.tailSnake = null;
+        /**
+         * @type {Snake?}
+         */
+        this.headSnake = null;
+        /**
+         * @type {number}
+         */
+        this.soundVolume = 0;
         // Integrating state variables
         /**
          * @type {number}
@@ -195,10 +207,22 @@ class Snake {
      */
     listenTo(other) {
         if (other === this) return;
-        if (other.lastAction != Action.CHIRP) return;
         var sourcePosition = new Vector(0, 20).rotate(other.head.angle).plus(other.head.position);
         var displacementFromSelf = new Vector(this.head.position).minus(sourcePosition).rotate(-this.head.angle);
-        this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq });
+        this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq, volume: other.soundVolume });
+    }
+    /**
+     * @param {Snake} snake
+     * @param {Vector} normal
+     * @param {Matter.Body} selfBody
+     */
+    touchedObject(snake, coll, selfBody) {
+        if (snake) {
+            if (Matter.Query.collides(this.head, [snake.tail])) this.headSnake = snake;
+            if (Matter.Query.collides(this.tail, [snake.head])) this.tailSnake = snake;
+        }
+        var isLeft = normal.rotate(selfBody.angle).x < 0;
+        this.brain.pushTouch(this.segments.indexOf(selfBody) / this.length, isLeft);
     }
     /**
      * @param {Level} currentLevel
@@ -225,6 +249,9 @@ class Snake {
         this.brain.learn(this.rewardEffect);
         this.rewardEffect *= 0.85;
         if (this.rewardEffect < 3) this.rewardEffect = 0;
+        // quiet down gradually
+        this.soundVolume *= 0.92;
+        if (this.soundVolume < 0.1) this.soundVolume = 0;
     }
     /**
      * @type {Vector}

@@ -79,12 +79,26 @@ class Level {
      */
     processCollision(pair) {
         var snake = pair.bodyA.plugin.snake || pair.bodyB.plugin.snake;
+        if (pair.parentA.plugin.snake instanceof Snake) throw new Error("foobar");
+        var isA = pair.bodyA.plugin.snake === snake;
+        var sBody = isA ? pair.bodyA : pair.bodyB;
+        var oBody = isA ? pair.bodyB : pair.bodyA;
         if (!snake) return;
-        var other = snake === pair.bodyA.plugin.snake ? pair.bodyB.plugin : pair.bodyA.plugin;
-        if (other.particle && other.particle instanceof RewardSignal) snake.addReward(otherP.particle);
-        if (other.snake) {
-            // we got two snakes
+        var other = isA ? pair.bodyB.plugin : pair.bodyA.plugin;
+        var n = new Vector(pair.collision.normal);
+        if (other.particle) {
+            if (other.particle instanceof RewardSignal) snake.addReward(other.particle);
         }
+        else if (other.snake) {
+            // we got two snakes
+            snake.touchedObject(other.snake, n, sBody);
+            other.snake.touchedObject(snake, n.scale(-1), oBody);
+        }
+        else if (other.block) {
+            // hit the wall
+            snake.touchedObject(null, n, sBody);
+        }
+        // all other collisions (particle-wall, particle-particle, glass-wall) are ignored
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
