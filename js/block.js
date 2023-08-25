@@ -61,7 +61,8 @@ class Block {
         ctx.translate(this.body.position.x - this.width / 2, this.body.position.y - this.height / 2);
         ctx.rotate(this.body.angle);
         ctx.fillStyle = this.body.render.fillStyle;
-        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.globalAlpha = 0.8;
+        ctx.fillRect(0, 0, this.width, this.height);
         ctx.restore();
     }
     tickWorld() {
