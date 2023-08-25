@@ -99,6 +99,10 @@ class Snake {
          * @type {number}
          */
         this.lastAction = null;
+        /**
+         * @type {number}
+         */
+        this.rewardEffect = 0;
         // Integrating state variables
         /**
          * @type {number}
@@ -217,8 +221,10 @@ class Snake {
         // execute action determined by brain
         this.brain.scan(currentLevel)
         this.executeAction(this.brain.think(), currentLevel);
-        // absorb punish or reward signals
-        //todo();
+        // process reward
+        this.brain.learn(this.rewardEffect);
+        this.rewardEffect *= 0.85;
+        if (this.rewardEffect < 3) this.rewardEffect = 0;
     }
     /**
      * @type {Vector}
@@ -246,16 +252,40 @@ class Snake {
      */
     renderTo(ctx) {
         ctx.save();
-        // draw body
+        this.drawBody(ctx);
+        this.drawEyes(ctx);
+        this.drawTongue(ctx);
+        this.drawName(ctx);
+        ctx.restore();
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    drawBody(ctx) {
+        ctx.save();
+        if (this.rewardEffect != 0) {
+            ctx.shadowColor = this.rewardEffect > 0 ? "lime" : "red";
+            ctx.shadowBlur = clamp(Math.abs(this.rewardEffect), 0, 10);
+        }
         for (var i = this.length - 1; i >= 1; i--) {
             var c = this.segments[i];
             var d = this.segments[i - 1];
             fatLine(ctx, c.position, d.position, d.circleRadius * 2, d.render.fillStyle);
         }
-        // draw eyes
+        ctx.restore();
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    drawEyes(ctx) {
         dotAt(ctx, this.forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
         dotAt(ctx, this.forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
-        // draw tongue
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    drawTongue(ctx) {
+        ctx.save();
         var tongueP1 = this.tongueTipRel.normalize(Snake.HEAD_WIDTH).plus(this.head.position);
         var tongueP2 = this.tongueTip;
         ctx.strokeStyle = "red";
@@ -267,6 +297,11 @@ class Snake {
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
+    }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    drawName(ctx) {
         // draw name
         var left = this.head.position.x;
         var top = this.head.position.y - Snake.HEAD_WIDTH * 1.3;
@@ -320,17 +355,37 @@ class Snake {
                 this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
                 break;
             case Action.EAT:
-                todo();
+                todo("reduce food particles to list of bodies");
                 var hits = Matter.Query.point(todo(), this.head.position);
                 break;
         }
         this.lastAction = action;
     }
     autoPunish() {
-        if (false) this.brain.badIdea();
+        if (false) this.addReward({ rewardAmount: -100, setEaten() { } });
+    }
+    /**
+     * @param {RewardSignal} sig
+     */
+    addReward(sig) {
+        var amount = sig.rewardAmount;
+        if (this.rewardEffect * amount < 0) {
+            // wrong sign
+            this.rewardEffect = amount;
+        }
+        else {
+            this.rewardEffect += amount;
+        }
+        sig.setEaten();
     }
 }
 
 class PlayerSnake extends Snake {
     static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.PLAYER_MASK };
+    /**
+     * @param {number} amount
+     */
+    addReward(amount) {
+        // player snake can't take reward
+    }
 }

@@ -138,8 +138,9 @@ function gauss(mu, sigma) {
 }
 
 /**
+ * @param {string} foo
  * @return {never}
  */
-function todo() {
-    throw new Error("todo");
+function todo(foo) {
+    throw new Error("todo: " + foo);
 }
