@@ -117,9 +117,9 @@ class ParasiteGame extends XEventEmitter {
      */
     openLevel(index) {
         // remove player snake from current level
-        Matter.World.remove(this.currentLevel.physicsWorld, this.playerSnake.body);
+        this.currentLevel.removeSnake(this.playerSnake);
         this.currentLevelIndex = index;
-        Matter.World.add(this.currentLevel.physicsWorld, this.playerSnake.body);
+        this.currentLevel.addSnake(this.playerSnake);
         this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
@@ -147,17 +147,12 @@ class ParasiteGame extends XEventEmitter {
      */
     tickWorld() {
         this.currentLevel.tickWorld();
-        this.playerSnake.tickWorld();
     }
     /**
      * Render
      */
     render() {
         this.canvas.clear();
-        this.canvas.drawTransformed(() => {
-            this.canvas.ctx.globalAlpha = 1;
-            this.currentLevel.renderTo(this.canvas.ctx);
-            this.playerSnake.renderTo(this.canvas.ctx);
-        });
+        this.canvas.drawTransformed(() => this.currentLevel.renderTo(this.canvas.ctx));
     }
 }

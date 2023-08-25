@@ -59,4 +59,20 @@ class Level {
         this.snakes.forEach(snake => snake.renderTo(ctx));
         this.blocks.forEach(block => block.renderTo(ctx));
     }
+    /**
+     * @param {Snake} s
+     */
+    addSnake(s) {
+        this.snakes.push(s);
+        Matter.World.add(this.physicsWorld, snake.body);
+    }
+    /**
+     * @param {Snake} s
+     */
+    removeSnake(s) {
+        var i = this.snakes.indexOf(s);
+        if (i == -1) return; 
+        Matter.World.remove(this.physicsWorld, snake.body);
+        this.snakes.splice(i, 1);
+    }
 }
