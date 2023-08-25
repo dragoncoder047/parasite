@@ -51,15 +51,30 @@ class Particle {
 }
 
 class FoodParticle extends Particle {
-    constructor(size, position) {
+    /**
+     * @param {number} size
+     * @param {Vector} position
+     * @param {Vector} velocity
+     */
+    constructor(size, position, velocity) {
         super(size, 0, position, { category: CollisionLayer.FOOD, mask: CollisionLayer.FOOD_MASK });
+        Matter.Body.setVelocity(this.body, velocity);
         this.body.render.fillStyle = "white";
     }
 }
 
 class Pheremone extends Particle {
-    constructor(size, position) {
-        super(size, 0, position, { category: CollisionLayer.FOOD, mask: CollisionLayer.FOOD_MASK });
+    /**
+     * @param {number} size
+     * @param {number} hue
+     * @param {Vector} position
+     */
+    constructor(size, hue, position) {
+        super(size, hue, position, { category: CollisionLayer.PHEREMONE, mask: CollisionLayer.PHEREMONE_MASK });
+        /**
+         * @type {number}
+         */
+        this.hue = hue;
     }
     tickWorld() {
         // Pheremones decay over time
@@ -72,5 +87,16 @@ class Pheremone extends Particle {
         ctx.shadowColor = this.body.render.fillStyle;
         super.renderTo(ctx);
         ctx.restore();
+    }
+}
+
+class RewardSignal extends Particle {
+    constructor(rewardAmount, position, velocity) {
+        super(10, 0, position, { category: CollisionLayer.PHEREMONE, mask: CollisionLayer.PHEREMONE_MASK });
+        Matter.Body.setVelocity(this.body, velocity);
+        /**
+         * @type {number}
+         */
+        this.rewardAmount = rewardAmount;
     }
 }
