@@ -133,10 +133,10 @@ class NNBrain extends Brain {
         this.actor = /* ??? */null;
     }
     think() {
-        throw new Error("TODO");
+        todo();
     }
     learn(reward) {
-        //this.actor.learn(reward);
+        todo();
     }
 }
 
