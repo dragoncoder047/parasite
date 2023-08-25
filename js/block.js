@@ -67,3 +67,36 @@ class Block {
         // noop;
     }
 }
+
+class Wall extends Block {
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @param {Vector} position
+     */
+    constructor(width, height, position) {
+        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, true, "darkblue");
+    }
+}
+
+class Glass extends Block {
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @param {Vector} position
+     */
+    constructor(width, height, position) {
+        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, false, "brickred");
+    }
+}
+
+class Grate extends Block {
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @param {Vector} position
+     */
+    constructor(width, height, position) {
+        super(width, height, position, { category: CollisionLayer.GRATE, mask: CollisionLayer.GRATE_MASK }, true, "darkgreen");
+    }
+}
