@@ -1,18 +1,40 @@
 /**
  * @param {Matter.Body} t
  * @param {Matter.Body[]} b
- * @returns {Matter.Body[]}
+ * @returns {BinHit[]}
  */
 function getHits(t, b) {
-    return Matter.Query.collides(t, b).flatMap(coll => [coll.bodyA, coll.bodyB]);
+    return Matter.Query.collides(t, b)
+        .map(pair => ({
+            body: t === pair.bodyA ? pair.bodyB : pair.bodyA,
+            point: Vector.apply((...n) => n.reduce((a, b) => a + b), ...pair.activeContacts)
+                .scale(1 / pair.activeContacts.length)
+        }));
 }
 
 /**
+ * @param {Vector} pt
+ * @param {BinHit[]} hits
+ * @returns {BinHit?}
+ */
+function closest(pt, hits) {
+    var sorted = hits.sort((a, b) => new Vector(a.point).minus(pt).length() - new Vector(b.point).minus(pt).length());
+    alert(sorted.map(x => new Vector(x.point).minus(pt).length()));
+    return sorted[0] || null;
+}
+
+/**
+ * @typedef BinHit
+ * @property {Vector} point
+ * @property {Matter.Body} body
+ */
+
+/**
  * @typedef Bin
- * @property {Set<Snake>} snakes
- * @property {Set<FoodParticle>} food
- * @property {Set<Pheremone>} pheremones
- * @property {Set<Block>} walls
+ * @property {BinHit?} snake
+ * @property {BinHit?} food
+ * @property {BinHit?} pheremone
+ * @property {BinHit?} wall
  */
 
 /**
@@ -23,27 +45,6 @@ function getHits(t, b) {
  */
 
 class Brain {
-    /*
-
-    [1] Self length
-    [1] Self energy
-    [2] Self velocity
-    [x]* 5 eye sensors each have:
-        [3] snake head hue + distance + energy
-        [3] pheremone hue, distance + amount
-        [2] food distance + amount
-        [2] wall distance + presence
-    [4] Touch on sides position + presence
-    [2] Touch on tail, head
-    [4] Sound L/R (center freq, vol)
-    [x]* Integrating processes:
-        [2] Tongue angle, position
-        [1] Pheremone color
-        [2] Head/tail hue
-        [1] Sound frequency
-
-    */
-    static INPUT_DIMENSIONS = 84;
     constructor() {
         /**
          * @type {Snake}
@@ -66,10 +67,6 @@ class Brain {
          * @type {number[]}
          */
         this.rightTouches = [];
-        /**
-         * @type {number[]}
-         */
-        this.inputVector = [];
     }
     /**
      * @param {Snake} snake
@@ -117,14 +114,10 @@ class Brain {
          * @type {Bin}
          */
         var bin = {};
-        // get snakes
-        bin.snakes = new Set(getHits(triangle, level.snakes.flatMap(s => s.segments)).map(b => b.plugin.snake));
-        // get pheremones
-        bin.pheremones = new Set(getHits(triangle, level.activePheremones.map(s => s.body)).map(b => b.plugin.particle));
-        // get food
-        bin.food = new Set(getHits(triangle, level.foodParticles.map(s => s.body)).map(b => b.plugin.particle));
-        // get blocks
-        bin.walls = new Set(getHits(triangle, level.blocks.map(s => s.body)).map(b => b.plugin.block));
+        bin.snake = closest(this.snake.head.position, getHits(triangle, level.snakes.flatMap(s => s.segments)));
+        bin.pheremone = closest(this.snake.head.position, getHits(triangle, level.activePheremones.map(s => s.body)));
+        bin.food = closest(this.snake.head.position, getHits(triangle, level.foodParticles.map(s => s.body)));
+        bin.wall = closest(this.snake.head.position, getHits(triangle, level.blocks.flatMap(s => s.body)));
         this.bins[binNumber] = bin;
     }
     /**
@@ -145,18 +138,107 @@ class Brain {
 }
 
 class NNBrain extends Brain {
+    /*
+
+    [1] Self length
+    [1] Self energy
+    [2] Self velocity
+    [x]* 5 eye sensors each have:
+        [3] snake head hue + distance + energy
+        [3] pheremone hue, distance + amount
+        [2] food distance + amount
+        [2] wall distance + presence
+    [4] Touch on sides position + presence
+    [2] Touch on tail, head
+    [4] Sound L/R (center freq, vol)
+    [x]* Integrating processes:
+        [2] Tongue angle, position
+        [1] Pheremone color
+        [2] Head/tail hue
+        [1] Sound frequency
+
+    */
+    static INPUT_DIMENSIONS = 70;
     constructor() {
         super();
         /**
-         * @type {???}
+         * @type {number[]}
          */
-        this.actor = /* ??? */null;
+        this.inputVector = [];
+        /**
+         * @type {RL.DQNAgent}
+         */
+        this.actor = new RL.DQNAgent({
+            getNumStates: () => NNBrain.INPUT_DIMENSIONS,
+            getMaxNumActions: () => Action.NUM_AI_ACTIONS,
+        }, {
+            experience_add_every: 1,
+        });
     }
+    /**
+     * @returns {number}
+     */
     think() {
-        todo();
+        // assemble input vector
+        var i = new Array(NNBrain.INPUT_DIMENSIONS).fill(0);
+        i[0] = this.snake.length;
+        i[1] = this.snake.energy;
+        i[2] = this.snake.head.velocity.x;
+        i[3] = this.snake.head.velocity.y;
+        for (var i = 0; i < 5; i++) {
+            var b = i * 10;
+            if (this.bins[i].snake) {
+                i[b + 0] = this.bins[i].snake.body.plugin.snake.headHue;
+                i[b + 1] = this.bins[i].snake.point.minus(this.snake.head.position).length();
+                i[b + 2] = this.bins[i].snake.body.plugin.snake.energy;
+            }
+            if (this.bins[i].pheremone) {
+                i[b + 3] = this.bins[i].pheremone.body.plugin.particle.hue;
+                i[b + 4] = this.bins[i].pheremone.point.minus(this.snake.head.position).length();
+                i[b + 5] = this.bins[i].pheremone.body.plugin.particle.size;
+            }
+            if (this.bins[i].food) {
+                i[b + 6] = this.bins[i].food.point.minus(this.snake.head.position).length();
+                i[b + 7] = this.bins[i].food.body.plugin.particle.size;
+            }
+            if (this.bins[i].snake) {
+                i[b + 8] = this.bins[i].snake.point.minus(this.snake.head.position).length();
+                i[b + 9] = 1;
+            }
+        }
+        i[54] = this.leftTouches.length ? 1 : 0;
+        i[55] = this.leftTouches.reduce((a, b) => a + b) / this.leftTouches.length;
+        i[56] = this.rightTouches.length ? 1 : 0;
+        i[57] = this.rightTouches.reduce((a, b) => a + b) / this.rightTouches.length;
+        i[58] = this.headSnake ? 1 : 0;
+        i[59] = this.tailSnake ? 1 : 0;
+        // sound
+        var lv = 0, lsf = 0, rv = 0, rsf = 0;
+        for (var ss of this.soundSources) {
+            var pan = Math.sin(ss.angle);
+            var lf = ss.volume * clamp(1 - pan, 0, 1);
+            var rf = ss.volume * clamp(1 + pan, 0, 1);
+            lv += lf;
+            rv += rf;
+            lsf += ss.freq * lf;
+            rsf += ss.freq * rf;
+        }
+        var lf = lsf / lv, rf = rsf / rv;
+        i[60] = lf;
+        i[61] = lv;
+        i[62] = rf;
+        i[63] = rv;
+        // proprioception
+        i[64] = this.snake.tongueAngle;
+        i[65] = this.snake.tongueLength;
+        i[66] = this.snake.pheremoneHue;
+        i[67] = this.snake.headHue;
+        i[68] = this.snake.tailHue;
+        i[69] = this.snake.soundFreq;
+        return this.agent.act(i);
     }
     learn(reward) {
-        todo();
+        if (reward != 0) this.agent.learn(reward);
     }
 }
 
