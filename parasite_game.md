@@ -130,7 +130,3 @@ Player has limited resources available to build the world, some are already popu
 
 * Use Matter.js <https://github.com/liabru/matter-js/blob/master/examples/chains.js> for physics and motion
 * use <https://github.com/markedjs/marked> for Markdown parsing
-
-NEED TO FIND REINFORCEMENT LEARNING LIBRARY OR WRITE ONE
-
-* <https://spinningup.openai.com/en/latest/algorithms/ddpg.html> ??
