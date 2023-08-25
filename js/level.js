@@ -56,8 +56,12 @@ class Level {
     }
     tickWorld() {
         Matter.Engine.update(this.physicsEngine);
-        this.snakes.forEach(snake => snake.tickWorld());
+        this.snakes.forEach(snake => {
+            this.snakes.forEach(snake2 => snake.listenTo(snake2));
+            snake.tickWorld();
+        });
         this.blocks.forEach(block => block.tickWorld());
+        this.particles.forEach(particle => particle.tickWorld());
         // remove eaten particles after snakes eat them
         this.particles = this.particles.filter(particle => {
             if (particle.eaten) {
@@ -86,7 +90,7 @@ class Level {
      */
     removeSnake(s) {
         var i = this.snakes.indexOf(s);
-        if (i == -1) return; 
+        if (i == -1) return;
         Matter.World.remove(this.physicsWorld, snake.body);
         this.snakes.splice(i, 1);
     }
@@ -96,5 +100,11 @@ class Level {
     addParticle(p) {
         this.particles.push(p);
         Matter.World.add(this.physicsWorld, p.body);
+    }
+    /**
+     * @type {FoodParticle[]}
+     */
+    get foodParticles() {
+        return this.particles.filter(particle => particle instanceof FoodParticle);
     }
 }

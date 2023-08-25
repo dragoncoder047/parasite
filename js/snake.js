@@ -51,7 +51,7 @@ class Snake {
     static TAIL_WIDTH = 5;
     static LINK_OFFSET = 1.5;
     static VISION_DEPTH = 50;
-    static DEFAULT_COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.SNAKE_MASK };
+    static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.SNAKE_MASK };
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
@@ -74,11 +74,14 @@ class Snake {
         /**
          * @type {Object}
          */
-        this.collisionFilter = { group: Matter.Body.nextGroup(true), ...Snake.DEFAULT_COLL_FILTER };
-        var head = Matter.Bodies.circle(headPos.x, headPos.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.5 });
+        this.collisionFilter = { group: Matter.Body.nextGroup(true), ...this.constructor.COLL_FILTER };
+        var head = Matter.Bodies.circle(headPos.x, headPos.y, Snake.HEAD_WIDTH, {
+            collisionFilter: this.collisionFilter,
+            frictionAir: 0.1,
+            plugin: { snake: this }
+        });
         Matter.Composite.add(this.body, head);
         this.segments.push(head);
-        head.plugin.snake = this;
         this.growBy(Snake.INITIAL_LENGTH);
         /**
          * @type {number}
@@ -92,6 +95,10 @@ class Snake {
          * @type {number}
          */
         this.energy = 1000;
+        /**
+         * @type {number}
+         */
+        this.lastAction = null;
         // Integrating state variables
         /**
          * @type {number}
@@ -123,7 +130,11 @@ class Snake {
      */
     growBy(amount) {
         for (var i = 0; i < amount; i++) {
-            var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, { collisionFilter: this.collisionFilter, frictionAir: 0.1, plugin: { snake: this } });
+            var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, {
+                collisionFilter: this.collisionFilter,
+                frictionAir: 0.1,
+                plugin: { snake: this }
+            });
             Matter.Composite.add(this.body, newBody);
             var pin = Matter.Constraint.create({
                 bodyA: this.tail,
@@ -169,20 +180,26 @@ class Snake {
         return this.segments[this.segments.length - 1];
     }
     /**
-     * @param {number} mask
-     */
-    setCollisionMask(mask) {
-        this.collisionFilter.mask = mask;
-        this.segments.forEach(body => body.collisionFilter.mask = mask);
-    }
-    /**
      * @type {number}
      * @readonly
      */
     get length() {
         return this.segments.length;
     }
-    tickWorld() {
+    /**
+     * @param {Snake} other
+     */
+    listenTo(other) {
+        if (other === this) return;
+        if (other.lastAction != Action.CHIRP) return;
+        var sourcePosition = new Vector(0, 20).rotate(other.head.angle).plus(other.head.position);
+        var displacementFromSelf = new Vector(this.head.position).minus(sourcePosition).rotate(-this.head.angle);
+        this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq });
+    }
+    /**
+     * @param {Level} currentLevel
+     */
+    tickWorld(currentLevel) {
         // update reactive display colors
         for (var i = 0; i < this.length; i++) {
             var segment = this.segments[i];
@@ -198,14 +215,37 @@ class Snake {
             };
         }
         // execute action determined by brain
-        this.executeAction(this.brain.think());
+        this.brain.scan(currentLevel)
+        this.executeAction(this.brain.think(), currentLevel);
+        // absorb punish or reward signals
+        //todo();
+    }
+    /**
+     * @type {Vector}
+     * @readonly
+     */
+    get forward() {
+        return new Vector(0, 1).rotate(this.head.angle);
+    }
+    /**
+     * @type {Vector}
+     * @readonly
+     */
+    get tongueTipRel() {
+        return this.forward.rotate(this.tongueAngle).scale(map(this.tongueLength, 0, 1, Snake.HEAD_WIDTH, this.depthOfVision));
+    }
+    /**
+     * @type {Vector}
+     * @readonly
+     */
+    get tongueTip() {
+        return this.tongueTipRel.plus(this.head.position);
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
      */
     renderTo(ctx) {
         ctx.save();
-        var forward = new Vector(0, 1).rotate(this.head.angle);
         // draw body
         for (var i = this.length - 1; i >= 1; i--) {
             var c = this.segments[i];
@@ -213,12 +253,11 @@ class Snake {
             fatLine(ctx, c.position, d.position, d.circleRadius * 2, d.render.fillStyle);
         }
         // draw eyes
-        dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
-        dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
+        dotAt(ctx, this.forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
+        dotAt(ctx, this.forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
         // draw tongue
-        var tongueAngle = forward.rotate(this.tongueAngle);
-        var tongueP1 = tongueAngle.scale(Snake.HEAD_WIDTH).plus(this.head.position);
-        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + map(this.tongueLength, 0, 1, 0, this.depthOfVision)).plus(this.head.position);
+        var tongueP1 = this.tongueTipRel.normalize(Snake.HEAD_WIDTH).plus(this.head.position);
+        var tongueP2 = this.tongueTip;
         ctx.strokeStyle = "red";
         ctx.lineWidth = Snake.HEAD_WIDTH / 3;
         ctx.lineCap = ctx.lineJoin = "butt";
@@ -252,8 +291,9 @@ class Snake {
     /**
      * Does the action thought up by the brain.
      * @param {number} action
+     * @param {Level} level
      */
-    executeAction(action) {
+    executeAction(action, level) {
         switch (action) {
             case Action.FORWARD:
                 Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
@@ -281,11 +321,16 @@ class Snake {
                 break;
             case Action.EAT:
                 todo();
-                var hits = Matter.Query.point(_, this.head.position);
+                var hits = Matter.Query.point(todo(), this.head.position);
                 break;
         }
+        this.lastAction = action;
     }
     autoPunish() {
         if (false) this.brain.badIdea();
     }
+}
+
+class PlayerSnake extends Snake {
+    static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.PLAYER_MASK };
 }

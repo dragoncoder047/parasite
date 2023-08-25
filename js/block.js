@@ -19,7 +19,8 @@ class Block {
             },
             collisionFilter,
             isStatic,
-            render: { fillStyle }
+            render: { fillStyle },
+            frictionAir: 0.1,
         });
     }
     /**

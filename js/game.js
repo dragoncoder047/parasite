@@ -35,7 +35,6 @@ class ParasiteGame extends XEventEmitter {
          * @type {Snake}
          */
         this.playerSnake = opts.player;
-        this.playerSnake.setCollisionMask(CollisionLayer.PLAYER_MASK);
         // Set up scrolling controls
         this.canvas.on("scroll", e => {
             this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);

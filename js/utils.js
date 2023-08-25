@@ -11,7 +11,7 @@ function getMousePos(canvas, evt) {
         reportedXY = [].map.call(evt.touches, t => new Vector(t.clientX, t.clientY)).reduce((a, b) => a.plus(b)).scale(1 / evt.touches.length);
     }
     else {
-        reportedXY = { x: evt.clientX, y: evt.clientY };
+        reportedXY = new Vector(evt.clientX, evt.clientY);
     }
     return new Vector(
         (reportedXY.x - rect.left) / (rect.right - rect.left) * canvas.width,

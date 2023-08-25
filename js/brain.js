@@ -1,9 +1,15 @@
 /**
  * @typedef Bin
- * @property {Snake[]} snakes
- * @property {Pheremone[]} pheremones
- * @property {Food[]} food_items
- * @property {Block[]} walls
+ * @property {Set<Snake>} snakes
+ * @property {Set<FoodParticle>} pheremones
+ * @property {Set<Pheremone>} food
+ * @property {Set<Block>} walls
+ */
+
+/**
+ * @typedef SoundSource
+ * @property {number} angle
+ * @property {number} freq
  */
 
 class Brain {
@@ -39,6 +45,10 @@ class Brain {
          */
         this.bins = [{}, {}, {}, {}, {}];
         /**
+         * @type {SoundSource[]}
+         */
+        this.soundSources = [];
+        /**
          * @type {number[]}
          */
         this.inputVector = [];
@@ -71,16 +81,16 @@ class Brain {
         throw new Error("abstract method called");
     }
     /**
-     * @param {Matter.World} world
+     * @param {Level} level
      */
-    scanWorld(world) {
-        for (var i = 0; i < 5; i++) this.scanBin(i, world);
+    scan(level) {
+        for (var i = 0; i < 5; i++) this.scanBin(i, level);
     }
     /**
      * @param {0 | 1 | 2 | 3 | 4} bin
-     * @param {Matter.World} world
+     * @param {Level} level
      */
-    scanBin(bin, world) {
+    scanBin(bin, level) {
         var binCenterAngle = Math.PI / 4 * (bin - 2);
         var forward = new Vector(0, this.snake.depthOfVision).rotate(binCenterAngle);
         var triangle = Matter.Bodies.fromVertices(this.snake.head.position.x, this.snake.head.position.y, [[
@@ -91,8 +101,14 @@ class Brain {
         ]], {
             collisionFilter: this.snake.collisionFilter,
         });
-        var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
+        var hits = Matter.Query.collides(triangle, todo()).flatMap(coll => [coll.bodyA, coll.bodyB]);
         todo();
+    }
+    /**
+     * @param {SoundSource} srcDetails
+     */
+    pushSoundSource(srcDetails) {
+        this.soundSources.push(srcDetails);
     }
 }
 

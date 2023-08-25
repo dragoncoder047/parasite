@@ -21,7 +21,7 @@ class Vector {
     }
     /**
      * Applies the function to the vector's x- and y-coordinates.
-     * @param {Function} fun
+     * @param {(number) => number} fun
      * @param {Vector[]} vectors
      */
     static apply(fun, ...vectors) {
@@ -48,6 +48,13 @@ class Vector {
      */
     angle() {
         return Math.atan2(this.y, this.x);
+    }
+    /**
+     * @param {number} tgtLength
+     * @returns {Vector}
+     */
+    normalize(tgtLength = 1) {
+        return this.scale(tgtLength / this.length());
     }
     /**
      * this-other

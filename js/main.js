@@ -33,7 +33,7 @@ const game = new ParasiteGame({
             objective: "This is another TEST LEVEL. ".repeat(50),
         }),
     ],
-    player: new Snake(new TestBrain(), new Vector(0, 0), "Player (you)"),
+    player: new PlayerSnake(new TestBrain(), new Vector(0, 0), "Player (you)"),
 });
 
 async function main() {
