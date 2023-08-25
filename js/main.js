@@ -14,9 +14,9 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new TestBrain(), new Vector(0, 100), "Test snake 1"),
-                new Snake(new TestBrain(), new Vector(0, 200), "Test snake 2"),
-                new Snake(new TestBrain(), new Vector(0, 300), "Test snake 3"),
+                new Snake(new NNBrain(), new Vector(0, 100), "Test snake 1"),
+                new Snake(new NNBrain(), new Vector(0, 200), "Test snake 2"),
+                new Snake(new NNBrain(), new Vector(0, 300), "Test snake 3"),
             ],
             blocks: [
                 new Wall(20, 1000, new Vector(-30, 500)),
@@ -27,9 +27,9 @@ const game = new ParasiteGame({
         }),
         new Level({
             snakes: [
-                new Snake(new TestBrain(), new Vector(100, 100), "Test snake 4"),
-                new Snake(new TestBrain(), new Vector(200, 200), "Test snake 5"),
-                new Snake(new TestBrain(), new Vector(300, 300), "Test snake 6"),
+                new Snake(new NNBrain(), new Vector(100, 100), "Test snake 4"),
+                new Snake(new NNBrain(), new Vector(200, 200), "Test snake 5"),
+                new Snake(new NNBrain(), new Vector(300, 300), "Test snake 6"),
             ],
             goal: null,
             title: "Bar Baz",

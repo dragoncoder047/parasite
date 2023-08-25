@@ -241,15 +241,3 @@ class NNBrain extends Brain {
         if (reward != 0) this.agent.learn(reward);
     }
 }
-
-class TestBrain extends NNBrain {
-    constructor() {
-        super();
-    }
-    think() {
-        return Math.sin(Date.now() / 1000) * Math.sin(Date.now() / 100) < 0 ? Action.FORWARD : Action.NOTHING;
-    }
-    learn(reward) {
-        // noop;
-    }
-}
