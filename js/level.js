@@ -79,7 +79,6 @@ class Level {
      */
     processCollision(pair) {
         var snake = pair.bodyA.plugin.snake || pair.bodyB.plugin.snake;
-        if (pair.parentA.plugin.snake instanceof Snake) throw new Error("foobar");
         var isA = pair.bodyA.plugin.snake === snake;
         var sBody = isA ? pair.bodyA : pair.bodyB;
         var oBody = isA ? pair.bodyB : pair.bodyA;

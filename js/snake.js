@@ -216,7 +216,7 @@ class Snake {
      * @param {Vector} normal
      * @param {Matter.Body} selfBody
      */
-    touchedObject(snake, coll, selfBody) {
+    touchedObject(snake, normal, selfBody) {
         if (snake) {
             if (Matter.Query.collides(this.head, [snake.tail])) this.headSnake = snake;
             if (Matter.Query.collides(this.tail, [snake.head])) this.tailSnake = snake;
