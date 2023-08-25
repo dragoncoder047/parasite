@@ -1,3 +1,11 @@
+/**
+ * @param {number} num
+ * @param {number} amount
+ */
+function submag(num, amount) {
+    return Math.sign(num) * clamp(Math.abs(num) - amount, 0, Infinity);
+}
+
 class Canvas extends XEventEmitter {
     /**
      * @param {HTMLElement} main Container for canvas.
@@ -175,5 +183,18 @@ class Canvas extends XEventEmitter {
      */
     get center() {
         return new Vector(this.canvas.width / 2, this.canvas.height / 2);
+    }
+    /**
+     * makes sure the point an be seen in the center
+     * @param {Vector} point
+     */
+    follow(point) {
+        var transformed = new Vector(point).scale(this.zoom).plus(this.panxy);
+        var d = this.center.minus(transformed);
+        var absd = new Vector(Math.abs(d.x), Math.abs(d.y));
+        this.panBy(new Vector(submag(d.x, this.canvas.width / 2), submag(d.y, this.canvas.height / 2)));
+        d.y = submag(d.y, (this.canvas.height - 400) / 2);
+        d.x = submag(d.x, (this.canvas.width - 400) / 2);
+        this.panBy(d.scale(0.05));
     }
 }

@@ -146,6 +146,7 @@ class ParasiteGame extends XEventEmitter {
      */
     tickWorld() {
         this.currentLevel.tickWorld();
+        this.canvas.follow(this.playerSnake.head.position);
     }
     /**
      * Render
