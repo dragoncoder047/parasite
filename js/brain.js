@@ -67,17 +67,11 @@ class Brain {
         throw new Error("abstract method called");
     }
     /**
-     * @abstract
      * rewards the AI
-     */
-    goodIdea() {
-        throw new Error("abstract method called");
-    }
-    /**
      * @abstract
-     * punishes the AI
+     * @param {number} reward
      */
-    badIdea() {
+    learn(reward) {
         throw new Error("abstract method called");
     }
     /**
@@ -101,8 +95,8 @@ class Brain {
         ]], {
             collisionFilter: this.snake.collisionFilter,
         });
-        var hits = Matter.Query.collides(triangle, todo()).flatMap(coll => [coll.bodyA, coll.bodyB]);
-        todo();
+        var hits = Matter.Query.collides(triangle, todo("get level stuff")).flatMap(coll => [coll.bodyA, coll.bodyB]);
+        todo("process hits");
     }
     /**
      * @param {SoundSource} srcDetails
@@ -123,11 +117,8 @@ class NNBrain extends Brain {
     think() {
         throw new Error("TODO");
     }
-    goodIdea() {
-        //this.actor.learn(1); // Reward
-    }
-    badIdea() {
-        //this.actor.learn(-1); // Punish
+    learn(reward) {
+        //this.actor.learn(reward);
     }
 }
 
