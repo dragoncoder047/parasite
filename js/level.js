@@ -103,6 +103,7 @@ class Level {
      * @param {CanvasRenderingContext2D} ctx
      */
     renderTo(ctx) {
+        this.particles.forEach(particle => particle.renderTo(ctx));
         this.snakes.forEach(snake => snake.renderTo(ctx));
         this.blocks.forEach(block => block.renderTo(ctx));
     }
