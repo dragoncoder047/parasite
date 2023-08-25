@@ -1,8 +1,17 @@
 /**
+ * @param {Matter.Body} t
+ * @param {Matter.Body[]} b
+ * @returns {Matter.Body[]}
+ */
+function getHits(t, b) {
+    return Matter.Query.collides(t, b).flatMap(coll => [coll.bodyA, coll.bodyB]);
+}
+
+/**
  * @typedef Bin
  * @property {Set<Snake>} snakes
- * @property {Set<FoodParticle>} pheremones
- * @property {Set<Pheremone>} food
+ * @property {Set<FoodParticle>} food
+ * @property {Set<Pheremone>} pheremones
  * @property {Set<Block>} walls
  */
 
@@ -90,11 +99,11 @@ class Brain {
         for (var i = 0; i < 5; i++) this.scanBin(i, level);
     }
     /**
-     * @param {0 | 1 | 2 | 3 | 4} bin
+     * @param {0 | 1 | 2 | 3 | 4} binNumber
      * @param {Level} level
      */
-    scanBin(bin, level) {
-        var binCenterAngle = Math.PI / 4 * (bin - 2);
+    scanBin(binNumber, level) {
+        var binCenterAngle = Math.PI / 4 * (binNumber - 2);
         var forward = new Vector(0, this.snake.depthOfVision).rotate(binCenterAngle);
         var triangle = Matter.Bodies.fromVertices(this.snake.head.position.x, this.snake.head.position.y, [[
             new Vector(0, 0),
@@ -104,8 +113,19 @@ class Brain {
         ]], {
             collisionFilter: this.snake.collisionFilter,
         });
-        var hits = Matter.Query.collides(triangle, todo("get level stuff")).flatMap(coll => [coll.bodyA, coll.bodyB]);
-        todo("process hits");
+        /**
+         * @type {Bin}
+         */
+        var bin = {};
+        // get snakes
+        bin.snakes = new Set(getHits(triangle, level.snakes.flatMap(s => s.segments)).map(b => b.plugin.snake));
+        // get pheremones
+        bin.pheremones = new Set(getHits(triangle, level.activePheremones.map(s => s.body)).map(b => b.plugin.particle));
+        // get food
+        bin.food = new Set(getHits(triangle, level.foodParticles.map(s => s.body)).map(b => b.plugin.particle));
+        // get blocks
+        bin.walls = new Set(getHits(triangle, level.blocks.map(s => s.body)).map(b => b.plugin.block));
+        this.bins[binNumber] = bin;
     }
     /**
      * @param {SoundSource} srcDetails
