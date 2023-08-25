@@ -20,7 +20,7 @@ class Level {
             Matter.World.add(this.physicsWorld, snake.body);
         });
         /**
-         * @type {???[]}
+         * @type {Block[]}
          */
         this.blocks = options.blocks || [];
         this.blocks.forEach(block => {
