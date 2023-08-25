@@ -8,6 +8,9 @@ class Block {
      * @param {string} fillStyle
      */
     constructor(width, height, position, collisionFilter, isStatic, fillStyle) {
+        /**
+         * @type {Matter.Body}
+         */
         this.body = Matter.Bodies.rectangle(position.x, position.y, width, height, {
             plugin: {
                 block: this,
@@ -19,24 +22,39 @@ class Block {
             render: { fillStyle }
         });
     }
+    /**
+     * @type {number}
+     */
     get width() {
         return this.body.plugin.width;
     }
+    /**
+     * @type {number}
+     */
     get height() {
         return this.body.plugin.height;
     }
+    /**
+     * @type {number}
+     */
     set width(newVal) {
         if (typeof newVal !== "number") throw new Error("strange width");
         var ratio = newVal / this.width;
         Matter.Body.scale(this.body, ratio, 1);
         this.body.plugin.width = newVal;
     }
+    /**
+     * @type {number}
+     */
     set height(newVal) {
         if (typeof newVal !== "number") throw new Error("strange height");
         var ratio = newVal / this.height;
         Matter.Body.scale(this.body, 1, ratio);
         this.body.plugin.height = newVal;
     }
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     */
     renderTo(ctx) {
         ctx.save();
         ctx.translate(this.body.position.x - this.width / 2, this.body.position.y - this.height / 2);
