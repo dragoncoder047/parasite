@@ -6,7 +6,7 @@ function safe$(selector) {
 
 const game = new ParasiteGame({
     bottomBar: safe$("#bottom_bar"),
-    canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5 }),
+    canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5, minZoom: 0.5 }),
     popovers: {
         welcome: new Popover(safe$("#welcome"), "Play"),
         help: new Popover(safe$("#help")),
