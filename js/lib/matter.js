@@ -7370,7 +7370,7 @@ Matter.Sleeping = __webpack_require__(7);
 Matter.Svg = __webpack_require__(29);
 Matter.Vector = __webpack_require__(2);
 Matter.Vertices = __webpack_require__(3);
-Matter.Composite = __webpack_require__(30);
+Matter.World = __webpack_require__(30);
 
 // temporary back compatibility
 Matter.Engine.run = Matter.Runner.run;
@@ -8885,7 +8885,7 @@ var Mouse = __webpack_require__(14);
     };
 
     /**
-     * Renders the given `engine`'s `Matter.Composite` object.
+     * Renders the given `engine`'s `Matter.World` object.
      * This is the entry point for all rendering and should be called every time the scene changes.
      * @method world
      * @param {render} render
