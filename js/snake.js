@@ -299,6 +299,15 @@ class Snake {
             var d = this.segments[i - 1];
             fatLine(ctx, c.position, d.position, d.circleRadius * 2, d.render.fillStyle);
         }
+        if (this.rewardEffect != 0) {
+            ctx.shadowBlur = 0;
+            // Draw again to remove shadow over body
+            for (var i = this.length - 1; i >= 1; i--) {
+                var c = this.segments[i];
+                var d = this.segments[i - 1];
+                fatLine(ctx, c.position, d.position, d.circleRadius * 2, d.render.fillStyle);
+            }
+        }
         ctx.restore();
     }
     /**
