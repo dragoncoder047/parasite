@@ -365,7 +365,7 @@ class Snake {
             case Action.NOTHING:
                 break;
             case Action.FORWARD:
-                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.1).rotate(this.head.angle));
+                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
                 break;
             case Action.LEFT:
                 this.head.torque += 0.01;
