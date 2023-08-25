@@ -137,7 +137,7 @@ class ParasiteGame extends XEventEmitter {
             await this.allPopoversClosed;
             this.render();
             this.tickWorld();
-            if (this.currentLevel.complete || true) this.showLevelCompleteToast();
+            if (this.currentLevel.complete || true) this.showLevelCompleteToast(); // TODO: REMOVE THIS KLUDGE
             await wait;
         }
     }

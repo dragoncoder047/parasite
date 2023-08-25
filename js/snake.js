@@ -2,8 +2,8 @@
  * @enum
  */
 class Action {
-    static FORWARD = 0;
-    static BACKWARD = 1;
+    static NOTHING = 0;
+    static FORWARD = 1;
     static LEFT = 2;
     static RIGHT = 3;
     static TONGUE_OUT = 4;
@@ -95,10 +95,6 @@ class Snake {
          * @type {number}
          */
         this.energy = 1000;
-        /**
-         * @type {number?}
-         */
-        this.lastAction = null;
         /**
          * @type {number}
          */
@@ -232,7 +228,7 @@ class Snake {
         for (var i = 0; i < this.length; i++) {
             var segment = this.segments[i];
             var hue = map(i, 0, this.length, this.headHue, this.tailHue);
-            var sat = map(new Vector(segment.velocity).length(), 0, 15, 0.5, 1);
+            var sat = map(new Vector(segment.velocity).length(), 0, 10, 0.5, 1);
             var val = map(this.energy, 0, 500, 0.1, 1);
             segment.render = {
                 visible: true,
@@ -366,11 +362,10 @@ class Snake {
      */
     executeAction(action, level) {
         switch (action) {
-            case Action.FORWARD:
-                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
+            case Action.NOTHING:
                 break;
-            case Action.BACKWARD:
-                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, -0.01).rotate(this.head.angle));
+            case Action.FORWARD:
+                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.1).rotate(this.head.angle));
                 break;
             case Action.LEFT:
                 this.head.torque += 0.01;
@@ -391,11 +386,17 @@ class Snake {
                 this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
                 break;
             case Action.EAT:
-                todo("reduce food particles to list of bodies");
-                var hits = Matter.Query.point(todo(), this.head.position);
+                var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
+                if (p) {
+                    p.forEach(p => {
+                        this.energy += p.size;
+                        p.markEaten();
+                    });
+                } else this.autoPunish();
                 break;
+            default:
+                throw new Error(`unimplemented action for ${this.constructor.name}: ${action} (Action.${Object.keys(Action).find(b => Action[b] == action) || "???"})`);
         }
-        this.lastAction = action;
     }
     autoPunish() {
         if (false) this.addReward({ rewardAmount: -100, setEaten() { } });
