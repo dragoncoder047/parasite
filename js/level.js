@@ -58,7 +58,7 @@ class Level {
         Matter.Engine.update(this.physicsEngine);
         this.snakes.forEach(snake => {
             this.snakes.forEach(snake2 => snake.listenTo(snake2));
-            snake.tickWorld();
+            snake.tickWorld(this);
         });
         this.blocks.forEach(block => block.tickWorld());
         this.particles.forEach(particle => particle.tickWorld());
