@@ -37,7 +37,7 @@ class ParasiteGame extends XEventEmitter {
         this.playerSnake = opts.player;
         // Set up scrolling controls
         this.canvas.on("scroll", e => {
-            this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.lastxy);
+            this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.center || this.canvas.lastxy);
         });
     }
     //////////////////////////////////////////////////////

@@ -352,6 +352,8 @@ class Snake {
     scrunch(position, angle) {
         for (var b of this.segments) {
             b.position = new Vector(position);
+            Matter.Body.setStatic(b, true);
+            Matter.Body.setStatic(b, false);
             b.angle = angle;
         }
     }
