@@ -4,8 +4,11 @@ class Level {
          * @type {Matter.Engine}
          */
         this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 }, enableSleeping: true });
+        Matter.Events.on(this.physicsEngine,
+            "collisionStart collisionActive",
+            e => e.pairs.forEach(pair => this.processCollision(pair)));
         /**
-         * @type {Matter.World}
+         * @type {Matter.Composite}
          */
         this.physicsWorld = this.physicsEngine.world;
         /**
@@ -17,14 +20,14 @@ class Level {
          */
         this.snakes = options.snakes || [];
         this.snakes.forEach(snake => {
-            Matter.World.add(this.physicsWorld, snake.body);
+            Matter.Composite.add(this.physicsWorld, snake.body);
         });
         /**
          * @type {Block[]}
          */
         this.blocks = options.blocks || [];
         this.blocks.forEach(block => {
-            Matter.World.add(this.physicsWorld, block.body);
+            Matter.Composite.add(this.physicsWorld, block.body);
         });
         /**
          * @type {Particle[]}
@@ -65,11 +68,23 @@ class Level {
         // remove eaten particles after snakes eat them
         this.particles = this.particles.filter(particle => {
             if (particle.eaten) {
-                Matter.World.remove(this.physicsWorld, particle.body);
+                Matter.Composite.remove(this.physicsWorld, particle.body);
                 return false;
             }
             return true;
         });
+    }
+    /**
+     * @param {Matter.Pair} pair
+     */
+    processCollision(pair) {
+        var snake = pair.bodyA.plugin.snake || pair.bodyB.plugin.snake;
+        if (!snake) return;
+        var other = snake === pair.bodyA.plugin.snake ? pair.bodyB.plugin : pair.bodyA.plugin;
+        if (other.particle && other.particle instanceof RewardSignal) snake.addReward(otherP.particle);
+        if (other.snake) {
+            // we got two snakes
+        }
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
@@ -83,7 +98,7 @@ class Level {
      */
     addSnake(s) {
         this.snakes.push(s);
-        Matter.World.add(this.physicsWorld, snake.body);
+        Matter.Composite.add(this.physicsWorld, snake.body);
     }
     /**
      * @param {Snake} s
@@ -91,7 +106,7 @@ class Level {
     removeSnake(s) {
         var i = this.snakes.indexOf(s);
         if (i == -1) return;
-        Matter.World.remove(this.physicsWorld, snake.body);
+        Matter.Composite.remove(this.physicsWorld, snake.body);
         this.snakes.splice(i, 1);
     }
     /**
@@ -99,7 +114,7 @@ class Level {
      */
     addParticle(p) {
         this.particles.push(p);
-        Matter.World.add(this.physicsWorld, p.body);
+        Matter.Composite.add(this.physicsWorld, p.body);
     }
     /**
      * @type {FoodParticle[]}
