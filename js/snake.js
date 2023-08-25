@@ -209,7 +209,7 @@ class Snake {
         if (other === this) return;
         var sourcePosition = new Vector(0, 20).rotate(other.head.angle).plus(other.head.position);
         var displacementFromSelf = new Vector(this.head.position).minus(sourcePosition).rotate(-this.head.angle);
-        this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq, volume: other.soundVolume });
+        this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq, volume: other.soundVolume * (0.6 ** displacementFromSelf.length()) });
     }
     /**
      * @param {Snake} snake
