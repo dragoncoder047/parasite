@@ -44,7 +44,10 @@ class Level {
      * @readonly
      */
     get complete() {
-        if (this.goal) return this.goal.complete;
+        if (this.goal) {
+            this.goal.evaluate(this);
+            return this.goal.complete;
+        }
         return false;
     }
     tickWorld() {
