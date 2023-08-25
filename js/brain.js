@@ -165,7 +165,7 @@ class TestBrain extends NNBrain {
         super();
     }
     think() {
-        return Action.FORWARD;
+        return Action.TONGUE_OUT;
     }
     learn(reward) {
         // noop;
