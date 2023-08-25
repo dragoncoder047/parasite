@@ -112,7 +112,7 @@ class Level {
      */
     addSnake(s) {
         this.snakes.push(s);
-        Matter.Composite.add(this.physicsWorld, snake.body);
+        Matter.Composite.add(this.physicsWorld, s.body);
     }
     /**
      * @param {Snake} s
@@ -120,7 +120,7 @@ class Level {
     removeSnake(s) {
         var i = this.snakes.indexOf(s);
         if (i == -1) return;
-        Matter.Composite.remove(this.physicsWorld, snake.body);
+        Matter.Composite.remove(this.physicsWorld, s.body);
         this.snakes.splice(i, 1);
     }
     /**
