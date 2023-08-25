@@ -27,6 +27,10 @@ class Level {
             Matter.World.add(this.physicsWorld, block.body);
         });
         /**
+         * @type {Particle[]}
+         */
+        this.particles = [];
+        /**
          * @type {string}
          */
         this.title = options.title || "";
@@ -54,6 +58,14 @@ class Level {
         Matter.Engine.update(this.physicsEngine);
         this.snakes.forEach(snake => snake.tickWorld());
         this.blocks.forEach(block => block.tickWorld());
+        // remove eaten particles after snakes eat them
+        this.particles = this.particles.filter(particle => {
+            if (particle.eaten) {
+                Matter.World.remove(this.physicsWorld, particle.body);
+                return false;
+            }
+            return true;
+        });
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
@@ -77,5 +89,12 @@ class Level {
         if (i == -1) return; 
         Matter.World.remove(this.physicsWorld, snake.body);
         this.snakes.splice(i, 1);
+    }
+    /**
+     * @param {Particle} p
+     */
+    addParticle(p) {
+        this.particles.push(p);
+        Matter.World.add(this.physicsWorld, p.body);
     }
 }
