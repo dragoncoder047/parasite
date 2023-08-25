@@ -141,6 +141,6 @@ function gauss(mu, sigma) {
  * @param {string} foo
  * @return {never}
  */
-function todo(foo) {
-    throw new Error("todo: " + foo || (arguments.callee.name + "()"));
+function todo(foo = "") {
+    throw new Error("todo: " + foo);
 }

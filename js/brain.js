@@ -164,12 +164,10 @@ class TestBrain extends NNBrain {
     constructor() {
         super();
     }
-    get mood() {
-        return [
-            Color.hsv(0.7, 1, 1),
-            Color.hsv(0.3, 1, 1),
-        ];
+    think() {
+        return Action.FORWARD;
     }
-    get tongueLength() { return 0.5; }
-    get tongueAngle() { return 0; }
+    learn(reward) {
+        // noop;
+    }
 }
