@@ -128,6 +128,16 @@ function fatLine(ctx, p1, p2, radius, fillColor) {
 }
 
 /**
+ * @param {number} mu
+ * @param {number} sigma
+ * @returns {number}
+ */
+function gauss(mu, sigma) {
+    // From https://stackoverflow.com/a/36481059
+    return mu + sigma * Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+}
+
+/**
  * @return {never}
  */
 function todo() {
