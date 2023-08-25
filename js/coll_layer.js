@@ -3,8 +3,8 @@
 side view
 
 
-normal                                      player    player grabbing
-  v                                           v          v
+normal         reward sigs                  player    player grabbing
+  v                v                          v          v
 snake    FOOD                wall           snake     snake
 snake           PHEREMONE    wall
 snake    food   pheremone    WALL                     snake
@@ -15,6 +15,9 @@ SNAKE    food   pheremone           grate   SNAKE     SNAKE
 
 */
 
+/**
+ * @enum
+ */
 class CollisionLayer {
     static FOOD             = 0b00001;
     static PHEREMONE        = 0b00010;
@@ -28,4 +31,5 @@ class CollisionLayer {
     static GRATE_MASK       = 0b11000;
     static PLAYER_GRAB_MASK = 0b11101;
     static PLAYER_MASK      = 0b10001;
+    static SCANWORLD_MASK   = 0b01111;
 }

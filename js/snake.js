@@ -1,3 +1,50 @@
+/**
+ * @enum
+ */
+class Action {
+    static FORWARD = 0;
+    static BACKWARD = 1;
+    static LEFT = 2;
+    static RIGHT = 3;
+    static TONGUE_OUT = 4;
+    static TONGUE_IN = 5;
+    static TONGUE_LEFT = 6;
+    static TONGUE_RIGHT = 7;
+    static EAT = 8;
+    static MATE_H = 9;
+    static MATE_T = 10;
+    static GROW = 11;
+    static PHEREMONE_INC_COLOR = 12;
+    static PHEREMONE_DEC_COLOR = 13;
+    static PHEREMONE_RELEASE = 14;
+    static HEAD_INC_COLOR = 15;
+    static HEAD_DEC_COLOR = 16;
+    static TAIL_INC_COLOR = 17;
+    static TAIL_DEC_COLOR = 18;
+    static SOUND_INC_FREQ = 19;
+    static SOUND_DEC_FREQ = 20;
+    static CHIRP = 21;
+    static NUM_AI_ACTIONS = 22;
+    // Additional player actions
+    static GRAB_RELEASE = 22;
+    static MUCK_SNAKE = 23;
+    static SAVE_SNAKE_MODEL = 24;
+    static PUNISH = 25;
+    static REWARD = 26;
+    static WORLD_MOVE_L = 27;
+    static WORLD_MOVE_R = 28;
+    static WORLD_MOVE_U = 29;
+    static WORLD_MOVE_D = 30;
+    static WORLD_TURN_CW = 31;
+    static WORLD_TURN_CCW = 32;
+    static WORLD_INCREASE_WIDTH = 33;
+    static WORLD_DECREASE_WIDTH = 34;
+    static WORLD_INCREASE_HEIGHT = 35;
+    static WORLD_DECREASE_HEIGHT = 36;
+    static WORLD_EDIT = 37;
+    static NUM_PLAYER_ACTIONS = 38;
+}
+
 class Snake {
     static INITIAL_LENGTH = 30;
     static HEAD_WIDTH = 10;
@@ -41,6 +88,35 @@ class Snake {
          * @type {string}
          */
         this.name = name || Linnaeus.randomBinomial();
+        /**
+         * @type {number}
+         */
+        this.energy = 1000;
+        // Integrating state variables
+        /**
+         * @type {number}
+         */
+        this.tongueAngle = 0;
+        /**
+         * @type {number}
+         */
+        this.tongueLength = 0.5;
+        /**
+         * @type {number}
+         */
+        this.pheremoneHue = 0;
+        /**
+         * @type {number}
+         */
+        this.headHue = 0.7;
+        /**
+         * @type {number}
+         */
+        this.tailHue = 0.3;
+        /**
+         * @type {number}
+         */
+        this.soundFreq = 440;
     }
     /**
      * @param {number} amount number of segments to add
@@ -98,33 +174,32 @@ class Snake {
      */
     setCollisionMask(mask) {
         this.collisionFilter.mask = mask;
-        this.body.bodies.forEach(body => body.collisionFilter.mask = mask);
+        this.segments.forEach(body => body.collisionFilter.mask = mask);
     }
     /**
      * @type {number}
      * @readonly
      */
     get length() {
-        return this.body.bodies.length;
+        return this.segments.length;
     }
     tickWorld() {
-        // update brain
-        //todo;
-        // move self
-        //todo;
-        // update display colors
+        // update reactive display colors
         for (var i = 0; i < this.length; i++) {
             var segment = this.segments[i];
-            var color = Color.map2(i, 0, this.length, this.brain.mood[0], this.brain.mood[1], false);
-            var style = `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
+            var hue = map(i, 0, this.length, this.headHue, this.tailHue);
+            var sat = map(new Vector(segment.velocity).length(), 0, 15, 0.5, 1);
+            var val = map(this.energy, 0, 500, 0.1, 1);
             segment.render = {
                 visible: true,
                 opacity: 1,
                 strokeStyle: null,
-                fillStyle: style,
+                fillStyle: Color.hsv(hue, sat, val).toCSSStr(),
                 lineWidth: 0,
             };
         }
+        // execute action determined by brain
+        this.executeAction(this.brain.think());
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
@@ -142,9 +217,9 @@ class Snake {
         dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(+1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
         dotAt(ctx, forward.scale(Snake.HEAD_WIDTH / 2).rotate(-1).plus(this.head.position), Snake.HEAD_WIDTH / 4, "black", "white", 1);
         // draw tongue
-        var tongueAngle = forward.rotate(this.brain.tongueAngle);
+        var tongueAngle = forward.rotate(this.tongueAngle);
         var tongueP1 = tongueAngle.scale(Snake.HEAD_WIDTH).plus(this.head.position);
-        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + map(this.brain.tongueLength, 0, 1, 0, this.depthOfVision)).plus(this.head.position);
+        var tongueP2 = tongueAngle.scale(Snake.HEAD_WIDTH + map(this.tongueLength, 0, 1, 0, this.depthOfVision)).plus(this.head.position);
         ctx.strokeStyle = "red";
         ctx.lineWidth = Snake.HEAD_WIDTH / 3;
         ctx.lineCap = ctx.lineJoin = "butt";
@@ -174,5 +249,44 @@ class Snake {
             b.position = new Vector(position);
             b.angle = angle;
         }
+    }
+    /**
+     * Does the action thought up by the brain.
+     * @param {number} action
+     */
+    executeAction(action) {
+        switch (action) {
+            case Action.FORWARD:
+                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
+                break;
+            case Action.BACKWARD:
+                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, -0.01).rotate(this.head.angle));
+                break;
+            case Action.LEFT:
+                this.head.torque += 0.01;
+                break;
+            case Action.RIGHT:
+                this.head.torque -= 0.01;
+                break;
+            case Action.TONGUE_OUT:
+                this.tongueLength = clamp(this.tongueLength + 0.01, 0, 1);
+                break;
+            case Action.TONGUE_IN:
+                this.tongueLength = clamp(this.tongueLength - 0.01, 0, 1);
+                break;
+            case Action.TONGUE_LEFT:
+                this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
+                break;
+            case Action.TONGUE_RIGHT:
+                this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
+                break;
+            case Action.EAT:
+                todo();
+                var hits = Matter.Query.point(_, this.head.position);
+                break;
+        }
+    }
+    autoPunish() {
+        if (false) this.brain.badIdea();
     }
 }

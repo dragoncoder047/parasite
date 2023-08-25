@@ -126,3 +126,10 @@ function fatLine(ctx, p1, p2, radius, fillColor) {
     ctx.stroke();
     ctx.restore();
 }
+
+/**
+ * @return {never}
+ */
+function todo() {
+    throw new Error("todo");
+}

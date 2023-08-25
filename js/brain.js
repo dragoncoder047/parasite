@@ -1,33 +1,3 @@
-/*
-
-Input vector: total 84
-[1] Self length
-[1] Self energy
-[2] Self velocity
-[70]* 5 eye sensors each have:
-    [5] snake head color + distance + energy
-    [5] pheremone color distance + amount
-    [2] food distance + amount
-    [2] wall distance + presence
-[4] Touch on sides position + presence
-[2] Touch on tail, head
-[4] Sound L/R (center freq, vol)
-
-Output vector: total 20
-[1] Thrust
-[1] Torque
-[2] Tongue angle/position
-[1] Eat
-[2] Mate instinct (head/tail)
-[1] Growth
-[4] Pheremone color + amount
-[3] Head color
-[3] Tail color
-[2] Sound (freq, vol)
-
-
-*/
-
 /**
  * @typedef Bin
  * @property {Snake[]} snakes
@@ -37,8 +7,27 @@ Output vector: total 20
  */
 
 class Brain {
+    /*
+
+    [1] Self length
+    [1] Self energy
+    [2] Self velocity
+    [x]* 5 eye sensors each have:
+        [3] snake head hue + distance + energy
+        [3] pheremone hue, distance + amount
+        [2] food distance + amount
+        [2] wall distance + presence
+    [4] Touch on sides position + presence
+    [2] Touch on tail, head
+    [4] Sound L/R (center freq, vol)
+    [x]* Integrating processes:
+        [2] Tongue angle, position
+        [1] Pheremone color
+        [2] Head/tail hue
+        [1] Sound frequency
+
+    */
     static INPUT_DIMENSIONS = 84;
-    static OUTPUT_DIMENSIONS = 20;
     constructor() {
         /**
          * @type {Snake}
@@ -53,10 +42,6 @@ class Brain {
          * @type {number[]}
          */
         this.inputVector = [];
-        /**
-         * @type {number[]}
-         */
-        this.outputVector = [];
     }
     /**
      * @param {Snake} snake
@@ -66,18 +51,21 @@ class Brain {
     }
     /**
      * @abstract
+     * @returns {number} The action in the {@link Action} enum.
      */
     think() {
         throw new Error("abstract method called");
     }
     /**
      * @abstract
+     * rewards the AI
      */
     goodIdea() {
         throw new Error("abstract method called");
     }
     /**
      * @abstract
+     * punishes the AI
      */
     badIdea() {
         throw new Error("abstract method called");
@@ -104,96 +92,11 @@ class Brain {
             collisionFilter: this.snake.collisionFilter,
         });
         var hits = Matter.Query.collides(triangle, Matter.World.allBodies(world)).flatMap(coll => [coll.bodyA, coll.bodyB]);
-        throw new Error("Todo scanBin()");
-    }
-    /**
-     * @type {{thrust: number, torque: number}}
-     * @readonly
-     */
-    get motion() {
-        return { thrust: this.outputVector[0], torque: this.outputVector[1] };
-    }
-    /**
-     * @type {[Color, Color]}
-     * @readonly
-     */
-    get mood() {
-        return [
-            Color.hsv(this.outputVector[2], this.outputVector[3], this.outputVector[4]),
-            Color.hsv(this.outputVector[5], this.outputVector[6], this.outputVector[7]),
-        ];
-    }
-    /**
-     * @type {number}
-     * @readonly
-     */
-    get tongueAngle() {
-        return map(this.outputVector[8], -1, 1, -Math.PI / 2, Math.PI / 2);
-    }
-    /**
-     * @type {number}
-     * @readonly
-     */
-    get tongueLength() {
-        return map(this.outputVector[9], 0, 1, 0, this.snake.depthOfVision);
-    }
-    /**
-     * @type {boolean}
-     * @readonly
-     */
-    get hungry() {
-        return this.outputVector[10];
-    }
-    /**
-     * @type {[boolean, boolean]}
-     * @readonly
-     */
-    get inHeat() {
-        return [this.outputVector[11], this.outputVector[12]];
-    }
-    /**
-     * @type {boolean}
-     * @readonly
-     */
-    get wantsToGrow() {
-        return this.outputVector[13];
-    }
-    /**
-     * @type {{color: Color, release: boolean}}
-     * @readonly
-     */
-    get pheremones() {
-        return { color: Color.hsv(this.outputVector[14], this.outputVector[15], this.outputVector[16]), release: this.outputVector[17] };
-    }
-    /**
-     * @type {{freq: number, vol: number}}
-     * @readonly
-     */
-    get sound() {
-        return { freq: this.outputVector[18], vol: this.outputVector[19] };
+        todo();
     }
 }
 
 class NNBrain extends Brain {
-    static GRANULES = 0.1;
-    static OUTPUT_CHOICES = (function () {
-        const c01 = irange(0, 1, NNBrain.GRANULES);
-        const c_11 = irange(-1, 1, NNBrain.GRANULES);
-        const bool = [true, false];
-        return [
-            c01, // thrust
-            c_11, // steering
-            c01, c01, c01, // mood 1
-            c01, c01, c01, // mood 2
-            c_11, // tongue angle
-            c01, // tongue length
-            bool, // hungry
-            bool, bool, // mate
-            bool, // grow
-            c01, c01, c01, bool, // pheremones
-            c01, c01, // sound
-        ];
-    })();
     constructor() {
         super();
         /**
@@ -201,9 +104,6 @@ class NNBrain extends Brain {
          */
         this.actor = /* ??? */null;
     }
-    /**
-     * Uses the input vector to update the output vector.
-     */
     think() {
         throw new Error("TODO");
     }
@@ -228,6 +128,3 @@ class TestBrain extends NNBrain {
     get tongueLength() { return 0.5; }
     get tongueAngle() { return 0; }
 }
-
-// sanity check myself
-if (Brain.OUTPUT_DIMENSIONS != NNBrain.OUTPUT_CHOICES.length) throw new Error("i screwed up");
