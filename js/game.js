@@ -1,6 +1,18 @@
 class ParasiteGame extends XEventEmitter {
+    /**
+     * @type {ParasiteGame}
+     */
+    static _instance = null;
+    /**
+     * @returns {ParasiteGame}
+     */
+    static instance() {
+        return ParasiteGame._instance;
+    }
     constructor(opts) {
         super();
+        if (ParasiteGame._instance !== null) throw new TypeError("can only have one game");
+        ParasiteGame._instance = this;
         /**
          * @type {HTMLElement}
          */
