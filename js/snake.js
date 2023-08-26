@@ -389,15 +389,14 @@ class Snake {
                 break;
             case Action.EAT:
                 var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
-                if (p) {
-                    p.forEach(p => {
-                        this.energy += p.size;
-                        p.markEaten();
-                    });
-                } else this.autoPunish();
+                if (p) p.forEach(p => {
+                    this.energy += p.size;
+                    p.markEaten();
+                });
+                else this.autoPunish();
                 break;
             default:
-                throw new Error(`unimplemented action for ${this.constructor.name}: ${action} (Action.${Object.keys(Action).find(b => Action[b] == action) || "???"})`);
+                throw new Error(`unimplemented action for ${this.constructor.name}: ${action} (Action.${Object.keys(Action).find(b => Action[b] == action) || " ???"})`);
         }
     }
     autoPunish() {

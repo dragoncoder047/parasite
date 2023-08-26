@@ -4,6 +4,9 @@ function safe$(selector) {
     return elem;
 }
 
+// TODO: add more IO sources
+const io = new InputDispatcher(new Keyboard());
+
 const game = new ParasiteGame({
     bottomBar: safe$("#bottom_bar"),
     canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5, minZoom: 0.5 }),

@@ -162,10 +162,6 @@ class NNBrain extends Brain {
     constructor() {
         super();
         /**
-         * @type {number[]}
-         */
-        this.inputVector = [];
-        /**
          * @type {RL.DQNAgent}
          */
         this.actor = new RL.DQNAgent({
@@ -239,5 +235,24 @@ class NNBrain extends Brain {
     }
     learn(reward) {
         if (reward != 0) this.agent.learn(reward);
+    }
+}
+
+class PlayerBrain extends Brain {
+    /**
+     * @param {InputDispatcher} dispatcher
+     * @param  {...InputTransformer} transformers
+     */
+    constructor(dispatcher, ...transformers) {
+        /**
+         * @type {InputListener}
+         */
+        this.listener = new InputListener(...transformers);
+        dispatcher.pushContext(this.listener);
+    }
+    think() {
+        // todo create sensible output
+        // this.listener.sendOutput(output);
+        return this.listener.getNext() || Action.NOTHING;
     }
 }
