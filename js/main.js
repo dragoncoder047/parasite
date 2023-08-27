@@ -17,29 +17,37 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new NNBrain(), new Vector(0, 100), "Test snake 1"),
-                new Snake(new NNBrain(), new Vector(0, 200), "Test snake 2"),
-                new Snake(new NNBrain(), new Vector(0, 300), "Test snake 3"),
+                new Snake(new NNBrain(), new Vector(0, 100), "Sheldon"),
+                new Snake(new NNBrain(), new Vector(0, 200), "Raj"),
+                new Snake(new NNBrain(), new Vector(0, 300), "Howard"),
+                new Snake(new NNBrain(), new Vector(0, 400), "Leonard"),
             ],
             blocks: [
                 new Wall(20, 1000, new Vector(-30, 500)),
             ],
             goal: null,
             title: "Foo Bar",
-            objective: "This is a TEST level. ".repeat(50),
+            objective: "This is a TEST level. ",
         }),
         new Level({
             snakes: [
-                new Snake(new NNBrain(), new Vector(100, 100), "Test snake 4"),
-                new Snake(new NNBrain(), new Vector(200, 200), "Test snake 5"),
-                new Snake(new NNBrain(), new Vector(300, 300), "Test snake 6"),
+                new Snake(new NNBrain(), new Vector(100, 100), "Joey"),
+                new Snake(new NNBrain(), new Vector(125, 100), "Rachel"),
+                new Snake(new NNBrain(), new Vector(150, 100), "Monica"),
+                new Snake(new NNBrain(), new Vector(175, 100), "Phoebe"),
+                new Snake(new NNBrain(), new Vector(200, 100), "Chandler"),
+                new Snake(new NNBrain(), new Vector(225, 100), "Ross"),
             ],
             goal: null,
             title: "Bar Baz",
-            objective: "This is another TEST LEVEL. ".repeat(50),
+            objective: "This is another TEST LEVEL. ",
         }),
     ],
-    player: new PlayerSnake(new TestBrain(), new Vector(0, 0), "Player (you)"),
+    player: new PlayerSnake(new PlayerBrain(io, [
+        new KeyRepeat("ArrowUp", Action.FORWARD),
+        new KeyRepeat("ArrowLeft", Action.LEFT),
+        new KeyRepeat("ArrowRight", Action.RIGHT),
+    ]), new Vector(0, 0), "Player (you)"),
 });
 
 async function main() {

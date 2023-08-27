@@ -241,9 +241,9 @@ class NNBrain extends Brain {
 class PlayerBrain extends Brain {
     /**
      * @param {InputDispatcher} dispatcher
-     * @param  {...InputTransformer} transformers
+     * @param  {InputTransformer[]} transformers
      */
-    constructor(dispatcher, ...transformers) {
+    constructor(dispatcher, transformers) {
         /**
          * @type {InputListener}
          */
