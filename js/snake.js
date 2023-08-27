@@ -46,7 +46,7 @@ class Action {
 }
 
 class Snake {
-    static INITIAL_LENGTH = 30;
+    static INITIAL_LENGTH = 20;
     static HEAD_WIDTH = 10;
     static TAIL_WIDTH = 5;
     static LINK_OFFSET = 1.5;
@@ -91,6 +91,10 @@ class Snake {
          * @type {string}
          */
         this.name = name || Linnaeus.randomBinomial();
+        /**
+         * @type {string}
+         */
+        this.realName = this.name;
         /**
          * @type {number}
          */
@@ -145,25 +149,26 @@ class Snake {
             var newBody = Matter.Bodies.circle(this.tail.position.x, this.tail.position.y, Snake.HEAD_WIDTH, {
                 collisionFilter: this.collisionFilter,
                 frictionAir: 0.1,
-                plugin: { snake: this }
+                plugin: { snake: this },
+                angle: this.tail.angle,
             });
-            Matter.Composite.add(this.body, newBody);
             var pin = Matter.Constraint.create({
                 bodyA: this.tail,
                 bodyB: newBody,
-                pointA: new Vector(0, -Snake.LINK_OFFSET),
-                pointB: new Vector(0, Snake.LINK_OFFSET),
+                pointA: new Vector(0, -Snake.LINK_OFFSET).rotate(this.tail.angle),
+                pointB: new Vector(0, Snake.LINK_OFFSET).rotate(this.tail.angle),
                 stiffness: 1,
                 length: 0,
             });
             var spring = Matter.Constraint.create({
                 bodyA: this.tail,
                 bodyB: newBody,
-                pointA: new Vector(0, Snake.LINK_OFFSET),
-                pointB: new Vector(0, -Snake.LINK_OFFSET),
+                pointA: new Vector(0, Snake.LINK_OFFSET).rotate(this.tail.angle),
+                pointB: new Vector(0, -Snake.LINK_OFFSET).rotate(this.tail.angle),
                 stiffness: 1,
                 length: Snake.LINK_OFFSET * 5, // * 4 is the nominal length but need to push to keep snake straight
             });
+            Matter.Composite.add(this.body, newBody);
             Matter.Composite.add(this.body, pin);
             Matter.Composite.add(this.body, spring);
             this.segments.push(newBody);
@@ -229,7 +234,7 @@ class Snake {
             var segment = this.segments[i];
             var hue = map(i, 0, this.length, this.headHue, this.tailHue);
             var sat = map(new Vector(segment.velocity).length(), 0, 10, 0.5, 1);
-            var val = map(this.energy, 0, 500, 0.1, 1);
+            var val = map(this.energy, 0, 500, 0.25, 1);
             segment.render = {
                 visible: true,
                 opacity: 1,
@@ -425,7 +430,7 @@ class Snake {
                 if (this.energy > 2) {
                     this.energy -= 2;
                     level.addParticle(new Pheremone(
-                        gauss(10, 3),
+                        gauss(Snake.TAIL_WIDTH, 3),
                         this.pheremoneHue,
                         this.forward.scale(Snake.HEAD_WIDTH * 2)
                             .plus(this.head.position)));

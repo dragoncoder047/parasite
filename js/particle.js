@@ -1,4 +1,5 @@
 class Particle {
+    static COLLISION_GROUP = Matter.Body.nextGroup(true);
     /**
      * @param {number} size
      * @param {number} hue
@@ -10,10 +11,10 @@ class Particle {
          * @type {Matter.Body}
          */
         this.body = Matter.Bodies.circle(position.x, position.y, size, {
-            collisionFilter,
+            collisionFilter: Object.assign({ group: Particle.COLLISION_GROUP }, collisionFilter),
             render: { fillStyle: Color.hsv(hue, 1, 1).toCSSStr() },
             plugin: { particle: this },
-            frictionAir: 0
+            frictionAir: 0.01
         });
         /**
          * @type {boolean}
@@ -83,7 +84,7 @@ class Pheremone extends Particle {
     }
     renderTo(ctx) {
         ctx.save();
-        ctx.shadowBlur = this.size / 2;
+        ctx.shadowBlur = this.size * 2;
         ctx.shadowColor = this.body.render.fillStyle;
         super.renderTo(ctx);
         ctx.restore();

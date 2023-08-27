@@ -95,7 +95,7 @@ class InputListener extends XEventEmitter {
         transformers.forEach(t => t.startTransforming(this));
         transformers.forEach(t => t.on("process", e => this.add(e.detail)));
         /**
-         * @type {Input[]}
+         * @type {any[]}
          */
         this.tQ = [];
     }
@@ -105,7 +105,7 @@ class InputListener extends XEventEmitter {
         while (this.tQ.length && now - this.tQ[0].timestamp > 20) this.tQ.shift();
     }
     /**
-     * @returns {Input?}
+     * @returns {any?}
      */
     getNext() {
         this.discardOutOfDate();
@@ -114,7 +114,7 @@ class InputListener extends XEventEmitter {
         return null;
     }
     /**
-     * @param {Input} i
+     * @param {any} i
      */
     add(i) {
         this.tQ.push(i);

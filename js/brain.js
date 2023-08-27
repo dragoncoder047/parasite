@@ -253,7 +253,9 @@ class PlayerBrain extends Brain {
     think() {
         // todo create sensible output
         // this.listener.sendOutput(output);
-        return this.listener.getNext() || Action.NOTHING;
+        var action = this.listener.getNext() || Action.NOTHING;
+        this.snake.name = `${this.snake.realName} current action: ${Object.keys(Action).find(b => Action[b] == action) || "???"}`;
+        return action;
     }
     learn() {
         // player plays. They learn from their own experience.
