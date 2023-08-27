@@ -1,5 +1,6 @@
 class IODevice extends XEventEmitter {
     constructor() {
+        super();
         /**
          * @type {InputDispatcher}
          */
