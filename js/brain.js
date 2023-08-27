@@ -244,6 +244,7 @@ class PlayerBrain extends Brain {
      * @param  {InputTransformer[]} transformers
      */
     constructor(dispatcher, transformers) {
+        super();
         /**
          * @type {InputListener}
          */
