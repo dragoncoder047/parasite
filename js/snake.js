@@ -402,12 +402,12 @@ class Snake {
                 break;
             case Action.MATE_H:
                 if (this.headSnake) {
-                    todo("mate using head snake");
+                    //todo("mate using head snake");
                 } else this.autoPunish("No snake to mate with.");
                 break;
             case Action.MATE_T:
                 if (this.tailSnake) {
-                    todo("mate using tail snake");
+                    //todo("mate using tail snake");
                 } else this.autoPunish("No snake to mate with.");
                 break;
             case Action.GROW:
@@ -460,7 +460,8 @@ class Snake {
      * @param {string} message
      */
     autoPunish(message) {
-        if (false) this.addReward({ rewardAmount: -100, setEaten() { } });
+        // if (false)
+        this.addReward({ rewardAmount: -100, setEaten() { } });
     }
     /**
      * @param {RewardSignal} sig
@@ -492,6 +493,5 @@ class PlayerSnake extends Snake {
     }
     autoPunish(message) {
         this.errortoast.show(message, "error");
-        // todo: show message to user
     }
 }

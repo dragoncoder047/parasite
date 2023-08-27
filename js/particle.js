@@ -78,7 +78,7 @@ class Pheremone extends Particle {
     }
     tickWorld() {
         // Pheremones decay over time
-        Matter.Body.scale(this.body, 0.9, 0.9);
+        Matter.Body.scale(this.body, 0.999, 0.999);
         if (this.size < 2) this.setEaten();
     }
     renderTo(ctx) {
