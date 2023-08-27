@@ -428,7 +428,7 @@ class Snake {
                         gauss(10, 3),
                         this.pheremoneHue,
                         this.forward.scale(Snake.HEAD_WIDTH * 2)
-                            .plus(this.headSnake.position)));
+                            .plus(this.head.position)));
                 } else this.autoPunish("Not enough energy to release pehermones.");
                 break;
             case Action.HEAD_INC_COLOR:
