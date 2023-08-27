@@ -14,7 +14,7 @@ class Popover extends XEventEmitter {
          * @type {HTMLDialogElement}
          */
         this.elem = elem;
-        this.elem.addEventListener("close", () => this.emit("close"));
+        this.elem.addEventListener("close", () => this.emit("close", this.elem.returnValue));
         this.elem.addEventListener("keydown", e => { if (e.key == "Escape") e.preventDefault(); });
         // move elemnts to span
         /**
