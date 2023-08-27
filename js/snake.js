@@ -255,6 +255,8 @@ class Snake {
         if (this.soundVolume < 0.1) this.soundVolume = 0;
         // remove the references to bumped snakes
         this.headSnake = this.tailSnake = null;
+        // slowly regenerate energy
+        this.energy += 0.05;
     }
     /**
      * @type {Vector}
@@ -380,10 +382,10 @@ class Snake {
                 } else this.autoPunish("Not enough energy to move.");
                 break;
             case Action.LEFT:
-                this.head.torque += 0.01;
+                this.head.torque -= 0.01;
                 break;
             case Action.RIGHT:
-                this.head.torque -= 0.01;
+                this.head.torque += 0.01;
                 break;
             case Action.TONGUE_OUT:
                 this.tongueLength = clamp(this.tongueLength + 0.01, 0, 1);
@@ -416,8 +418,8 @@ class Snake {
                 } else this.autoPunish("No snake to mate with.");
                 break;
             case Action.GROW:
-                if (this.energy > 10) {
-                    this.energy -= 10;
+                if (this.energy > 10 + this.length) {
+                    this.energy -= 10 + this.length;
                     this.growBy(1);
                 } else this.autoPunish("Not enough energy to grow.");
             case Action.PHEREMONE_INC_COLOR:
@@ -430,7 +432,7 @@ class Snake {
                 if (this.energy > 2) {
                     this.energy -= 2;
                     level.addParticle(new Pheremone(
-                        gauss(Snake.TAIL_WIDTH, 3),
+                        gauss(Snake.TAIL_WIDTH, 1),
                         this.pheremoneHue,
                         this.forward.scale(Snake.HEAD_WIDTH * 2)
                             .plus(this.head.position)));

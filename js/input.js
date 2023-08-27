@@ -117,7 +117,7 @@ class InputListener extends XEventEmitter {
      * @param {any} i
      */
     add(i) {
-        this.tQ.push(i);
+        this.tQ.push(new Input(i));
     }
     /**
      * @param {Output} o
@@ -151,8 +151,14 @@ class InputTransformer extends XEventEmitter {
 class Keyboard extends IODevice {
     constructor() {
         super();
-        document.body.addEventListener("keydown", e => this.dispatch("keydown", e.key));
-        document.body.addEventListener("keyup", e => this.dispatch("keyup", e.key));
+        document.body.addEventListener("keydown", e => {
+            e.preventDefault();
+            this.dispatch("keydown", e.key)
+        });
+        document.body.addEventListener("keyup", e => {
+            e.preventDefault();
+            this.dispatch("keyup", e.key)
+        });
     }
 }
 
@@ -162,7 +168,7 @@ class KeyRepeat extends InputTransformer {
      * @param {any} emitWhileHeld
      * @param {number} interval
      */
-    constructor(key, emitWhileHeld, interval = 100) {
+    constructor(key, emitWhileHeld, interval = 10) {
         super();
         /**
          * @type {string}
@@ -180,8 +186,11 @@ class KeyRepeat extends InputTransformer {
     }
     process(input) {
         if (input.detail === this.key) {
-            if (input.action === "keydown") this.iid = setInterval(() => this.emit("process", this.emitWhileHeld), this.interval);
-            else if (input.action === "keyup") clearInterval(this.iid);
+            if (input.action === "keydown" && this.iid == null) this.iid = setInterval(() => this.emit("process", this.emitWhileHeld), this.interval);
+            else if (input.action === "keyup") {
+                clearInterval(this.iid);
+                this.iid = null;
+            }
         }
     }
 }
