@@ -5,10 +5,10 @@
  */
 function getHits(t, b) {
     return Matter.Query.collides(t, b)
-        .map(pair => ({
-            body: t === pair.bodyA ? pair.bodyB : pair.bodyA,
-            point: Vector.apply((...n) => n.reduce((a, b) => a + b), ...pair.activeContacts)
-                .scale(1 / pair.activeContacts.length)
+        .map(coll => ({
+            body: t === coll.bodyA ? coll.bodyB : coll.bodyA,
+            point: Vector.apply((...n) => n.reduce((a, b) => a + b), ...coll.supports)
+                .scale(1 / coll.supports.length)
         }));
 }
 
@@ -18,8 +18,7 @@ function getHits(t, b) {
  * @returns {BinHit?}
  */
 function closest(pt, hits) {
-    var sorted = hits.sort((a, b) => new Vector(a.point).minus(pt).length() - new Vector(b.point).minus(pt).length());
-    alert(sorted.map(x => new Vector(x.point).minus(pt).length()));
+    var sorted = hits.sort((a, b) => new Vector(b.point).minus(pt).length() - new Vector(a.point).minus(pt).length());
     return sorted[0] || null;
 }
 
@@ -164,7 +163,7 @@ class NNBrain extends Brain {
         /**
          * @type {RL.DQNAgent}
          */
-        this.actor = new RL.DQNAgent({
+        this.agent = new RL.DQNAgent({
             getNumStates: () => NNBrain.INPUT_DIMENSIONS,
             getMaxNumActions: () => Action.NUM_AI_ACTIONS,
         }, {
@@ -176,38 +175,38 @@ class NNBrain extends Brain {
      */
     think() {
         // assemble input vector
-        var i = new Array(NNBrain.INPUT_DIMENSIONS).fill(0);
-        i[0] = this.snake.length;
-        i[1] = this.snake.energy;
-        i[2] = this.snake.head.velocity.x;
-        i[3] = this.snake.head.velocity.y;
-        for (var i = 0; i < 5; i++) {
-            var b = i * 10;
-            if (this.bins[i].snake) {
-                i[b + 0] = this.bins[i].snake.body.plugin.snake.headHue;
-                i[b + 1] = this.bins[i].snake.point.minus(this.snake.head.position).length();
-                i[b + 2] = this.bins[i].snake.body.plugin.snake.energy;
+        var ia = new Array(NNBrain.INPUT_DIMENSIONS).fill(0);
+        ia[0] = this.snake.length;
+        ia[1] = this.snake.energy;
+        ia[2] = this.snake.head.velocity.x;
+        ia[3] = this.snake.head.velocity.y;
+        for (var bn = 0; bn < 5; bn++) {
+            var bbi = bn * 10;
+            if (this.bins[bn].snake) {
+                ia[bbi + 0] = this.bins[bn].snake.body.plugin.snake.headHue;
+                ia[bbi + 1] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
+                ia[bbi + 2] = this.bins[bn].snake.body.plugin.snake.energy;
             }
-            if (this.bins[i].pheremone) {
-                i[b + 3] = this.bins[i].pheremone.body.plugin.particle.hue;
-                i[b + 4] = this.bins[i].pheremone.point.minus(this.snake.head.position).length();
-                i[b + 5] = this.bins[i].pheremone.body.plugin.particle.size;
+            if (this.bins[bn].pheremone) {
+                ia[bbi + 3] = this.bins[bn].pheremone.body.plugin.particle.hue;
+                ia[bbi + 4] = this.bins[bn].pheremone.point.minus(this.snake.head.position).length();
+                ia[bbi + 5] = this.bins[bn].pheremone.body.plugin.particle.size;
             }
-            if (this.bins[i].food) {
-                i[b + 6] = this.bins[i].food.point.minus(this.snake.head.position).length();
-                i[b + 7] = this.bins[i].food.body.plugin.particle.size;
+            if (this.bins[bn].food) {
+                ia[bbi + 6] = this.bins[bn].food.point.minus(this.snake.head.position).length();
+                ia[bbi + 7] = this.bins[bn].food.body.plugin.particle.size;
             }
-            if (this.bins[i].snake) {
-                i[b + 8] = this.bins[i].snake.point.minus(this.snake.head.position).length();
-                i[b + 9] = 1;
+            if (this.bins[bn].snake) {
+                ia[bbi + 8] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
+                ia[bbi + 9] = 1;
             }
         }
-        i[54] = this.leftTouches.length ? 1 : 0;
-        i[55] = this.leftTouches.reduce((a, b) => a + b) / this.leftTouches.length;
-        i[56] = this.rightTouches.length ? 1 : 0;
-        i[57] = this.rightTouches.reduce((a, b) => a + b) / this.rightTouches.length;
-        i[58] = this.headSnake ? 1 : 0;
-        i[59] = this.tailSnake ? 1 : 0;
+        ia[54] = this.leftTouches.length ? 1 : 0;
+        ia[55] = ia[54] ? this.leftTouches.reduce((a, b) => a + b) / this.leftTouches.length : 0;
+        ia[56] = this.rightTouches.length ? 1 : 0;
+        ia[57] = ia[56] ? this.rightTouches.reduce((a, b) => a + b) / this.rightTouches.length : 0;
+        ia[58] = this.headSnake ? 1 : 0;
+        ia[59] = this.tailSnake ? 1 : 0;
         // sound
         var lv = 0, lsf = 0, rv = 0, rsf = 0;
         for (var ss of this.soundSources) {
@@ -220,18 +219,18 @@ class NNBrain extends Brain {
             rsf += ss.freq * rf;
         }
         var lf = lsf / lv, rf = rsf / rv;
-        i[60] = lf;
-        i[61] = lv;
-        i[62] = rf;
-        i[63] = rv;
+        ia[60] = lf;
+        ia[61] = lv;
+        ia[62] = rf;
+        ia[63] = rv;
         // proprioception
-        i[64] = this.snake.tongueAngle;
-        i[65] = this.snake.tongueLength;
-        i[66] = this.snake.pheremoneHue;
-        i[67] = this.snake.headHue;
-        i[68] = this.snake.tailHue;
-        i[69] = this.snake.soundFreq;
-        return this.agent.act(i);
+        ia[64] = this.snake.tongueAngle;
+        ia[65] = this.snake.tongueLength;
+        ia[66] = this.snake.pheremoneHue;
+        ia[67] = this.snake.headHue;
+        ia[68] = this.snake.tailHue;
+        ia[69] = this.snake.soundFreq;
+        return this.agent.act(ia);
     }
     learn(reward) {
         if (reward != 0) this.agent.learn(reward);
@@ -255,5 +254,8 @@ class PlayerBrain extends Brain {
         // todo create sensible output
         // this.listener.sendOutput(output);
         return this.listener.getNext() || Action.NOTHING;
+    }
+    learn() {
+        // player plays. They learn from their own experience.
     }
 }
