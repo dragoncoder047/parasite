@@ -117,7 +117,7 @@ class InputListener extends XEventEmitter {
      * @param {Input} i
      */
     add(i) {
-        this.queue.push(i);
+        this.tQ.push(i);
     }
     /**
      * @param {Output} o
