@@ -248,6 +248,8 @@ class Snake {
         // quiet down gradually
         this.soundVolume *= 0.92;
         if (this.soundVolume < 0.1) this.soundVolume = 0;
+        // remove the references to bumped snakes
+        this.headSnake = this.tailSnake = null;
     }
     /**
      * @type {Vector}
@@ -367,7 +369,10 @@ class Snake {
             case Action.NOTHING:
                 break;
             case Action.FORWARD:
-                Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
+                if (this.energy > 1) {
+                    this.energy--;
+                    Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
+                } else this.autoPunish("Not enough energy to move.");
                 break;
             case Action.LEFT:
                 this.head.torque += 0.01;
@@ -393,13 +398,68 @@ class Snake {
                     this.energy += p.size;
                     p.markEaten();
                 });
-                else this.autoPunish();
+                else this.autoPunish("Nothing to eat.");
+                break;
+            case Action.MATE_H:
+                if (this.headSnake) {
+                    todo("mate using head snake");
+                } else this.autoPunish("No snake to mate with.");
+                break;
+            case Action.MATE_T:
+                if (this.tailSnake) {
+                    todo("mate using tail snake");
+                } else this.autoPunish("No snake to mate with.");
+                break;
+            case Action.GROW:
+                if (this.energy > 10) {
+                    this.energy -= 10;
+                    this.growBy(1);
+                } else this.autoPunish("Not enough energy to grow.");
+            case Action.PHEREMONE_INC_COLOR:
+                this.pheremoneHue = (this.pheremoneHue + 1 / 360) % 1;
+                break;
+            case Action.PHEREMONE_DEC_COLOR:
+                this.pheremoneHue = (this.pheremoneHue - 1 / 360) % 1;
+                break;
+            case Action.PHEREMONE_RELEASE:
+                if (this.energy > 2) {
+                    this.energy -= 2;
+                    level.addParticle(new Pheremone(
+                        gauss(10, 3),
+                        this.pheremoneHue,
+                        this.forward.scale(Snake.HEAD_WIDTH * 2)
+                            .plus(this.headSnake.position)));
+                } else this.autoPunish("Not enough energy to release pehermones.");
+                break;
+            case Action.HEAD_INC_COLOR:
+                this.headHue = (this.headHue + 1 / 360) % 1;
+                break;
+            case Action.HEAD_DEC_COLOR:
+                this.headHue = (this.headHue - 1 / 360) % 1;
+                break;
+            case Action.TAIL_INC_COLOR:
+                this.tailHue = (this.tailHue + 1 / 360) % 1;
+                break;
+            case Action.TAIL_DEC_COLOR:
+                this.tailHue = (this.tailHue - 1 / 360) % 1;
+                break;
+            case Action.SOUND_INC_FREQ:
+                this.soundFreq = clamp(this.soundFreq * Math.exp(Math.LOG2E / 12), 110, 7040);
+                break;
+            case Action.SOUND_DEC_FREQ:
+                this.soundFreq = clamp(this.soundFreq / Math.exp(Math.LOG2E / 12), 110, 7040);
+                break;
+            case Action.CHIRP:
+                this.soundVolume = 1;
                 break;
             default:
                 throw new Error(`unimplemented action for ${this.constructor.name}: ${action} (Action.${Object.keys(Action).find(b => Action[b] == action) || " ???"})`);
         }
     }
-    autoPunish() {
+    /**
+     * @param {string} message
+     */
+    autoPunish(message) {
         if (false) this.addReward({ rewardAmount: -100, setEaten() { } });
     }
     /**
@@ -420,10 +480,18 @@ class Snake {
 
 class PlayerSnake extends Snake {
     static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.PLAYER_MASK };
-    /**
-     * @param {number} amount
-     */
+    constructor(brain, pos, name) {
+        super(brain, pos, name);
+        /**
+         * @type {Toast}
+         */
+        this.errortoast = new Toast(500);
+    }
     addReward(amount) {
         // player snake can't take reward
+    }
+    autoPunish(message) {
+        this.errortoast.show(message, "error");
+        // todo: show message to user
     }
 }
