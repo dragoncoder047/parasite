@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="style.css" />
         <script>
             onerror = function (event, source, lineno, colno, error) {
+                if (error == "ResizeObserver loop limit exceeded") return;
                 try {
                     var err = ("" +
                         "\nline: " + (lineno || "unknown") +

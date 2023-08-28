@@ -287,8 +287,6 @@ class PlayerBrain extends Brain {
         var span = document.createElement("span");
         span.append("Energy: ", this.energyoutput);
         this.column2.append(span, this.energybar);
-        // force the canvas to resize
-        window.dispatchEvent(new Event("resize"));
     }
     think() {
         this.showPlayerStatus();
