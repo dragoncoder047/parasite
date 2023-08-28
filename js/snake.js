@@ -249,7 +249,7 @@ class Snake {
         // process reward
         this.brain.learn(this.rewardEffect);
         this.rewardEffect *= 0.85;
-        if (this.rewardEffect < 3) this.rewardEffect = 0;
+        if (Math.abs(this.rewardEffect) < 3) this.rewardEffect = 0;
         // quiet down gradually
         this.soundVolume *= 0.92;
         if (this.soundVolume < 0.1) this.soundVolume = 0;
