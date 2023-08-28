@@ -9,9 +9,9 @@ const keyboard = new Keyboard();
 const io = new IOStack(keyboard);
 const player_controls = new MultiControl(
     new Keymap(keyboard, [
-        [Action.FORWARD, "KeyUp", false],
-        [Action.LEFT, "KeyLeft", false],
-        [Action.RIGHT, "KeyRight", false],
+        ["KeyUp", "hold", Action.FORWARD],
+        ["KeyLeft", "hold", Action.LEFT],
+        ["KeyRight", "hold", Action.RIGHT],
     ]),
 );
 
