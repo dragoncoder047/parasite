@@ -161,9 +161,9 @@ class Key extends Control {
      * @param {Keyboard} kbd
      * @param {string} key
      * @param {any} result
-     * @param {boolean} oneshot
+     * @param {"hold" | "once" | "toggle"} mode
      */
-    constructor(kbd, key, result, oneshot) {
+    constructor(kbd, key, result, mode) {
         super(kbd);
         /**
          * @type {string}
@@ -176,13 +176,17 @@ class Key extends Control {
         /**
          * @type {boolean}
          */
-        this.used = false;
+        this.edge = false;
+        /**
+         * @type {boolean}
+         */
+        this.state = false;
         this.device.on("input", i => {
             if (i.detail !== this.key) return;
-            if (i.name === "keydown") {
-                if (!this.down) this.emit("press");
+            if (i.name === "keydown" && !this.down) {
+                this.emit("press");
                 this.down = true;
-                this.used = false;
+                this.edge = true;
             }
             else if (i.name === "keyup") {
                 this.down = false;
@@ -190,16 +194,26 @@ class Key extends Control {
         });
         this.result = result;
         /**
-         * @type {boolean}
+         * @type {"hold" | "once" | "toggle"}
          */
-        this.oneshot = oneshot;
+        this.mode = mode;
+        if (mode !== "hold")
     }
     query() {
-        if (this.down && (!this.oneshot || !this.used)) {
-            this.used = true;
-            return [this.result];
+        switch (this.mode) {
+            case "hold":
+                return this.down ? [this.result] : [];
+            case "once":
+                var res = this.edge ? [this.result] : [];
+                this.edge = false;
+                return res;
+            case "toggle":
+                if (this.edge) this.state = = !this.state;
+                this.edge = false;
+                return this.state ? [this.result] : [];
+            default:
+                throw new Error("strange mode " + this.mode);
         }
-        return [];
     }
 }
 
@@ -207,7 +221,7 @@ class Keymap extends Control {
     /**
      * 
      * @param {Keyboard} kbd 
-     * @param {[any, string, boolean][]} map 
+     * @param {[string, string, any][]} map 
      */
     constructor(kbd, map) {
         super(kbd);
@@ -215,8 +229,8 @@ class Keymap extends Control {
          * @type {Key[]}
          */
         this.keys = [];
-        for (var [action, key, oneshot] of map) {
-            this.keys.push(new Key(kbd, key, action, oneshot));
+        for (var [key, mode, action] of map) {
+            this.keys.push(new Key(kbd, key, action, mode));
         }
     }
     query() {
