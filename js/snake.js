@@ -92,10 +92,6 @@ class Snake {
          */
         this.name = name || Linnaeus.randomBinomial();
         /**
-         * @type {string}
-         */
-        this.realName = this.name;
-        /**
          * @type {number}
          */
         this.energy = 1000;
@@ -245,7 +241,7 @@ class Snake {
         }
         // execute action determined by brain
         this.brain.scan(currentLevel)
-        this.executeAction(this.brain.think(), currentLevel);
+        this.brain.think().forEach(a => this.executeAction(a, currentLevel));
         // process reward
         this.brain.learn(this.rewardEffect);
         this.rewardEffect *= 0.85;

@@ -1,39 +1,13 @@
-class IODevice extends XEventEmitter {
-    constructor() {
-        super();
-        /**
-         * @type {InputDispatcher}
-         */
-        this.target = null;
-    }
-    /**
-     * @param {InputDispatcher} q
-     */
-    dispatchTo(q) {
-        this.target = q;
-    }
-    dispatch(iname, detail) {
-        this.target.dispatchInput(new Input(iname, detail));
-    }
-    /**
-     * @abstract
-     * @param {Output}
-     */
-    reactToOutput(out) {
-        // default action is nothing
-    }
-}
-
 class Input {
     /**
-     * @param {string | number} action
-     * @param {*} detail
+     * @param {string} name
+     * @param {any} detail
      */
-    constructor(action, detail) {
+    constructor(name, detail) {
         /**
-         * @type {string | number}
+         * @type {string}
          */
-        this.action = action;
+        this.name = name;
         this.detail = detail;
         /**
          * @type {number}
@@ -47,104 +21,124 @@ class Output {
     // what do I put here
 }
 
-class InputDispatcher {
+class IODevice extends XEventEmitter {
     /**
-     * @param  {...IODevice} sources
+     * @abstract
+     * @param {Output}
      */
-    constructor(...sources) {
-        sources.forEach(source => source.dispatchTo(this));
-        /**
-         * @type {IODevice[]}
-         */
-        this.sources = sources;
-        /**
-         * @type {InputListener[]}
-         */
-        this.trxStack = [];
-        this.processOutput = this.processOutput.bind(this);
-    }
-    dispatchInput(input) {
-        var t = this.trxStack[this.trxStack.length - 1];
-        if (t) t.emit("input", input);
+    reactToOutput(out) {
+        // default action is nothing
     }
     /**
-     * @param {InputListener} l
+     * @param {string} name
+     * @param {any} detail
      */
-    pushContext(l) {
-        this.trxStack.push(l);
-        l.on("output", this.processOutput);
-    }
-    popContext() {
-        var l = this.trxStack.pop();
-        if (l) l.off("output", this.processOutput);
-    }
-    /**
-     * @param {Output} o
-     */
-    processOutput(o) {
-        this.sources.forEach(s => s.reactToOutput(o));
+    dispatch(name, detail) {
+        this.emit("input", new Input(name, detail));
     }
 }
 
-class InputListener extends XEventEmitter {
+class IOStack {
     /**
-     * @param {...InputTransformer} transformers
+     * @param  {...IODevice} inputSources
      */
-    constructor(...transformers) {
-        super();
-        transformers.forEach(t => t.startTransforming(this));
-        transformers.forEach(t => t.on("process", e => this.add(e.detail)));
+    constructor(...inputSources) {
+        this.inputSources = inputSources;
+        inputSources.forEach(src =>
+            src.on("input", e => this.handleInput(e.detail)));
         /**
-         * @type {any[]}
+         * @type {InputCtx}
          */
-        this.tQ = [];
-    }
-    discardOutOfDate() {
-        var now = Date.now();
-        // max 20 ms latency
-        while (this.tQ.length && now - this.tQ[0].timestamp > 20) this.tQ.shift();
+        this.stack = [];
     }
     /**
-     * @returns {any?}
+     * @param {Input} d
      */
-    getNext() {
-        this.discardOutOfDate();
-        var i = this.tQ.shift();
-        if (i) return i.action;
-        return null;
+    handleInput(d) {
+        if (this.stack) this.stack[this.stack.length - 1].emit("input", d);
     }
     /**
-     * @param {any} i
+     * @param {InputCtx} c
+     * @returns {boolean}
      */
-    add(i) {
-        this.tQ.push(new Input(i));
+    hasControl(c) {
+        return this.stack[this.stack.length - 1] === c;
     }
     /**
-     * @param {Output} o
+     * @param {InputCtx} c
      */
-    sendOutput(o) {
-        this.emit("output", o);
+    push(c) {
+        this.stack.push(c);
+    }
+    pop() {
+        this.stack.pop();
     }
 }
 
-class InputTransformer extends XEventEmitter {
+class InputCtx {
     /**
-     * @param {InputListener} ln
+     * @param {IOStack} stack
+     * @param {Control[]} controls
      */
-    startTransforming(ln) {
+    constructor(stack, controls) {
         /**
-         * @type {InputListener}
+         * @type {IOStack}
          */
-        this.listener = ln;
-        ln.on("input", e => this.process(e.detail));
+        this.iostack = stack;
+        /**
+         * @type {Control[]}
+         */
+        this.controls = controls;
+    }
+    /**
+     * @returns {boolean}
+     */
+    hasControl() {
+        return this.iostack.hasControl(this);
+    }
+    takeControl() {
+        this.iostack.push(this);
+    }
+    returnControl() {
+        if (this.hasControl()) this.iostack.pop();
+    }
+    /**
+     * @returns {any[]}
+     */
+    getInputs() {
+        return this.hasControl() ? this.controls.flatMap(c => c.query()) : [];
+    }
+}
+
+class Control {
+    /**
+     * @param {IODevice} source
+     */
+    constructor(source) {
+        /**
+         * @type {IODevice}
+         */
+        this.device = source;
     }
     /**
      * @abstract
-     * @param {Input} input
-     * @returns {Input[]}
+     * @returns {any[]}
      */
-    process(input) {
+    query() {
         throw new Error("abstract method called");
+    }
+}
+
+class MultiControl extends Control {
+    constructor(...controls) {
+        super(null);
+        /**
+         * @type {Control[]}
+         */
+        this.controls = controls;
+    }
+    query() {
+        return this.controls.flatMap(c => c.query());
     }
 }
 
@@ -162,56 +156,70 @@ class Keyboard extends IODevice {
     }
 }
 
-class KeyRepeat extends InputTransformer {
+class Key extends Control {
     /**
+     * @param {Keyboard} kbd
      * @param {string} key
-     * @param {any} emitWhileHeld
-     * @param {number} interval
+     * @param {any} result
+     * @param {boolean} oneshot
      */
-    constructor(key, emitWhileHeld, interval = 10) {
-        super();
+    constructor(kbd, key, result, oneshot) {
+        super(kbd);
         /**
          * @type {string}
          */
         this.key = key;
-        this.emitWhileHeld = emitWhileHeld;
         /**
-         * @type {number}
+         * @type {boolean}
          */
-        this.interval = interval;
+        this.down = false;
         /**
-         * @type {number?}
+         * @type {boolean}
          */
-        this.iid = null;
-    }
-    process(input) {
-        if (input.detail === this.key) {
-            if (input.action === "keydown" && this.iid == null) this.iid = setInterval(() => this.emit("process", this.emitWhileHeld), this.interval);
-            else if (input.action === "keyup") {
-                clearInterval(this.iid);
-                this.iid = null;
+        this.used = false;
+        this.device.on("input", i => {
+            if (i.detail !== this.key) return;
+            if (i.name === "keydown") {
+                if (!this.down) this.emit("press");
+                this.down = true;
+                this.used = false;
             }
+            else if (i.name === "keyup") {
+                this.down = false;
+            }
+        });
+        this.result = result;
+        /**
+         * @type {boolean}
+         */
+        this.oneshot = oneshot;
+    }
+    query() {
+        if (this.down && (!this.oneshot || !this.used)) {
+            this.used = true;
+            return [this.result];
         }
+        return [];
     }
 }
 
-class KeyOneShot extends InputTransformer {
+class Keymap extends Control {
     /**
-     * @param {string} key
-     * @param {any} output
-     * @param {number} interval
+     * 
+     * @param {Keyboard} kbd 
+     * @param {[any, string, boolean][]} map 
      */
-    constructor(key, output) {
-        super();
+    constructor(kbd, map) {
+        super(kbd);
         /**
-         * @type {string}
+         * @type {Key[]}
          */
-        this.key = key;
-        this.output = output;
-    }
-    process(input) {
-        if (input.detail === this.key) {
-            if (input.action === "keydown") this.emit("process", this.output);
+        this.keys = [];
+        for (var [action, key, oneshot] of map) {
+            this.keys.push(new Key(kbd, key, action, oneshot));
         }
+    }
+    query() {
+        return this.keys.flatMap(k => k.query());
     }
 }

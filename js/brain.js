@@ -75,7 +75,7 @@ class Brain {
     }
     /**
      * @abstract
-     * @returns {number} The action in the {@link Action} enum.
+     * @returns {number[]} List of the actions in the {@link Action} enum.
      */
     think() {
         throw new Error("abstract method called");
@@ -230,7 +230,7 @@ class NNBrain extends Brain {
         ia[67] = this.snake.headHue;
         ia[68] = this.snake.tailHue;
         ia[69] = this.snake.soundFreq;
-        return this.agent.act(ia);
+        return [this.agent.act(ia)];
     }
     learn(reward) {
         if (reward != 0) this.agent.learn(reward);
@@ -239,23 +239,22 @@ class NNBrain extends Brain {
 
 class PlayerBrain extends Brain {
     /**
-     * @param {InputDispatcher} dispatcher
-     * @param  {InputTransformer[]} transformers
+     * @param {IOStack} stack
+     * @param {Control} control
      */
-    constructor(dispatcher, transformers) {
+    constructor(stack, control) {
         super();
         /**
-         * @type {InputListener}
+         * @type {InputCtx}
          */
-        this.listener = new InputListener(...transformers);
-        dispatcher.pushContext(this.listener);
+        this.ctx = new InputCtx(stack, control);
+        ctx.takeControl();
     }
     think() {
         // todo create sensible output
         // this.listener.sendOutput(output);
-        var action = this.listener.getNext() || Action.NOTHING;
-        this.snake.name = `${this.snake.realName} current action: ${Object.keys(Action).find(b => Action[b] == action) || "???"}`;
-        return action;
+        var actions = this.ctx.getInputs() || [Action.NOTHING];
+        return actions;
     }
     learn() {
         // player plays. They learn from their own experience.

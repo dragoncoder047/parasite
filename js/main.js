@@ -5,7 +5,15 @@ function safe$(selector) {
 }
 
 // TODO: add more IO sources
-const io = new InputDispatcher(new Keyboard());
+const keyboard = new Keyboard();
+const io = new IOStack(keyboard);
+const player_controls = new MultiControl(
+    new Keymap(keyboard, [
+        [Action.FORWARD, "KeyUp", false],
+        [Action.LEFT, "KeyLeft", false],
+        [Action.RIGHT, "KeyRight", false],
+    ]),
+);
 
 const game = new ParasiteGame({
     bottomBar: safe$("#bottom_bar"),
@@ -43,11 +51,7 @@ const game = new ParasiteGame({
             objective: "This is another TEST LEVEL. ",
         }),
     ],
-    player: new PlayerSnake(new PlayerBrain(io, [
-        new KeyRepeat("ArrowUp", Action.FORWARD),
-        new KeyRepeat("ArrowLeft", Action.LEFT),
-        new KeyRepeat("ArrowRight", Action.RIGHT),
-    ]), new Vector(0, 0), "Player (you)"),
+    player: new PlayerSnake(new PlayerBrain(io, player_controls), new Vector(0, 0), "Player (you)"),
 });
 
 async function main() {
