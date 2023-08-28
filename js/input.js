@@ -156,12 +156,16 @@ class Keyboard extends IODevice {
     }
 }
 
+/**
+ * @typedef {"hold" | "once" | "toggle"} KeyMode
+ */
+
 class Key extends Control {
     /**
      * @param {Keyboard} kbd
      * @param {string} key
      * @param {any} result
-     * @param {"hold" | "once" | "toggle"} mode
+     * @param {KeyMode} mode
      */
     constructor(kbd, key, result, mode) {
         super(kbd);
@@ -194,7 +198,7 @@ class Key extends Control {
         });
         this.result = result;
         /**
-         * @type {"hold" | "once" | "toggle"}
+         * @type {KeyMode}
          */
         this.mode = mode;
         if (mode !== "hold")
@@ -221,7 +225,7 @@ class Keymap extends Control {
     /**
      * 
      * @param {Keyboard} kbd 
-     * @param {[string, string, any][]} map 
+     * @param {[string, KeyMode, any][]} map 
      */
     constructor(kbd, map) {
         super(kbd);
