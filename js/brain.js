@@ -242,15 +242,56 @@ class PlayerBrain extends Brain {
      * @param {IOStack} stack
      * @param {Control} control
      */
-    constructor(stack, control) {
+    constructor(stack, control, bottombar) {
         super();
         /**
          * @type {InputCtx}
          */
         this.ctx = new InputCtx(stack, control);
         this.ctx.takeControl();
+        /**
+         * @type {HTMLDivElement}
+         */
+        this.bar = bottombar;
+        // make 3 column
+        /**
+         * @type {HTMLDivElement}
+         */
+        this.column1 = document.createElement("div");
+        /**
+         * @type {HTMLDivElement}
+         */
+        this.column2 = document.createElement("div");
+        this.column2.style.flex = 2;
+        this.column2.classList.add("flex-row");
+        /**
+         * @type {HTMLDivElement}
+         */
+        this.column3 = document.createElement("div");
+        this.bar.append(this.column1, this.column2, this.column3);
+        // make energy meter and output
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.energyoutput = document.createElement("output");
+        /**
+         * @type {HTMLMeterElement}
+         */
+        this.energybar = document.createElement("meter");
+        this.energybar.style.flex = 1;
+        this.energybar.min = 0;
+        this.energybar.max = 1000;
+        this.energybar.low = 100;
+        this.energybar.high = 500;
+        this.energybar.optimum = 900;
+        var span = document.createElement("span");
+        span.append("Energy: ", this.energyoutput);
+        this.column2.append(span, this.energybar);
+        // force the canvas to resize
+        window.dispatchEvent(new Event("resize"));
     }
     think() {
+        this.showPlayerStatus();
         // todo create sensible output
         // this.listener.sendOutput(output);
         var actions = this.ctx.getInputs() || [Action.NOTHING];
@@ -258,5 +299,10 @@ class PlayerBrain extends Brain {
     }
     learn() {
         // player plays. They learn from their own experience.
+    }
+    showPlayerStatus() {
+        // only thing implemented right now is energy
+        this.energyoutput.value = this.snake.energy.toFixed();
+        this.energybar.value = this.snake.energy;
     }
 }

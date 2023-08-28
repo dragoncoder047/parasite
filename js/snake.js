@@ -252,7 +252,7 @@ class Snake {
         // remove the references to bumped snakes
         this.headSnake = this.tailSnake = null;
         // slowly regenerate energy
-        this.energy += 0.05;
+        this.energy += 0.005;
     }
     /**
      * @type {Vector}
@@ -356,10 +356,12 @@ class Snake {
      */
     scrunch(position, angle) {
         for (var b of this.segments) {
-            b.position = new Vector(position);
-            Matter.Body.setStatic(b, true);
-            Matter.Body.setStatic(b, false);
-            b.angle = angle;
+            Matter.Body.set(b, {
+                position: new Vector(position),
+                angle: angle,
+                velocity: new Vector(0, 0),
+                angularVelocity: 0,
+            });
         }
     }
     /**
@@ -491,8 +493,17 @@ class PlayerSnake extends Snake {
          */
         this.errortoast = new Toast(500);
     }
-    addReward(amount) {
-        // player snake can't take reward
+    addReward(sig) {
+        var amount = sig.rewardAmount;
+        if (this.rewardEffect * amount < 0) {
+            // wrong sign
+            this.rewardEffect = amount;
+        }
+        else {
+            this.rewardEffect += amount;
+        }
+        this.rewardEffect = clamp(this.rewardEffect, -20, 20);
+        // Reward amount does nothing except show the outline
     }
     autoPunish(message) {
         this.errortoast.show(message, "error");

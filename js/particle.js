@@ -19,7 +19,7 @@ class Particle {
         /**
          * @type {boolean}
          */
-        this.eaten = false;
+        this.eaten = this.size < 0;
     }
     setEaten() {
         if (this.eaten) return;

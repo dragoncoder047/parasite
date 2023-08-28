@@ -31,6 +31,8 @@ dialog {
     overflow: scroll;
     padding: 1em;
     transition: opacity 0.5s;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 dialog[open] {
@@ -55,7 +57,7 @@ dialog:focus {
 
 dialog.toast {
     position: absolute;
-    bottom: 1em;
+    top: 1em;
     z-index: 9999;
 }
 
@@ -90,4 +92,14 @@ form[method=dialog] {
     display: inline-block;
     width: 100%;
     text-align: center;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
 }

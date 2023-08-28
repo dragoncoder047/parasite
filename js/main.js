@@ -1,6 +1,10 @@
+/**
+ * @param {string} selector
+ * @returns {HTMLElement}
+ */
 function safe$(selector) {
     var elem = document.querySelector(selector);
-    if (!elem) throw new Error("can't find element: " + selector);
+    if (elem === null) throw new Error("can't find element: " + selector);
     return elem;
 }
 
@@ -15,7 +19,6 @@ const player_controls = new MultiControl(
 );
 
 const game = new ParasiteGame({
-    bottomBar: safe$("#bottom_bar"),
     canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5, minZoom: 0.5 }),
     popovers: {
         welcome: new Popover(safe$("#welcome"), "Play"),
@@ -50,7 +53,7 @@ const game = new ParasiteGame({
             objective: "This is another TEST LEVEL. ",
         }),
     ],
-    player: new PlayerSnake(new PlayerBrain(io, player_controls), new Vector(0, 0), "Player (you)"),
+    player: new PlayerSnake(new PlayerBrain(io, player_controls, safe$("#bottom_bar")), new Vector(0, 0), "Player (you)"),
 });
 
 async function main() {

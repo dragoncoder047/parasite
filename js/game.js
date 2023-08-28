@@ -14,10 +14,6 @@ class ParasiteGame extends XEventEmitter {
         if (ParasiteGame._instance !== null) throw new TypeError("can only have one game");
         ParasiteGame._instance = this;
         /**
-         * @type {HTMLElement}
-         */
-        this.bottomElement = opts.bottomBar;
-        /**
          * @type {Object<string, Popover>}
          */
         this.popovers = opts.popovers;
