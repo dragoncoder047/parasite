@@ -157,7 +157,7 @@ class Keyboard extends IODevice {
 }
 
 /**
- * @typedef {"hold" | "once" | "toggle"} KeyMode
+ * @typedef {"while-held" | "once" | "toggle"} KeyMode
  */
 
 class Key extends Control {
@@ -201,11 +201,10 @@ class Key extends Control {
          * @type {KeyMode}
          */
         this.mode = mode;
-        if (mode !== "hold")
     }
     query() {
         switch (this.mode) {
-            case "hold":
+            case "while-held":
                 return this.down ? [this.result] : [];
             case "once":
                 var res = this.edge ? [this.result] : [];
