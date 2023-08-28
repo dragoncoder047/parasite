@@ -78,9 +78,9 @@ class IOStack {
 class InputCtx {
     /**
      * @param {IOStack} stack
-     * @param {Control[]} controls
+     * @param {...Control} controls
      */
-    constructor(stack, controls) {
+    constructor(stack, ...controls) {
         /**
          * @type {IOStack}
          */

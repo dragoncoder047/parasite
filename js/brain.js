@@ -248,7 +248,7 @@ class PlayerBrain extends Brain {
          * @type {InputCtx}
          */
         this.ctx = new InputCtx(stack, control);
-        ctx.takeControl();
+        this.ctx.takeControl();
     }
     think() {
         // todo create sensible output
