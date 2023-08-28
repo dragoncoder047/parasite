@@ -211,7 +211,7 @@ class Key extends Control {
                 this.edge = false;
                 return res;
             case "toggle":
-                if (this.edge) this.state = = !this.state;
+                if (this.edge) this.state = !this.state;
                 this.edge = false;
                 return this.state ? [this.result] : [];
             default:
