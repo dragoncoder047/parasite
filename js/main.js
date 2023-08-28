@@ -5,13 +5,12 @@ function safe$(selector) {
 }
 
 // TODO: add more IO sources
-const keyboard = new Keyboard();
-const io = new IOStack(keyboard);
+const io = new IOStack();
 const player_controls = new MultiControl(
-    new Keymap(keyboard, [
-        ["KeyUp", "while-held", Action.FORWARD],
-        ["KeyLeft", "while-held", Action.LEFT],
-        ["KeyRight", "while-held", Action.RIGHT],
+    new Keymap([
+        ["ArrowUp", "while-held", Action.FORWARD],
+        ["ArrowLeft", "while-held", Action.LEFT],
+        ["ArrowRight", "while-held", Action.RIGHT],
     ]),
 );
 

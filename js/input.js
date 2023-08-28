@@ -21,41 +21,12 @@ class Output {
     // what do I put here
 }
 
-class IODevice extends XEventEmitter {
-    /**
-     * @abstract
-     * @param {Output}
-     */
-    reactToOutput(out) {
-        // default action is nothing
-    }
-    /**
-     * @param {string} name
-     * @param {any} detail
-     */
-    dispatch(name, detail) {
-        this.emit("input", new Input(name, detail));
-    }
-}
-
 class IOStack {
-    /**
-     * @param  {...IODevice} inputSources
-     */
-    constructor(...inputSources) {
-        this.inputSources = inputSources;
-        inputSources.forEach(src =>
-            src.on("input", e => this.handleInput(e.detail)));
+    constructor() {
         /**
          * @type {InputCtx}
          */
         this.stack = [];
-    }
-    /**
-     * @param {Input} d
-     */
-    handleInput(d) {
-        if (this.stack) this.stack[this.stack.length - 1].emit("input", d);
     }
     /**
      * @param {InputCtx} c
@@ -110,16 +81,7 @@ class InputCtx {
     }
 }
 
-class Control {
-    /**
-     * @param {IODevice} source
-     */
-    constructor(source) {
-        /**
-         * @type {IODevice}
-         */
-        this.device = source;
-    }
+class Control extends XEventEmitter {
     /**
      * @abstract
      * @returns {any[]}
@@ -130,8 +92,11 @@ class Control {
 }
 
 class MultiControl extends Control {
+    /**
+     * @param  {...Control} controls
+     */
     constructor(...controls) {
-        super(null);
+        super();
         /**
          * @type {Control[]}
          */
@@ -142,33 +107,18 @@ class MultiControl extends Control {
     }
 }
 
-class Keyboard extends IODevice {
-    constructor() {
-        super();
-        document.body.addEventListener("keydown", e => {
-            e.preventDefault();
-            this.dispatch("keydown", e.key)
-        });
-        document.body.addEventListener("keyup", e => {
-            e.preventDefault();
-            this.dispatch("keyup", e.key)
-        });
-    }
-}
-
 /**
  * @typedef {"while-held" | "once" | "toggle"} KeyMode
  */
 
 class Key extends Control {
     /**
-     * @param {Keyboard} kbd
      * @param {string} key
      * @param {any} result
      * @param {KeyMode} mode
      */
-    constructor(kbd, key, result, mode) {
-        super(kbd);
+    constructor(key, result, mode) {
+        super();
         /**
          * @type {string}
          */
@@ -185,16 +135,19 @@ class Key extends Control {
          * @type {boolean}
          */
         this.state = false;
-        this.device.on("input", i => {
-            if (i.detail !== this.key) return;
-            if (i.name === "keydown" && !this.down) {
+        document.body.addEventListener("keydown", e => {
+            if (e.key !== this.key) return;
+            e.preventDefault();
+            if (!this.down) {
                 this.emit("press");
                 this.down = true;
                 this.edge = true;
             }
-            else if (i.name === "keyup") {
-                this.down = false;
-            }
+        });
+        document.body.addEventListener("keyup", e => {
+            if (e.key !== this.key) return;
+            e.preventDefault();
+            this.down = false;
         });
         this.result = result;
         /**
@@ -222,18 +175,16 @@ class Key extends Control {
 
 class Keymap extends Control {
     /**
-     * 
-     * @param {Keyboard} kbd 
      * @param {[string, KeyMode, any][]} map 
      */
-    constructor(kbd, map) {
-        super(kbd);
+    constructor(map) {
+        super();
         /**
          * @type {Key[]}
          */
         this.keys = [];
         for (var [key, mode, action] of map) {
-            this.keys.push(new Key(kbd, key, action, mode));
+            this.keys.push(new Key(key, action, mode));
         }
     }
     query() {
