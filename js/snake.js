@@ -537,4 +537,11 @@ class PlayerSnake extends Snake {
     autoPunish(message) {
         this.errortoast.show(message, "error");
     }
+    executeAction(action, level) {
+        switch (action) {
+            // TODO implement player actions
+            default:
+                super.executeAction(action, level);
+        }
+    }
 }
