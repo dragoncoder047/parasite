@@ -635,7 +635,6 @@ class PlayerSnake extends Snake {
             case WORLD_DECREASE_HEIGHT:
                 this._worldEdit(new Vector(0, 0), 0, 0, -1);
                 break;
-            // TODO implement player actions
             case Action.SAVE_SNAKE_MODEL:
             case Action.VIEW_SAVED_SNAKES:
                 todo();
@@ -652,6 +651,5 @@ class PlayerSnake extends Snake {
         var middle = new Vector(bounds.max).minus(bounds.min);
         Matter.Composite.rotate(this.grabbing.body, turn * scaleFactor, middle, true);
         Matter.Composite.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
-
     }
 }
