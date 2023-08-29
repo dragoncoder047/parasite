@@ -1,26 +1,3 @@
-class Input {
-    /**
-     * @param {string} name
-     * @param {any} detail
-     */
-    constructor(name, detail) {
-        /**
-         * @type {string}
-         */
-        this.name = name;
-        this.detail = detail;
-        /**
-         * @type {number}
-         */
-        this.timestamp = Date.now();
-    }
-}
-
-class Output {
-    // stub
-    // what do I put here
-}
-
 class IOStack {
     constructor() {
         /**
@@ -79,6 +56,13 @@ class InputCtx {
     getInputs() {
         return this.hasControl() ? this.controls.flatMap(c => c.query()) : [];
     }
+    /**
+     * @param {any} o
+     */
+    sendOutput(o) {
+        if (!this.hasControl()) return;
+        this.controls.forEach(c => c.processOutput(o));
+    }
 }
 
 class Control extends XEventEmitter {
@@ -88,6 +72,13 @@ class Control extends XEventEmitter {
      */
     query() {
         throw new Error("abstract method called");
+    }
+    /**
+     * @abstract
+     * @param {any} o
+     */
+    processOutput(o) {
+        // default action is nothing
     }
 }
 
@@ -104,5 +95,8 @@ class MultiControl extends Control {
     }
     query() {
         return this.controls.flatMap(c => c.query());
+    }
+    processOutput(o) {
+        this.controls.forEach(c => c.processOutput(o));
     }
 }
