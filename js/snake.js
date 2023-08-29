@@ -27,7 +27,7 @@ class Action {
     static NUM_AI_ACTIONS = 22;
     // Additional player actions
     static GRAB_RELEASE = 22;
-    static MUCK_SNAKE = 23;
+    static MUCK = 23;
     static SAVE_SNAKE_MODEL = 24;
     static PUNISH = 25;
     static REWARD = 26;
@@ -41,7 +41,7 @@ class Action {
     static WORLD_DECREASE_WIDTH = 34;
     static WORLD_INCREASE_HEIGHT = 35;
     static WORLD_DECREASE_HEIGHT = 36;
-    static WORLD_EDIT = 37;
+    static VIEW_SAVED_SNAKES = 37;
     static NUM_PLAYER_ACTIONS = 38;
 }
 
@@ -522,6 +522,26 @@ class PlayerSnake extends Snake {
          * @type {Toast}
          */
         this.errortoast = new Toast(500);
+        /**
+         * @type {Block | Snake}
+         */
+        this.grabbing = null;
+        /**
+         * @type {Matter.Constraint?}
+         */
+        this.grabber = null;
+    }
+    drawTongue(ctx) {
+        super.drawTongue(ctx);
+        if (this.grabbing) dotAt(ctx, this.tongueTip, Snake.HEAD_WIDTH / 3, "red");
+    }
+    get tongueTip() {
+        if (!this.grabbing) return super.tongueTip;
+        return new Vector(Matter.Constraint.pointBWorld(this.grabber));
+    }
+    get tongueAngle() {
+        if (!this.grabbing) return super.tongueAngle;
+        return this.tongueTip.minus(this.head.position).angle();
     }
     addReward(sig) {
         var amount = sig.rewardAmount;
@@ -536,12 +556,102 @@ class PlayerSnake extends Snake {
     }
     autoPunish(message) {
         this.errortoast.show(message, "error");
+        this.addReward({ rewardAmount: -100 });
     }
     executeAction(action, level) {
         switch (action) {
+            case Action.TONGUE_OUT:
+            case Action.TONGUE_IN:
+                if (!this.grabbing) super.executeAction(action, level);
+                else {
+                    this.grabber.length = clamp(this.grabber.length + (action == Action.TONGUE_IN ? -1 : +1), Snake.HEAD_WIDTH, this.depthOfVision);
+                }
+                break;
+            case Action.GRAB_RELEASE:
+                if (this.grabbing) {
+                    Matter.Composite.remove(level.physicsWorld, this.grabber);
+                    this.grabber = this.grabbing = null;
+                } else {
+                    var s = Matter.Query.point(
+                        level.snakes.concat(level.blocks)
+                            .flatMap(s => Matter.Composite.allBodies(s.body)),
+                        this.tongueTip);
+                    if (s) {
+                        var body = s[0]
+                        this.grabbing = body.plugin.snake || body.plugin.block;
+                        this.grabber = Matter.Constraint.create({
+                            bodyA: this.head,
+                            bodyB: body,
+                            pointB: this.tongueTip,
+                            stiffness: 1,
+                        });
+                        Matter.Composite.add(level.physicsWorld, this.grabber);
+                    } else this.autoPunish("Nothing to grab.");
+                }
+                break;
+            case Action.MUCK:
+                if (this.grabbing) {
+                    if (this.grabbing instanceof Snake) {
+                        this.grabbing.muckParams.muck();
+                        break;
+                    }
+                    else if (this.grabbing instanceof (class { })) { // TODO: editable blocks
+                        // TODO
+                    }
+                }
+                this.autoPunish("Not grabbing anything muckable.");
+                break;
+            case PUNISH:
+            case REWARD:
+                level.addParticle(new RewardSignal(action === Action.REWARD ? 10 : -10, this.head.position, this.forward.rotate(this.tongueAngle).scale(10)));
+                break;
+            case WORLD_MOVE_L:
+                this._worldEdit(new Vector(-1, 0), 0, 0, 0);
+                break;
+            case WORLD_MOVE_R:
+                this._worldEdit(new Vector(1, 0), 0, 0, 0);
+                break;
+            case WORLD_MOVE_U:
+                this._worldEdit(new Vector(0, -1), 0, 0, 0);
+                break;
+            case WORLD_MOVE_D:
+                this._worldEdit(new Vector(0, 1), 0, 0, 0);
+                break;
+            case WORLD_TURN_CW:
+                this._worldEdit(new Vector(0, 0), 1, 0, 0);
+                break;
+            case WORLD_TURN_CCW:
+                this._worldEdit(new Vector(0, 0), -1, 0, 0);
+                break;
+            case WORLD_INCREASE_WIDTH:
+                this._worldEdit(new Vector(0, 0), 0, 1, 0);
+                break;
+            case WORLD_DECREASE_WIDTH:
+                this._worldEdit(new Vector(0, 0), 0, -1, 0);
+                break;
+            case WORLD_INCREASE_HEIGHT:
+                this._worldEdit(new Vector(0, 0), 0, 0, 1);
+                break;
+            case WORLD_DECREASE_HEIGHT:
+                this._worldEdit(new Vector(0, 0), 0, 0, -1);
+                break;
             // TODO implement player actions
+            case Action.SAVE_SNAKE_MODEL:
+            case Action.VIEW_SAVED_SNAKES:
+                todo();
             default:
                 super.executeAction(action, level);
         }
+    }
+    _worldEdit(displacement, turn, heightChange, widthChange, scaleFactor = 0.01) {
+        if (!this.grabbing) {
+            this.autoPunish("Nothing to modify.");
+            return;
+        }
+        var bounds = Matter.Composite.bounds(this.grabbing.body);
+        var middle = new Vector(bounds.max).minus(bounds.min);
+        Matter.Composite.rotate(this.grabbing.body, turn * scaleFactor, middle, true);
+        Matter.Composite.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
+
     }
 }
