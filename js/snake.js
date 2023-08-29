@@ -407,7 +407,7 @@ class Snake {
                         this.head,
                         this.head.position,
                         new Vector(0, this.muckParams.get("speed")).rotate(this.head.angle));
-                } else this.autoPunish("Not enough energy to move.");
+                } else this.autoLearn(false, "Not enough energy to move.");
                 break;
             case Action.LEFT:
                 this.head.torque -= this.muckParams.get("speed");
@@ -432,24 +432,26 @@ class Snake {
                 if (p) p.forEach(p => {
                     this.energy += p.size;
                     p.markEaten();
+                    this.autoLearn(true);
                 });
-                else this.autoPunish("Nothing to eat.");
+                else this.autoLearn(false, "Nothing to eat.");
                 break;
             case Action.MATE_H:
                 if (this.headSnake) {
                     //todo("mate using head snake"); this.muckParams.get("mateCost");
-                } else this.autoPunish("No snake to mate with.");
+                } else this.autoLearn(false, "No snake to mate with.");
                 break;
             case Action.MATE_T:
                 if (this.tailSnake) {
                     //todo("mate using tail snake"); this.muckParams.get("mateCost");
-                } else this.autoPunish("No snake to mate with.");
+                } else this.autoLearn(false, "No snake to mate with.");
                 break;
             case Action.GROW:
                 if (this.energy > this.muckParams.get("growCost")) {
                     this.energy -= this.muckParams.get("growCost");
                     this.growBy(this.muckParams.get("growAmount"));
-                } else this.autoPunish("Not enough energy to grow.");
+                    this.autoLearn(true);
+                } else this.autoLearn(false, "Not enough energy to grow.");
             case Action.PHEREMONE_INC_COLOR:
                 this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta")) % 1;
                 break;
@@ -464,7 +466,7 @@ class Snake {
                         this.pheremoneHue,
                         this.forward.scale(Snake.HEAD_WIDTH * 2)
                             .plus(this.head.position)));
-                } else this.autoPunish("Not enough energy to release pehermones.");
+                } else this.autoLearn(false, "Not enough energy to release pehermones.");
                 break;
             case Action.HEAD_INC_COLOR:
                 this.headHue = (this.headHue + this.muckParams.get("colorDelta")) % 1;
@@ -492,11 +494,11 @@ class Snake {
         }
     }
     /**
+     * @param {boolean} isReward
      * @param {string} message
      */
-    autoPunish(message) {
-        // if (false)
-        this.addReward({ rewardAmount: -100, setEaten() { } });
+    autoLearn(isReward, message) {
+        this.addReward({ rewardAmount: isReward ? 100 : -100, setEaten() { } });
     }
     /**
      * @param {RewardSignal} sig
@@ -554,9 +556,9 @@ class PlayerSnake extends Snake {
         }
         // Reward amount does nothing except show the outline
     }
-    autoPunish(message) {
-        this.errortoast.show(message, "error");
-        this.addReward({ rewardAmount: -100 });
+    autoLearn(isReward, message) {
+        if (message) this.errortoast.show(message, isReward ? "info" : "error");
+        super.autoLearn(isReward, message);
     }
     executeAction(action, level) {
         switch (action) {
@@ -586,7 +588,7 @@ class PlayerSnake extends Snake {
                             stiffness: 1,
                         });
                         Matter.Composite.add(level.physicsWorld, this.grabber);
-                    } else this.autoPunish("Nothing to grab.");
+                    } else this.autoLearn("Nothing to grab.");
                 }
                 break;
             case Action.MUCK:
@@ -599,7 +601,7 @@ class PlayerSnake extends Snake {
                         // TODO
                     }
                 }
-                this.autoPunish("Not grabbing anything muckable.");
+                this.autoLearn("Not grabbing anything muckable.");
                 break;
             case PUNISH:
             case REWARD:
@@ -652,7 +654,7 @@ class PlayerSnake extends Snake {
      */
     _worldEdit(displacement, turn, heightChange, widthChange, scaleFactor = 0.01) {
         if (!this.grabbing) {
-            this.autoPunish("Nothing to modify.");
+            this.autoLearn("Nothing to modify.");
             return;
         }
         var bounds = Matter.Composite.bounds(this.grabbing.body);
