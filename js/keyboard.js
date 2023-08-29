@@ -1,6 +1,6 @@
 
 /**
- * @typedef {"while-held" | "once" | "toggle"} KeyMode
+ * @typedef {"while-held" | "once" | "auto-repeat" | "toggle"} KeyMode
  */
 
 class Key extends Control {
@@ -34,12 +34,16 @@ class Key extends Control {
                 this.emit("press");
                 this.down = true;
                 this.edge = true;
+            } else {
+                this.emit("repeat");
+                if (this.mode === "auto-repeat") this.edge = true;
             }
         });
         document.body.addEventListener("keyup", e => {
             if (e.key !== this.key) return;
             e.preventDefault();
             this.down = false;
+            this.emit("up");
         });
         this.result = result;
         /**
@@ -52,6 +56,7 @@ class Key extends Control {
             case "while-held":
                 return this.down ? [this.result] : [];
             case "once":
+            case "auto-repeat":
                 var res = this.edge ? [this.result] : [];
                 this.edge = false;
                 return res;
