@@ -74,7 +74,7 @@ class Level {
             return true;
         });
         // randomly add food
-        if (Math.random() < 0.001) {
+        if (Math.random() < 0.01) {
             this.addParticle(new FoodParticle(
                 gauss(20, 20),
                 new Vector(gauss(0, 1000), gauss(0, 1000)),
