@@ -479,10 +479,10 @@ class Snake {
                 this.tailHue = (this.tailHue - this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.SOUND_INC_FREQ:
-                this.soundFreq = clamp(this.soundFreq * Math.exp(Math.LOG2E / 12), 110, 7040);
+                this.soundFreq = clamp(this.soundFreq * Math.exp(Math.LN2 / 12), 110, 7040);
                 break;
             case Action.SOUND_DEC_FREQ:
-                this.soundFreq = clamp(this.soundFreq / Math.exp(Math.LOG2E / 12), 110, 7040);
+                this.soundFreq = clamp(this.soundFreq / Math.exp(Math.LN2 / 12), 110, 7040);
                 break;
             case Action.CHIRP:
                 this.soundVolume = 1;
