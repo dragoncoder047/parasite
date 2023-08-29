@@ -241,6 +241,7 @@ class PlayerBrain extends Brain {
     /**
      * @param {IOStack} stack
      * @param {Control} control
+     * @param {HTMLDivElement} bottombar
      */
     constructor(stack, control, bottombar) {
         super();
