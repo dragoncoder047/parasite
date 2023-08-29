@@ -642,6 +642,14 @@ class PlayerSnake extends Snake {
                 super.executeAction(action, level);
         }
     }
+    /**
+     * @private
+     * @param {Vector} displacement
+     * @param {number} turn
+     * @param {number} heightChange
+     * @param {number} widthChange
+     * @param {number} scaleFactor
+     */
     _worldEdit(displacement, turn, heightChange, widthChange, scaleFactor = 0.01) {
         if (!this.grabbing) {
             this.autoPunish("Nothing to modify.");
@@ -651,5 +659,9 @@ class PlayerSnake extends Snake {
         var middle = new Vector(bounds.max).minus(bounds.min);
         Matter.Composite.rotate(this.grabbing.body, turn * scaleFactor, middle, true);
         Matter.Composite.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
+        if (this.grabbing instanceof Block) {
+            this.grabbing.width += widthChange * scaleFactor;
+            this.grabbing.height += heightChange * scaleFactor;
+        }
     }
 }
