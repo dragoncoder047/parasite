@@ -36,6 +36,15 @@ const player_controls = new MultiControl(
     ]),
 );
 
+const muck_controls = new MultiControl(
+    new Keymap([
+        ["w", "once", "next"],
+        ["s", "once", "prev"],
+        ["a", "auto-repeat", "inc"],
+        ["d", "auto-repeat", "dec"],
+    ]),
+);
+
 const game = new ParasiteGame({
     canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5, minZoom: 0.5 }),
     popovers: {
@@ -71,7 +80,7 @@ const game = new ParasiteGame({
             objective: "This is another TEST LEVEL. ",
         }),
     ],
-    player: new PlayerSnake(new PlayerBrain(io, player_controls, safe$("#bottom_bar")), new Vector(0, 0), "Player (you)"),
+    player: new PlayerSnake(new PlayerBrain(io, player_controls, safe$("#bottom_bar")), new Vector(0, 0), io, muck_controls, "Player (you)"),
 });
 
 async function main() {

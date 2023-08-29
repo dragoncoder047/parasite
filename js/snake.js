@@ -55,14 +55,35 @@ class Snake {
     /**
      * @param {Brain} brain
      * @param {Vector} headPos
+     * @param {IOStack} stack
+     * @param {Control} control
      * @param {string} name
      */
-    constructor(brain, headPos, name) {
+    constructor(brain, headPos, stack, control, name) {
         /**
          * @type {Brain}
          */
         this.brain = brain;
         brain.setOwnerSnake(this);
+        /**
+         * @type {Muckable}
+         */
+        this.muckParams = new Muckable(stack, control);
+        var m = this.muckParams;
+        // TODO: define muckable parameters
+        m.define("name", { type: "string", value: name || Linnaeus.randomBinomial() });
+        m.define("depthOfVision", { type: "number", value: Snake.VISION_DEPTH, limits: [0, 500] });
+        m.define("rewardDecayRate", { type: "number", value: 0.85, limits: [0, 1], step: 0.001, description: "Exponent base that the reward effect is multipled by each frame." });
+        m.define("soundDecayRate", { type: "number", value: 0.92, limits: [0, 1], step: 0.001, description: "Exponent base that the sound volume is multipled by each frame." });
+        m.define("energyRegenerationRate", { type: "number", value: 0.005, limits: [0, 1], step: 0.001, description: "Amount of latent energy added each frame." });
+        m.define("speed", { type: "number", value: 0.01, limits: [0, 0.1], step: 0.001, description: "Force/torque applied when moving/turning." });
+        m.define("moveCost", { type: "number", value: 1, limits: [0, 100], step: 0.1, description: "Energy cost required to move forward." });
+        m.define("tongueMotionDelta", { type: "number", value: 0.01, limits: [0, 0.1], step: 0.001, description: "Delta used to move tongue left/right/in/out." });
+        m.define("colorDelta", { type: "number", value: 1 / 360, limits: [0, 1 / 6], step: 1 / 3600, description: "Delta used to change colors (head, tail, pheremone)." });
+        m.define("growCost", { type: "number", value: 10, limits: [0, 100], description: "Energy cost of growing." });
+        m.define("growAmount", { type: "number", value: 1, limits: [1, 10], description: "Number of segments to add when growing." });
+        m.define("pheremoneCost", { type: "number", value: 2, limits: [0, 100], description: "Energy cost of emitting a pheremone." });
+        m.define("mateCost", { type: "number", value: 15, limits: [0, 100], description: "Energy cost of emitting a pheremone." });
         /**
          * @type {Matter.Composite}
          */
@@ -83,14 +104,6 @@ class Snake {
         Matter.Composite.add(this.body, head);
         this.segments.push(head);
         this.growBy(Snake.INITIAL_LENGTH);
-        /**
-         * @type {number}
-         */
-        this.depthOfVision = Snake.VISION_DEPTH;
-        /**
-         * @type {string}
-         */
-        this.name = name || Linnaeus.randomBinomial();
         /**
          * @type {number}
          */
@@ -136,6 +149,20 @@ class Snake {
          * @type {number}
          */
         this.soundFreq = 440;
+    }
+    /**
+     * @type {string}
+     * @readonly
+     */
+    get name() {
+        return this.muckParams.get("name");
+    }
+    /**
+     * @type {number}
+     * @readonly
+     */
+    get depthOfVision() {
+        return this.muckParams.get("depthOfVision");
     }
     /**
      * @param {number} amount number of segments to add
@@ -204,7 +231,7 @@ class Snake {
      */
     listenTo(other) {
         if (other === this) return;
-        var sourcePosition = new Vector(0, 20).rotate(other.head.angle).plus(other.head.position);
+        var sourcePosition = new Vector(0, Snake.HEAD_WIDTH * 2).rotate(other.head.angle).plus(other.head.position);
         var displacementFromSelf = new Vector(this.head.position).minus(sourcePosition).rotate(-this.head.angle);
         this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq, volume: other.soundVolume * (0.6 ** displacementFromSelf.length()) });
     }
@@ -244,15 +271,15 @@ class Snake {
         this.brain.think().forEach(a => this.executeAction(a, currentLevel));
         // process reward
         this.brain.learn(this.rewardEffect);
-        this.rewardEffect *= 0.85;
+        this.rewardEffect *= this.muckParams.get("rewardDecayRate");
         if (Math.abs(this.rewardEffect) < 3) this.rewardEffect = 0;
         // quiet down gradually
-        this.soundVolume *= 0.92;
+        this.soundVolume *= this.muckParams.get("soundDecayRate");
         if (this.soundVolume < 0.1) this.soundVolume = 0;
         // remove the references to bumped snakes
         this.headSnake = this.tailSnake = null;
         // slowly regenerate energy
-        this.energy += 0.005;
+        this.energy += this.muckParams.get("energyRegenerationRate");
     }
     /**
      * @type {Vector}
@@ -374,28 +401,31 @@ class Snake {
             case Action.NOTHING:
                 break;
             case Action.FORWARD:
-                if (this.energy > 1) {
-                    this.energy--;
-                    Matter.Body.applyForce(this.head, this.head.position, new Vector(0, 0.01).rotate(this.head.angle));
+                if (this.energy > this.muckParams.get("moveCost")) {
+                    this.energy -= this.muckParams.get("moveCost");
+                    Matter.Body.applyForce(
+                        this.head,
+                        this.head.position,
+                        new Vector(0, this.muckParams.get("speed")).rotate(this.head.angle));
                 } else this.autoPunish("Not enough energy to move.");
                 break;
             case Action.LEFT:
-                this.head.torque -= 0.01;
+                this.head.torque -= this.muckParams.get("speed");
                 break;
             case Action.RIGHT:
-                this.head.torque += 0.01;
+                this.head.torque += this.muckParams.get("speed");
                 break;
             case Action.TONGUE_OUT:
-                this.tongueLength = clamp(this.tongueLength + 0.01, 0, 1);
+                this.tongueLength = clamp(this.tongueLength + this.muckParams.get("tongueMotionDelta"), 0, 1);
                 break;
             case Action.TONGUE_IN:
-                this.tongueLength = clamp(this.tongueLength - 0.01, 0, 1);
+                this.tongueLength = clamp(this.tongueLength - this.muckParams.get("tongueMotionDelta"), 0, 1);
                 break;
             case Action.TONGUE_LEFT:
-                this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
+                this.tongueAngle = clamp(this.tongueAngle - this.muckParams.get("tongueMotionDelta"), -Math.PI / 2, Math.PI / 2);
                 break;
             case Action.TONGUE_RIGHT:
-                this.tongueAngle = clamp(this.tongueAngle - 0.01, -Math.PI / 2, Math.PI / 2);
+                this.tongueAngle = clamp(this.tongueAngle + this.muckParams.get("tongueMotionDelta"), -Math.PI / 2, Math.PI / 2);
                 break;
             case Action.EAT:
                 var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
@@ -407,28 +437,28 @@ class Snake {
                 break;
             case Action.MATE_H:
                 if (this.headSnake) {
-                    //todo("mate using head snake");
+                    //todo("mate using head snake"); this.muckParams.get("mateCost");
                 } else this.autoPunish("No snake to mate with.");
                 break;
             case Action.MATE_T:
                 if (this.tailSnake) {
-                    //todo("mate using tail snake");
+                    //todo("mate using tail snake"); this.muckParams.get("mateCost");
                 } else this.autoPunish("No snake to mate with.");
                 break;
             case Action.GROW:
-                if (this.energy > 10 + this.length) {
-                    this.energy -= 10 + this.length;
-                    this.growBy(1);
+                if (this.energy > this.muckParams.get("growCost")) {
+                    this.energy -= this.muckParams.get("growCost");
+                    this.growBy(this.muckParams.get("growAmount"));
                 } else this.autoPunish("Not enough energy to grow.");
             case Action.PHEREMONE_INC_COLOR:
-                this.pheremoneHue = (this.pheremoneHue + 1 / 360) % 1;
+                this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.PHEREMONE_DEC_COLOR:
-                this.pheremoneHue = (this.pheremoneHue - 1 / 360) % 1;
+                this.pheremoneHue = (this.pheremoneHue - this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.PHEREMONE_RELEASE:
-                if (this.energy > 2) {
-                    this.energy -= 2;
+                if (this.energy > this.muckParams.get("pheremoneCost")) {
+                    this.energy -= this.muckParams.get("pheremoneCost");
                     level.addParticle(new Pheremone(
                         gauss(Snake.TAIL_WIDTH, 1),
                         this.pheremoneHue,
@@ -437,16 +467,16 @@ class Snake {
                 } else this.autoPunish("Not enough energy to release pehermones.");
                 break;
             case Action.HEAD_INC_COLOR:
-                this.headHue = (this.headHue + 1 / 360) % 1;
+                this.headHue = (this.headHue + this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.HEAD_DEC_COLOR:
-                this.headHue = (this.headHue - 1 / 360) % 1;
+                this.headHue = (this.headHue - this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.TAIL_INC_COLOR:
-                this.tailHue = (this.tailHue + 1 / 360) % 1;
+                this.tailHue = (this.tailHue + this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.TAIL_DEC_COLOR:
-                this.tailHue = (this.tailHue - 1 / 360) % 1;
+                this.tailHue = (this.tailHue - this.muckParams.get("colorDelta")) % 1;
                 break;
             case Action.SOUND_INC_FREQ:
                 this.soundFreq = clamp(this.soundFreq * Math.exp(Math.LOG2E / 12), 110, 7040);
@@ -502,7 +532,6 @@ class PlayerSnake extends Snake {
         else {
             this.rewardEffect += amount;
         }
-        this.rewardEffect = clamp(this.rewardEffect, -20, 20);
         // Reward amount does nothing except show the outline
     }
     autoPunish(message) {
