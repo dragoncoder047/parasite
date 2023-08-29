@@ -86,14 +86,18 @@ class ParasiteGame extends XEventEmitter {
      * @readonly
      */
     get popoverActive() {
-        return this.levelInfoPopover.open || Object.keys(this.popovers).some(name => this.popovers[name].open);
+        return !!document.querySelector("dialog:not(.toast)[open]");
     }
     /**
      * @type {Promise<void>}
      * @readonly
      */
     get allPopoversClosed() {
-        if (this.popoverActive) return this.waitFor("popoverclose");
+        var self = this;
+        if (this.popoverActive)
+            return (async () => {
+                while (self.popoverActive) await new Promise(r => requestAnimationFrame(r));
+            })();
         else return Promise.resolve();
     }
     /////////////////////////////////////////////////////////
