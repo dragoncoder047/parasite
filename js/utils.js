@@ -138,6 +138,18 @@ function gauss(mu, sigma) {
 }
 
 /**
+ * @param {string} camel
+ * @returns {string}
+ */
+function camel2words(camel) {
+    var words = [...camel.matchAll(/(^|[A-Z])[a-z]+/g)].map(x => x[0]);
+    var first = words[0];
+    first = first[0].toUpperCase() + first.slice(1).toLowerCase();
+    var rest = words.slice(1).map(x => x.toLowerCase());
+    return [first].concat(rest).join(" ");
+}
+
+/**
  * @param {string} foo
  * @return {never}
  */
