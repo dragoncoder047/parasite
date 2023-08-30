@@ -47,9 +47,9 @@ const muck_controls = new MultiControl(
 
 const game = new ParasiteGame({
     canvas: new Canvas(safe$("#canvas_container"), { maxZoom: 2.5, minZoom: 0.5 }),
-    popovers: {
-        welcome: new Popover(safe$("#welcome"), "Play"),
-        help: new Popover(safe$("#help")),
+    dialogs: {
+        welcome: new Dialog(safe$("#welcome"), "Play"),
+        help: new Dialog(safe$("#help")),
     },
     levels: [
         new Level({
@@ -84,8 +84,8 @@ const game = new ParasiteGame({
 });
 
 async function main() {
-    game.showPopover("welcome");
-    await game.popovers.welcome.waitFor("close");
+    game.showDialog("welcome");
+    await game.dialogs.welcome.waitFor("close");
     game.openLevel(0);
     await game.mainLoop();
     throw new Error("Main loop returned (unreachable!!)");

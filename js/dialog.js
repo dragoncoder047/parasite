@@ -1,4 +1,4 @@
-class Popover extends XEventEmitter {
+class Dialog extends XEventEmitter {
     /**
      * @param {HTMLDialogElement?} elem
      * @param {string | false} closeButtonMessage

@@ -14,15 +14,15 @@ class ParasiteGame extends XEventEmitter {
         if (ParasiteGame._instance !== null) throw new TypeError("can only have one game");
         ParasiteGame._instance = this;
         /**
-         * @type {Object<string, Popover>}
+         * @type {Object<string, Dialog>}
          */
-        this.popovers = opts.popovers;
-        Object.keys(this.popovers).forEach(name => this.popovers[name].pipeTo("close", this, "popoverclose"));
+        this.dialogs = opts.dialogs;
+        Object.keys(this.dialogs).forEach(name => this.dialogs[name].pipeTo("close", this, "dialogclose"));
         /**
-         * @type {Popover}
+         * @type {Dialog}
          */
-        this.levelInfoPopover = new Popover(null, "Play");
-        this.levelInfoPopover.pipeTo("close", this, "popoverclose");
+        this.levelInfoDialog = new Dialog(null, "Play");
+        this.levelInfoDialog.pipeTo("close", this, "dialogclose");
         /**
          * @type {Toast}
          */
@@ -74,9 +74,9 @@ class ParasiteGame extends XEventEmitter {
     /**
      * @param {string|false} name
      */
-    showPopover(name) {
-        for (var popName in this.popovers) {
-            var pop = this.popovers[popName];
+    showDialog(name) {
+        for (var popName in this.dialogs) {
+            var pop = this.dialogs[popName];
             if (popName == name) pop.show();
             else pop.close();
         }
@@ -85,16 +85,16 @@ class ParasiteGame extends XEventEmitter {
      * @type {boolean}
      * @readonly
      */
-    get popoverActive() {
+    get dialogActive() {
         return !!document.querySelector("dialog:not(.toast)[open]");
     }
     /**
      * @type {Promise<void>}
      * @readonly
      */
-    get allPopoversClosed() {
-        // if (this.popoverActive)
-        return (async () => { while (this.popoverActive) await this.nextFrame() })();
+    get allDialogsClosed() {
+        // if (this.dialogActive)
+        return (async () => { while (this.dialogActive) await this.nextFrame() })();
         // else return Promise.resolve();
     }
     /////////////////////////////////////////////////////////
@@ -131,8 +131,8 @@ class ParasiteGame extends XEventEmitter {
         this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
-        this.levelInfoPopover.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
-        this.levelInfoPopover.show();
+        this.levelInfoDialog.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
+        this.levelInfoDialog.show();
         this.canvas.zoom = 1;
         this.canvas.panxy = new Vector(this.playerSnake.head.position).plus(this.canvas.center);
     }
@@ -143,7 +143,7 @@ class ParasiteGame extends XEventEmitter {
     async mainLoop() {
         while (true) {
             var wait = this.nextFrame();
-            await this.allPopoversClosed;
+            await this.allDialogsClosed;
             this.render();
             this.tickWorld();
             if (this.currentLevel.complete || true) this.showLevelCompleteToast(); // TODO: REMOVE THIS KLUDGE
@@ -164,4 +164,5 @@ class ParasiteGame extends XEventEmitter {
         this.canvas.clear();
         this.canvas.drawTransformed(() => this.currentLevel.renderTo(this.canvas.ctx));
     }
+    //////////////////////////////////////////////////////////////////////
 }

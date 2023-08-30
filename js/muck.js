@@ -29,9 +29,9 @@ class Muckable {
          */
         this.v = {};
         /**
-         * @type {Popover}
+         * @type {Dialog}
          */
-        this.d = new Popover();
+        this.d = new Dialog();
         /**
          * @type {InputCtx}
          */
@@ -87,7 +87,7 @@ class Muckable {
         this.v[name] = schema;
     }
     /**
-     * opens the popover to allow mucking by user
+     * opens the dialog to allow mucking by user
      */
     muck() {
         this.loadInputs();
