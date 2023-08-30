@@ -44,7 +44,7 @@ dialog::backdrop {
     background-color: black;
 }
 
-dialog.bigg {
+dialog.big {
     width: 80%;
     height: 80%;
     padding: 2em;
@@ -102,4 +102,26 @@ form[method=dialog] {
 .flex-row {
     display: flex;
     flex-direction: row;
+}
+
+
+.sidebar {
+    --expanded-width: 24em;
+    --collapsed-width: 4em;
+    position: absolute;
+    top: 0;
+    left: calc(100vw - var(--collapsed-width));
+    width: var(--expanded-width);
+    transition: left 0.5s, height 0.5s;
+    height: 2em;
+    margin: none;
+    padding: 0.5em;
+    overflow: hidden;
+    border: 1px dotted white;
+    background: black;
+}
+
+.sidebar:hover {
+    left: calc(100vw - var(--expanded-width));
+    height: 100%;
 }

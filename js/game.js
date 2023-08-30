@@ -47,6 +47,8 @@ class ParasiteGame extends XEventEmitter {
         this.canvas.on("scroll", e => {
             this.canvas.zoomBy(1.001 ** (-e.detail.y), this.canvas.center || this.canvas.lastxy);
         });
+        // Sidebar
+        this._makeSidebar(opts.sidebar, opts.sidebarDialogNames);
     }
     //////////////////////////////////////////////////////
     /**
@@ -165,4 +167,22 @@ class ParasiteGame extends XEventEmitter {
         this.canvas.drawTransformed(() => this.currentLevel.renderTo(this.canvas.ctx));
     }
     //////////////////////////////////////////////////////////////////////
+    // Sidebar
+    /**
+     * @param {HTMLElement} el
+     */
+    _makeSidebar(el, names) {
+        for (var name of names) {
+            var a = document.createElement("a");
+            a.href = "#" + name; // dummy, does nothing
+            a.addEventListener("click", e => {
+                e.preventDefault();
+                this.showDialog(name);
+            });
+            a.append(camel2words(name));
+            var p = document.createElement("p");
+            p.append(a);
+            el.append(p);
+        }
+    }
 }
