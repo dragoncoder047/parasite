@@ -54,10 +54,10 @@ const game = new ParasiteGame({
     levels: [
         new Level({
             snakes: [
-                new Snake(new NNBrain(), new Vector(0, 100), "Sheldon"),
-                new Snake(new NNBrain(), new Vector(0, 200), "Raj"),
-                new Snake(new NNBrain(), new Vector(0, 300), "Howard"),
-                new Snake(new NNBrain(), new Vector(0, 400), "Leonard"),
+                new Snake(new NNBrain(), new Vector(0, 100), io, muck_controls, "Sheldon"),
+                new Snake(new NNBrain(), new Vector(0, 200), io, muck_controls, "Raj"),
+                new Snake(new NNBrain(), new Vector(0, 300), io, muck_controls, "Howard"),
+                new Snake(new NNBrain(), new Vector(0, 400), io, muck_controls, "Leonard"),
             ],
             blocks: [
                 new Wall(20, 1000, new Vector(-30, 500)),
@@ -68,12 +68,12 @@ const game = new ParasiteGame({
         }),
         new Level({
             snakes: [
-                new Snake(new NNBrain(), new Vector(100, 100), "Joey"),
-                new Snake(new NNBrain(), new Vector(125, 100), "Rachel"),
-                new Snake(new NNBrain(), new Vector(150, 100), "Monica"),
-                new Snake(new NNBrain(), new Vector(175, 100), "Phoebe"),
-                new Snake(new NNBrain(), new Vector(200, 100), "Chandler"),
-                new Snake(new NNBrain(), new Vector(225, 100), "Ross"),
+                new Snake(new NNBrain(), new Vector(100, 100), io, muck_controls, "Joey"),
+                new Snake(new NNBrain(), new Vector(125, 100), io, muck_controls, "Rachel"),
+                new Snake(new NNBrain(), new Vector(150, 100), io, muck_controls, "Monica"),
+                new Snake(new NNBrain(), new Vector(175, 100), io, muck_controls, "Phoebe"),
+                new Snake(new NNBrain(), new Vector(200, 100), io, muck_controls, "Chandler"),
+                new Snake(new NNBrain(), new Vector(225, 100), io, muck_controls, "Ross"),
             ],
             goal: null,
             title: "Bar Baz",
