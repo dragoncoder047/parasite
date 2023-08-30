@@ -1,4 +1,16 @@
 /**
+ * @param {string} camel
+ * @returns {string}
+ */
+function camel2words(camel) {
+    var words = [...camel.matchAll(/(^|[A-Z])[a-z]+/g)].map(x => x[0]);
+    var first = words[0];
+    first = first[0].toUpperCase() + first.slice(1).toLowerCase();
+    var rest = words.slice(1).map(x => x.toLowerCase());
+    return [first].concat(rest).join(" ");
+}
+
+/**
  * @typedef {Object} MuckParam
  * @property {string?} fullName
  * @property {string?} description
@@ -155,7 +167,7 @@ class Muckable {
             var p2ind = document.createElement("span");
             p2ind.style.width = CSS.em(1);
             p2ind.style.setProperty("text-align", "right");
-            r.append(p2ind, s.name, ": ", i);
+            r.append(p2ind, s.name || camel2words(p), ": ", i);
             if (i2) r.append(i2);
             this.p2.push({ p2: p2ind, m: s, i });
         }
