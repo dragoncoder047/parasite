@@ -16,13 +16,22 @@ class ParasiteGame extends XEventEmitter {
         /**
          * @type {Object<string, Dialog>}
          */
-        this.dialogs = opts.dialogs;
-        Object.keys(this.dialogs).forEach(name => this.dialogs[name].pipeTo("close", this, "dialogclose"));
+        this.dialogs = Object.assign({}, opts.dialogs);
         /**
          * @type {Dialog}
          */
         this.levelInfoDialog = new Dialog(null, "Play");
-        this.levelInfoDialog.pipeTo("close", this, "dialogclose");
+        this.dialogs._levelInfo = this.levelInfoDialog;
+        /**
+         * @type {Dialog}
+         */
+        this.levelsDialog = new Dialog(null, false);
+        this.dialogs._levels = this.levelsDialog;
+        this.dialogs._levels.inside.innerHTML = "";
+        var h1 = document.createElement("h1");
+        h1.textContent = "Levels";
+        this.dialogs._levels.inside.append(h1, ...this.levels[i].map(l => l.levelListEntry));
+        Object.keys(this.dialogs).forEach(name => this.dialogs[name].pipeTo("close", this, "dialogclose"));
         /**
          * @type {Toast}
          */
@@ -35,6 +44,10 @@ class ParasiteGame extends XEventEmitter {
          * @type {Level[]}
          */
         this.levels = opts.levels;
+        // Patch in the prev, next, and index
+        for (var i = 0; i < this.levels.length; i++) {
+            this.levels[i].setInfo(this.levels[i - 1], this.levels[i + 1], i);
+        }
         /**
          * @type {number}
          */
@@ -79,7 +92,7 @@ class ParasiteGame extends XEventEmitter {
     showDialog(name) {
         for (var popName in this.dialogs) {
             var pop = this.dialogs[popName];
-            if (popName == name) pop.show();
+            if (popName === name) pop.show();
             else pop.close();
         }
     }
@@ -134,7 +147,7 @@ class ParasiteGame extends XEventEmitter {
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
         this.levelInfoDialog.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
-        this.levelInfoDialog.show();
+        this.showDialog("_levelInfo");
         this.canvas.zoom = 1;
         this.canvas.panxy = new Vector(this.playerSnake.head.position).plus(this.canvas.center);
     }
@@ -170,6 +183,7 @@ class ParasiteGame extends XEventEmitter {
     // Sidebar
     /**
      * @param {HTMLElement} el
+     * @param {string[]} names
      */
     _makeSidebar(el, names) {
         for (var name of names) {

@@ -45,6 +45,33 @@ class Level {
          * @type {{position: Vector, angle: number}}
          */
         this.entry = options.entry || { position: new Vector(0, 0), angle: 0 };
+        // Make level info element
+        /**
+         * @type {HTMLLIElement}
+         */
+        this.levelListEntry = document.createElement("p");
+        /**
+         * @type {HTMLSpanElement}
+         */
+        this.beatenIndicator = document.createElement("span");
+        /**
+         * @type {Level?}
+         */
+        this.prevLevel = null;
+        /**
+         * @type {number}
+         */
+        this.index = null;
+    }
+    /**
+     * @param {Level?} prev
+     * @param {number} i
+     */
+    setInfo(prev, i) {
+        this.prevLevel = prev;
+        this.index = i;
+        this.levelListEntry.innerHTML = "";
+        this.levelListEntry.append("Level " + i + ": " + this.title, this.beatenIndicator);
     }
     /**
      * @type {boolean}
@@ -56,6 +83,13 @@ class Level {
             return this.goal.complete;
         }
         return false;
+    }
+    /**
+     * @type {boolean}
+     * @readonly
+     */
+    get unlocked() {
+        return this.complete || (!this.prevLevel || this.prevLevel.complete);
     }
     tickWorld() {
         Matter.Engine.update(this.physicsEngine);
@@ -79,6 +113,16 @@ class Level {
                 gauss(20, 20),
                 new Vector(gauss(0, 1000), gauss(0, 1000)),
                 new Vector(gauss(0, 5), gauss(0, 5))));
+        }
+        // update level complete indicator
+        if (this.complete) {
+            this.beatenIndicator.style.color = "lime";
+            this.beatenIndicator.textContent = "\u2713 Beaten!";
+        } else if (!this.prevLevel || this.prevLevel.complete) {
+            this.beatenIndicator.textContent = "";
+        } else {
+            this.beatenIndicator.style.color = "gray";
+            this.beatenIndicator.textContent = "\u{1f512} Locked";
         }
     }
     /**
