@@ -93,12 +93,9 @@ class ParasiteGame extends XEventEmitter {
      * @readonly
      */
     get allPopoversClosed() {
-        var self = this;
-        if (this.popoverActive)
-            return (async () => {
-                while (self.popoverActive) await new Promise(r => requestAnimationFrame(r));
-            })();
-        else return Promise.resolve();
+        // if (this.popoverActive)
+        return (async () => { while (this.popoverActive) await this.nextFrame() })();
+        // else return Promise.resolve();
     }
     /////////////////////////////////////////////////////////
     /**
