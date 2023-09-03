@@ -28,6 +28,7 @@ class Key extends Control {
          */
         this.state = false;
         document.body.addEventListener("keydown", e => {
+            if (!this.capturing) return;
             if (e.key !== this.key) return;
             e.preventDefault();
             if (!this.down) {
@@ -40,6 +41,7 @@ class Key extends Control {
             }
         });
         document.body.addEventListener("keyup", e => {
+            if (!this.capturing) return;
             if (e.key !== this.key) return;
             e.preventDefault();
             this.down = false;
@@ -50,6 +52,10 @@ class Key extends Control {
          * @type {KeyMode}
          */
         this.mode = mode;
+        /**
+         * @type {boolean}
+         */
+        this.capturing = false;
     }
     query() {
         switch (this.mode) {
@@ -67,6 +73,9 @@ class Key extends Control {
             default:
                 throw new Error("strange mode " + this.mode);
         }
+    }
+    enableCapture(x) {
+        this.capturing = x;
     }
 }
 
@@ -86,5 +95,8 @@ class Keymap extends Control {
     }
     query() {
         return this.keys.flatMap(k => k.query());
+    }
+    enableCapture(x) {
+        this.controls.forEach(c => c.enableCapture(x));
     }
 }

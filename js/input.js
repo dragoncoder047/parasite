@@ -46,9 +46,13 @@ class InputCtx {
     }
     takeControl() {
         this.iostack.push(this);
+        this.controls.forEach(c => c.enableCapture(true));
     }
     returnControl() {
-        if (this.hasControl()) this.iostack.pop();
+        if (this.hasControl()) {
+            this.iostack.pop();
+            this.controls.forEach(c => c.enableCapture(false));
+        }
     }
     /**
      * @returns {any[]}
@@ -80,6 +84,13 @@ class Control extends XEventEmitter {
     processOutput(o) {
         // default action is nothing
     }
+    /**
+     * @abstract
+     * @param {boolean} yes
+     */
+    enableCapture(yes) {
+        // nothing
+    }
 }
 
 class MultiControl extends Control {
@@ -98,5 +109,8 @@ class MultiControl extends Control {
     }
     processOutput(o) {
         this.controls.forEach(c => c.processOutput(o));
+    }
+    enableCapture(x) {
+        this.controls.forEach(c => c.enableCapture(x));
     }
 }
