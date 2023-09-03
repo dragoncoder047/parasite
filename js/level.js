@@ -108,13 +108,13 @@ class Level {
             }
             return true;
         });
-        var totalFoodAvailable = this.foodParticles.reduce((a, b) => a.size + b.size, 0);
+        var totalFoodAvailable = this.foodParticles.reduce((sum, particle) => sum + particle.size, 0);
         // randomly add food, less as it accumulates (no idea what this converges to)
-        if (Math.random() < (0.3 + Math.pow(0.999, totalFoodAvailable))) {
+        if (Math.random() < Math.pow(0.999, totalFoodAvailable)) {
             this.addParticle(new FoodParticle(
-                gauss(15, 3),
+                gauss(30, 10),
                 new Vector(gauss(0, 50 + totalFoodAvailable), gauss(0, 50 + totalFoodAvailable)),
-                new Vector(gauss(0, 2), gauss(0, 2))));
+                new Vector(gauss(0, 0.4), gauss(0, 0.4))));
         }
         this.updateCompleteIndicator();
     }

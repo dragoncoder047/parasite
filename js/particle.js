@@ -13,7 +13,7 @@ class Particle {
             collisionFilter,
             render: { fillStyle: Color.hsv(hue, 1, 1).toCSSStr() },
             plugin: { particle: this },
-            frictionAir: 0.5
+            frictionAir: 0
         });
         /**
          * @type {boolean}
@@ -57,9 +57,12 @@ class FoodParticle extends Particle {
      * @param {Vector} velocity
      */
     constructor(size, position, velocity) {
-        super(size, 0, position, { category: CollisionLayer.FOOD, mask: CollisionLayer.FOOD_MASK });
+        super(size / 5, 0, position, { category: CollisionLayer.FOOD, mask: CollisionLayer.FOOD_MASK });
         Matter.Body.setVelocity(this.body, velocity);
         this.body.render.fillStyle = "white";
+    }
+    get size() {
+        return this.body.circleRadius * 5;
     }
 }
 

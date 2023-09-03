@@ -447,7 +447,9 @@ class Snake {
                 this.tongueAngle += this.muckParams.get("tongueMotionDelta");
                 break;
             case Action.EAT:
-                var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
+                var p = level.foodParticles.filter(p => {
+                    return new Vector(p.body.position).minus(this.tongueTip).length() <= p.size;
+                });
                 if (p) p.forEach(p => {
                     this.energy += p.size;
                     p.setEaten();

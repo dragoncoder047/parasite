@@ -22,7 +22,7 @@ class ParasiteGame extends XEventEmitter {
          */
         this.levels = opts.levels;
         // Patch in the prev, next, and index
-        for (var i = 0; i < this.levels.length; i++) this.levels[i].setInfo(this.levels[i - 1], i);
+        for (var i = 0; i < this.levels.length; i++) this.levels[i].setInfo(this.levels[i - 1], i + 1);
         /**
          * @type {Dialog}
          */
@@ -43,6 +43,7 @@ class ParasiteGame extends XEventEmitter {
             a.addEventListener("click", e => {
                 e.preventDefault();
                 if (l.unlocked) {
+                    this.toaster.close();
                     this.showDialog(false);
                     this.openLevel(i);
                 }

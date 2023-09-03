@@ -26,9 +26,12 @@ main {
     padding: 0.3em;
 }
 
-#bottom_bar span {
-    padding-right: 0.3em;
-    padding-left: 0.3em;
+#bottom_bar div {
+    padding: 0.3em;
+}
+
+meter {
+    margin-left: 0.3em;
 }
 
 /* some from https://stackoverflow.com/a/64708195 */
