@@ -265,7 +265,7 @@ class PlayerBrain extends Brain {
          */
         this.column2 = document.createElement("div");
         this.column2.style.flex = 2;
-        this.column2.classList.add("flex-row");
+        this.column2.classList.add("flex-column");
         /**
          * @type {HTMLDivElement}
          */
@@ -288,9 +288,30 @@ class PlayerBrain extends Brain {
         this.energybar.high = 500;
         this.energybar.optimum = 900;
         var span = document.createElement("span");
-        span.style.paddingRight = CSS.em(1);
         span.append("Energy: ", this.energyoutput);
-        this.column2.append(span, this.energybar);
+        var r1 = document.createElement("div");
+        r1.style.flex = 1;
+        r1.classList.add("flex-row");
+        r1.append(span, this.energybar);
+        this.column2.append(r1);
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.headSwatch = document.createElement("output");
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.tailSwatch = document.createElement("output");
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.pherSwatch = document.createElement("output");
+        [this.headSwatch, this.tailSwatch, this.pherSwatch].forEach(s => s.classList.add("swatch"));
+        var r2 = document.createElement("div");
+        r2.style.flex = 1;
+        r2.classList.add("flex-row");
+        r2.append("Head Hue: ", this.headSwatch, "Tail Hue: ", this.tailSwatch, "Pheremone Hue: ", this.pherSwatch);
+        this.column2.append(r2);
     }
     think() {
         this.showPlayerStatus();
@@ -306,5 +327,11 @@ class PlayerBrain extends Brain {
         // only thing implemented right now is energy
         this.energyoutput.value = this.snake.energy.toFixed();
         this.energybar.value = this.snake.energy;
+        this.headSwatch.textContent = (this.snake.headHue * 360) | 0;
+        this.tailSwatch.textContent = (this.snake.tailHue * 360) | 0;
+        this.pherSwatch.textContent = (this.snake.pheremoneHue * 360) | 0;
+        this.headSwatch.style.backgroundColor = Color.hsv(this.snake.headHue, 1, 1).toCSSStr();
+        this.tailSwatch.style.backgroundColor = Color.hsv(this.snake.tailHue, 1, 1).toCSSStr();
+        this.pherSwatch.style.backgroundColor = Color.hsv(this.snake.pheremoneHue, 1, 1).toCSSStr();
     }
 }

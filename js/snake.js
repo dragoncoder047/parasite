@@ -50,7 +50,8 @@ class Snake {
     static HEAD_WIDTH = 10;
     static TAIL_WIDTH = 5;
     static LINK_OFFSET = 1.5;
-    static VISION_DEPTH = 50;
+    static VISION_DEPTH = 100;
+    static MAX_TONGUE = 50;
     static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.SNAKE_MASK };
     /**
      * @param {Brain} brain
@@ -311,7 +312,7 @@ class Snake {
      * @readonly
      */
     get tongueTipRel() {
-        return this.forward.rotate(this.tongueAngle).scale(map(this.tongueLength, 0, 1, Snake.HEAD_WIDTH, this.depthOfVision));
+        return this.forward.rotate(this.tongueAngle).scale(map(this.tongueLength, 0, 1, Snake.HEAD_WIDTH, Snake.MAX_TONGUE));
     }
     /**
      * @type {Vector}
@@ -562,7 +563,7 @@ class PlayerSnake extends Snake {
     get tongueLength() {
         if (!this.grabbing) return super.tongueLength;
         var realLength = new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(this.head.position).length();
-        return map(realLength, Snake.HEAD_WIDTH, this.depthOfVision, 0, 1, false);
+        return map(realLength, Snake.HEAD_WIDTH, Snake.MAX_TONGUE, 0, 1, false);
     }
     set tongueAngle(n) {
         if (this.grabbing) super.tongueAngle = this.tongueAngle; // Run getter and then set it on parent
@@ -593,7 +594,7 @@ class PlayerSnake extends Snake {
             case Action.TONGUE_IN:
                 if (!this.grabbing) super.executeAction(action, level);
                 else {
-                    this.grabber.length = clamp(this.grabber.length + (action == Action.TONGUE_IN ? -1 : +1), Snake.HEAD_WIDTH, this.depthOfVision);
+                    this.grabber.length = clamp(this.grabber.length + (action == Action.TONGUE_IN ? -1 : +1), Snake.HEAD_WIDTH, Snake.MAX_TONGUE);
                 }
                 break;
             case Action.GRAB_RELEASE:
