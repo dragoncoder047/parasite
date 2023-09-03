@@ -110,10 +110,10 @@ class Level {
         });
         var totalFoodAvailable = this.foodParticles.reduce((a, b) => a.size + b.size, 0);
         // randomly add food, less as it accumulates (no idea what this converges to)
-        if (Math.random() < Math.pow(0.8, totalFoodAvailable)) {
+        if (Math.random() < (0.3 + Math.pow(0.999, totalFoodAvailable))) {
             this.addParticle(new FoodParticle(
-                gauss(10, 3),
-                new Vector(gauss(0, 1000), gauss(0, 1000)),
+                gauss(15, 3),
+                new Vector(gauss(0, 50 + totalFoodAvailable), gauss(0, 50 + totalFoodAvailable)),
                 new Vector(gauss(0, 2), gauss(0, 2))));
         }
         this.updateCompleteIndicator();

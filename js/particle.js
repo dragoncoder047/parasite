@@ -13,7 +13,7 @@ class Particle {
             collisionFilter,
             render: { fillStyle: Color.hsv(hue, 1, 1).toCSSStr() },
             plugin: { particle: this },
-            frictionAir: 0.01
+            frictionAir: 0.5
         });
         /**
          * @type {boolean}

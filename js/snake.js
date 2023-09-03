@@ -78,7 +78,7 @@ class Snake {
         m.define("energyRegenerationRate", { type: "number", value: 0.005, limits: [0, 1], step: 0.001, description: "Amount of latent energy added each frame." });
         m.define("speed", { type: "number", value: 0.01, limits: [0, 0.1], step: 0.001, description: "Force/torque applied when moving/turning." });
         m.define("moveCost", { type: "number", value: 1, limits: [0, 100], step: 0.1, description: "Energy cost required to move forward." });
-        m.define("tongueMotionDelta", { type: "number", value: 0.01, limits: [0, 0.1], step: 0.001, description: "Delta used to move tongue left/right/in/out." });
+        m.define("tongueMotionDelta", { type: "number", value: 0.03, limits: [0, 0.2], step: 0.001, description: "Delta used to move tongue left/right/in/out." });
         m.define("colorDelta", { type: "number", value: 1 / 360, limits: [0, 1 / 6], step: 1 / 3600, description: "Delta used to change colors (head, tail, pheremone)." });
         m.define("growCost", { type: "number", value: 10, limits: [0, 100], description: "Energy cost of growing." });
         m.define("growAmount", { type: "number", value: 1, limits: [1, 10], description: "Number of segments to add when growing." });
@@ -471,10 +471,10 @@ class Snake {
                     this.autoLearn(true);
                 } else this.autoLearn(false, "Not enough energy to grow.");
             case Action.PHEREMONE_INC_COLOR:
-                this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta")) % 1;
+                this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.PHEREMONE_DEC_COLOR:
-                this.pheremoneHue = (this.pheremoneHue - this.muckParams.get("colorDelta")) % 1;
+                this.pheremoneHue = (this.pheremoneHue - this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.PHEREMONE_RELEASE:
                 if (this.energy > this.muckParams.get("pheremoneCost")) {
@@ -487,16 +487,16 @@ class Snake {
                 } else this.autoLearn(false, "Not enough energy to release pehermones.");
                 break;
             case Action.HEAD_INC_COLOR:
-                this.headHue = (this.headHue + this.muckParams.get("colorDelta")) % 1;
+                this.headHue = (this.headHue + this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.HEAD_DEC_COLOR:
-                this.headHue = (this.headHue - this.muckParams.get("colorDelta")) % 1;
+                this.headHue = (this.headHue - this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.TAIL_INC_COLOR:
-                this.tailHue = (this.tailHue + this.muckParams.get("colorDelta")) % 1;
+                this.tailHue = (this.tailHue + this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.TAIL_DEC_COLOR:
-                this.tailHue = (this.tailHue - this.muckParams.get("colorDelta")) % 1;
+                this.tailHue = (this.tailHue - this.muckParams.get("colorDelta") + 1) % 1;
                 break;
             case Action.SOUND_INC_FREQ:
                 this.soundFreq = clamp(this.soundFreq * Math.exp(Math.LN2 / 12), 110, 7040);

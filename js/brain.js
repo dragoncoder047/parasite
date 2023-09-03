@@ -259,6 +259,7 @@ class PlayerBrain extends Brain {
          * @type {HTMLDivElement}
          */
         this.column1 = document.createElement("div");
+        this.column1.style.flex = 1;
         /**
          * @type {HTMLDivElement}
          */
@@ -269,6 +270,7 @@ class PlayerBrain extends Brain {
          * @type {HTMLDivElement}
          */
         this.column3 = document.createElement("div");
+        this.column3.style.flex = 1;
         this.bar.append(this.column1, this.column2, this.column3);
         // make energy meter and output
         /**
@@ -286,6 +288,7 @@ class PlayerBrain extends Brain {
         this.energybar.high = 500;
         this.energybar.optimum = 900;
         var span = document.createElement("span");
+        span.style.paddingRight = CSS.em(1);
         span.append("Energy: ", this.energyoutput);
         this.column2.append(span, this.energybar);
     }
