@@ -88,7 +88,7 @@ class Muckable {
         this.d.setContent("");
         var es = [];
         this.p2 = [];
-        for (var p in this.v) {
+        Object.keys(this.v).forEach(p => {
             var s = this.v[p];
             var r = document.createElement("div");
             es.push(r);
@@ -96,19 +96,22 @@ class Muckable {
                 r.classList.add("flex-column");
                 var desc = document.createElement("span");
                 desc.append(s.description);
+                desc.style.fontStyle = "italic";
+                desc.style.opacity = CSS.percent(50);
                 desc.style.setProperty("font-style", "italic");
                 var top = document.createElement("div");
                 r.append(top, desc);
                 r = top;
             }
             r.classList.add("flex-row");
+            r.style.margin = CSS.em(1);
             var i, i2;
             switch (s.type) {
                 case "string":
                     if (s.choices) {
                         i = document.createElement("select");
                         i.append(...s.choices.map(c => {
-                            var e = documen.createElement("option");
+                            var e = document.createElement("option");
                             e.value = e.textContent = c;
                             return e;
                         }));
@@ -130,16 +133,16 @@ class Muckable {
                     if (s.limits) {
                         i2 = document.createElement("input");
                         i2.type = "range";
+                        if (s.step) i2.step = s.step;
                         i.min = i2.min = s.limits[0];
                         i.max = i2.max = s.limits[1];
                         i2.value = s.value;
                         i.addEventListener("input", () => {
                             i2.value = i.value;
-                            i2.dispatchEvent(new Event("input"));
                         });
                         i2.addEventListener("input", () => {
-                            i.value = i2.value
-                            i.dispatchEvent(new Event("input"));
+                            i.value = i2.value;
+                            i.dispatchEvent(new InputEvent("input"));
                         });
                     }
                     i.value = s.value;
@@ -158,7 +161,7 @@ class Muckable {
             r.append(p2ind, s.name || camel2words(p), ": ", i);
             if (i2) r.append(i2);
             this.p2.push({ p2: p2ind, m: s, i });
-        }
+        });
         this.d.inside.append(...es);
         this.d.inside.classList.add("flex-column");
     }
@@ -168,16 +171,19 @@ class Muckable {
             this.ctx.getInputs().forEach(i => {
                 switch (i) {
                     case "next":
-                        this.p2i = clamp(this.p2i + 1, 0, this.p2.length);
+                        this.p2i = clamp(this.p2i + 1, 0, this.p2.length - 1);
                         break;
                     case "prev":
-                        this.p2i = clamp(this.p2i - 1, 0, this.p2.length);
+                        this.p2i = clamp(this.p2i - 1, 0, this.p2.length - 1 );
                         break;
                     case "inc":
                         this.changeValue(1);
                         break;
                     case "dec":
                         this.changeValue(-1);
+                        break;
+                    case "exit":
+                        this.d.close();
                         break;
                     default:
                         throw new Error("strange action " + i);
@@ -187,9 +193,10 @@ class Muckable {
             this.p2.forEach((p, i) => {
                 p.p2.textContent = i === this.p2i ? "\u2b9e" : "";
             });
+            this.p2[this.p2i].p2.scrollIntoViewIfNeeded();
         }
         this.ctx.returnControl();
-        for (var p of this.v) delete p._p2ind;
+        for (var p in this.v) delete this.v[p]._p2ind;
         this.p2 = [];
     }
     changeValue(how) {
@@ -197,12 +204,13 @@ class Muckable {
         switch (e.m.type) {
             case "string":
                 if (e.m.choices) {
-                    var z = clamp(e.m.choices.indexOf(e.i.value) + how, 0, e.m.choices.length);
+                    var z = clamp(e.m.choices.indexOf(e.i.value) + how, 0, e.m.choices.length - 1);
                     e.i.value = e.m.choices[z];
                 }
                 break;
             case "number":
-                e.i.value += how * (e.i.step || 1);
+                e.i.value = +e.i.value + how * (+e.i.step || 1);
+                if (e.m.limits) e.i.value = clamp(e.i.value, e.m.limits[0], e.m.limits[1]);
                 break;
             case "boolean":
                 e.i.checked = !e.i.checked;
@@ -210,6 +218,6 @@ class Muckable {
             default:
                 throw new Error("strange type");
         }
-        e.i.dispatchEvent(new Event("input"));
+        e.i.dispatchEvent(new InputEvent("input"));
     }
 }

@@ -97,6 +97,6 @@ class Keymap extends Control {
         return this.keys.flatMap(k => k.query());
     }
     enableCapture(x) {
-        this.controls.forEach(c => c.enableCapture(x));
+        this.keys.forEach(c => c.enableCapture(x));
     }
 }

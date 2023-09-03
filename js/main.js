@@ -11,6 +11,16 @@ function safe$(selector) {
 // TODO: add more IO sources
 const io = new IOStack();
 const player_controls = new MultiControl(
+/*
+
+Key assignments:
+
+`=grab 
+q=grow                e=eat     r t y u      iop=pheremones
+          wasd=tongue            f g h j      kl;'=colors
+z=mate      x=muck    c=mate      v b n m      ,./=sound
+
+*/
     new Keymap([
         ["ArrowUp", "while-held", Action.FORWARD],
         ["ArrowLeft", "while-held", Action.LEFT],
@@ -26,22 +36,25 @@ const player_controls = new MultiControl(
         ["i", "auto-repeat", Action.PHEREMONE_INC_COLOR],
         ["o", "auto-repeat", Action.PHEREMONE_DEC_COLOR],
         ["p", "while-held", Action.PHEREMONE_RELEASE],
-        ["k", "while-held", Action.HEAD_INC_COLOR],
-        ["l", "while-held", Action.HEAD_DEC_COLOR],
-        [";", "while-held", Action.TAIL_INC_COLOR],
-        ["'", "while-held", Action.TAIL_DEC_COLOR],
-        [",", "while-held", Action.SOUND_INC_FREQ],
-        [".", "while-held", Action.SOUND_DEC_FREQ],
+        ["k", "auto-repeat", Action.HEAD_INC_COLOR],
+        ["l", "auto-repeat", Action.HEAD_DEC_COLOR],
+        [";", "auto-repeat", Action.TAIL_INC_COLOR],
+        ["'", "auto-repeat", Action.TAIL_DEC_COLOR],
+        [",", "auto-repeat", Action.SOUND_INC_FREQ],
+        [".", "auto-repeat", Action.SOUND_DEC_FREQ],
         ["/", "while-held", Action.CHIRP],
+        ["x", "once", Action.MUCK],
+        ["`", "once", Action.GRAB_RELEASE],
     ]),
 );
 
 const muck_controls = new MultiControl(
     new Keymap([
-        ["w", "once", "next"],
-        ["s", "once", "prev"],
-        ["a", "auto-repeat", "inc"],
-        ["d", "auto-repeat", "dec"],
+        ["w", "once", "prev"],
+        ["s", "once", "next"],
+        ["a", "auto-repeat", "dec"],
+        ["d", "auto-repeat", "inc"],
+        ["Escape", "once", "exit"],
     ]),
 );
 

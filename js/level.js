@@ -110,7 +110,7 @@ class Level {
         });
         var totalFoodAvailable = this.foodParticles.reduce((sum, particle) => sum + particle.size, 0);
         // randomly add food, less as it accumulates (no idea what this converges to)
-        if (Math.random() < Math.pow(0.999, totalFoodAvailable)) {
+        if (Math.random() < 0.1 + Math.pow(0.9999, totalFoodAvailable / 100)) {
             this.addParticle(new FoodParticle(
                 gauss(30, 10),
                 new Vector(gauss(0, 50 + totalFoodAvailable), gauss(0, 50 + totalFoodAvailable)),
@@ -159,8 +159,8 @@ class Level {
      */
     renderTo(ctx) {
         this.particles.forEach(particle => particle.renderTo(ctx));
-        this.snakes.forEach(snake => snake.renderTo(ctx));
         this.blocks.forEach(block => block.renderTo(ctx));
+        this.snakes.forEach(snake => snake.renderTo(ctx));
     }
     /**
      * @param {Snake} s

@@ -78,13 +78,13 @@ class Snake {
         m.define("soundDecayRate", { type: "number", value: 0.92, limits: [0, 1], step: 0.001, description: "Exponent base that the sound volume is multipled by each frame." });
         m.define("energyRegenerationRate", { type: "number", value: 0.005, limits: [0, 1], step: 0.001, description: "Amount of latent energy added each frame." });
         m.define("speed", { type: "number", value: 0.01, limits: [0, 0.1], step: 0.001, description: "Force/torque applied when moving/turning." });
-        m.define("moveCost", { type: "number", value: 1, limits: [0, 100], step: 0.1, description: "Energy cost required to move forward." });
+        m.define("moveCost", { type: "number", value: 0.1, limits: [0, 10], step: 0.01, description: "Energy cost required to move forward." });
         m.define("tongueMotionDelta", { type: "number", value: 0.03, limits: [0, 0.2], step: 0.001, description: "Delta used to move tongue left/right/in/out." });
         m.define("colorDelta", { type: "number", value: 1 / 360, limits: [0, 1 / 6], step: 1 / 3600, description: "Delta used to change colors (head, tail, pheremone)." });
         m.define("growCost", { type: "number", value: 10, limits: [0, 100], description: "Energy cost of growing." });
         m.define("growAmount", { type: "number", value: 1, limits: [1, 10], description: "Number of segments to add when growing." });
         m.define("pheremoneCost", { type: "number", value: 2, limits: [0, 100], description: "Energy cost of emitting a pheremone." });
-        m.define("mateCost", { type: "number", value: 15, limits: [0, 100], description: "Energy cost of emitting a pheremone." });
+        m.define("mateCost", { type: "number", value: 15, limits: [0, 100], description: "Energy cost of mating with another snake." });
         /**
          * @type {Matter.Composite}
          */
@@ -450,7 +450,7 @@ class Snake {
                 var p = level.foodParticles.filter(p => {
                     return new Vector(p.body.position).minus(this.tongueTip).length() <= p.size;
                 });
-                if (p) p.forEach(p => {
+                if (p.length > 0) p.forEach(p => {
                     this.energy += p.size;
                     p.setEaten();
                     this.autoLearn(true);
@@ -560,7 +560,7 @@ class PlayerSnake extends Snake {
     }
     get tongueAngle() {
         if (!this.grabbing) return super.tongueAngle;
-        return new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(this.head.position).angle();
+        return new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(this.head.position).rotate(-this.head.angle /* kludge--why?? */ - Math.PI / 2).angle();
     }
     get tongueLength() {
         if (!this.grabbing) return super.tongueLength;
@@ -605,20 +605,20 @@ class PlayerSnake extends Snake {
                     this.grabber = this.grabbing = null;
                 } else {
                     var s = Matter.Query.point(
-                        level.snakes.concat(level.blocks)
-                            .flatMap(s => Matter.Composite.allBodies(s.body)),
+                        level.snakes.flatMap(s => s.segments)
+                            .concat(level.blocks.map(b => b.body)),
                         this.tongueTip);
-                    if (s) {
-                        var body = s[0]
-                        this.grabbing = body.plugin.snake || body.plugin.block;
+                    if (s.length > 0) {
+                        var body = s[0];
                         this.grabber = Matter.Constraint.create({
                             bodyA: this.head,
                             bodyB: body,
-                            pointB: this.tongueTip,
+                            pointB: this.tongueTip.minus(body.position),
                             stiffness: 1,
                         });
+                        this.grabbing = body.plugin.snake || body.plugin.block;
                         Matter.Composite.add(level.physicsWorld, this.grabber);
-                    } else this.autoLearn("Nothing to grab.");
+                    } else this.autoLearn(false, "Nothing to grab.");
                 }
                 break;
             case Action.MUCK:
@@ -631,7 +631,7 @@ class PlayerSnake extends Snake {
                         // TODO
                     }
                 }
-                this.autoLearn("Not grabbing anything muckable.");
+                this.autoLearn(false, "Not grabbing anything muckable.");
                 break;
             case Action.PUNISH:
             case Action.REWARD:
@@ -684,7 +684,7 @@ class PlayerSnake extends Snake {
      */
     _worldEdit(displacement, turn, heightChange, widthChange, scaleFactor = 0.01) {
         if (!this.grabbing) {
-            this.autoLearn("Nothing to modify.");
+            this.autoLearn(false, "Nothing to modify.");
             return;
         }
         var bounds = Matter.Composite.bounds(this.grabbing.body);
