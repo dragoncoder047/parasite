@@ -191,7 +191,6 @@ class Canvas extends XEventEmitter {
     follow(point) {
         var transformed = new Vector(point).scale(this.zoom).plus(this.panxy);
         var d = this.center.minus(transformed);
-        var absd = new Vector(Math.abs(d.x), Math.abs(d.y));
         this.panBy(new Vector(submag(d.x, this.canvas.width / 2), submag(d.y, this.canvas.height / 2)));
         d.y = submag(d.y, (this.canvas.height - 400) / 2);
         d.x = submag(d.x, (this.canvas.width - 400) / 2);
