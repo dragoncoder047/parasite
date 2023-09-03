@@ -687,13 +687,14 @@ class PlayerSnake extends Snake {
             this.autoLearn(false, "Nothing to modify.");
             return;
         }
-        var bounds = Matter.Composite.bounds(this.grabbing.body);
-        var middle = new Vector(bounds.max).minus(bounds.min);
-        Matter.Composite.rotate(this.grabbing.body, turn * scaleFactor, middle, true);
-        Matter.Composite.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
-        if (this.grabbing instanceof Block) {
-            this.grabbing.width += widthChange * scaleFactor;
-            this.grabbing.height += heightChange * scaleFactor;
+        if (this.grabbing instanceof Snake) {
+            this.autoLearn(false, "Can't modify a snake. Muck it instead.");
+            return;
         }
+        var bounds = this.grabbing.body.bounds;
+        Matter.Body.rotate(this.grabbing.body, turn * scaleFactor, false, true);
+        Matter.Body.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
+        this.grabbing.width += widthChange * scaleFactor;
+        this.grabbing.height += heightChange * scaleFactor;
     }
 }

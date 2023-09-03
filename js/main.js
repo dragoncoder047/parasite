@@ -15,10 +15,10 @@ const player_controls = new MultiControl(
 
 Key assignments:
 
-`=grab  1=reward 2=punish              4 5 6 7
-        q=grow                e=eat     r t y u      iop=pheremones
-                 wasd=tongue             f g h j      kl;'=colors
-         z=mate      x=muck    c=mate     v b n m      ,./=sound
+`=grab  1=reward 2=punish              4          6 7
+        q=grow                e=eat        5rty=move uj=turn      iop=pheremones
+                 wasd=tongue             f            h            kl;'=colors
+         z=mate      x=muck    c=mate       gvbn=size  m            ,./=sound
 
 */
     new Keymap([
@@ -47,6 +47,12 @@ Key assignments:
         ["`", "once", Action.GRAB_RELEASE],
         ["1", "while-held", Action.REWARD],
         ["2", "while-held", Action.PUNISH],
+        ["5", "while-held", Action.WORLD_MOVE_U],
+        ["r", "while-held", Action.WORLD_MOVE_L],
+        ["t", "while-held", Action.WORLD_MOVE_D],
+        ["y", "while-held", Action.WORLD_MOVE_R],
+        ["u", "while-held", Action.WORLD_TURN_CW],
+        ["j", "while-held", Action.WORLD_TURN_CCW],
     ]),
 );
 
