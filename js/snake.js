@@ -635,7 +635,7 @@ class PlayerSnake extends Snake {
                 break;
             case Action.PUNISH:
             case Action.REWARD:
-                level.addParticle(new RewardSignal(action === Action.REWARD ? 10 : -10, this.head.position, this.forward.rotate(this.tongueAngle).scale(10)));
+                level.addParticle(new RewardSignal(action === Action.REWARD ? 10 : -10, this.head.position, this.forward.rotate(this.tongueAngle).scale(5)));
                 break;
             case Action.WORLD_MOVE_L:
                 this._worldEdit(new Vector(-1, 0), 0, 0, 0);

@@ -95,11 +95,12 @@ class Pheremone extends Particle {
 
 class RewardSignal extends Particle {
     constructor(rewardAmount, position, velocity) {
-        super(10, 0, position, { category: CollisionLayer.PHEREMONE, mask: CollisionLayer.PHEREMONE_MASK });
+        super(2, 0, position, { category: CollisionLayer.PHEREMONE, mask: CollisionLayer.PHEREMONE_MASK });
         Matter.Body.setVelocity(this.body, velocity);
         /**
          * @type {number}
          */
         this.rewardAmount = rewardAmount;
+        this.body.render.fillStyle = this.rewardAmount > 0 ? "lime" : "red";
     }
 }
