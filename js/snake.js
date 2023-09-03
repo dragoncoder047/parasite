@@ -128,11 +128,11 @@ class Snake {
         /**
          * @type {number}
          */
-        this.tongueAngle = 0;
+        this._tongueAngle = 0;
         /**
          * @type {number}
          */
-        this.tongueLength = 0.5;
+        this._tongueLength = 0.5;
         /**
          * @type {number}
          */
@@ -156,6 +156,24 @@ class Snake {
      */
     get name() {
         return this.muckParams.get("name");
+    }
+    /**
+     * @type {number}
+     */
+    get tongueAngle() {
+        return this._tongueAngle;
+    }
+    /**
+     * @type {number}
+     */
+    get tongueLength() {
+        return this._tongueLength;
+    }
+    set tongueAngle(n) {
+        this._tongueAngle = clamp(n, -Math.PI / 2, Math.PI / 2);
+    }
+    set tongueLength(n) {
+        this._tongueLength = clamp(n, 0, 1);
     }
     /**
      * @type {number}
@@ -416,16 +434,16 @@ class Snake {
                 this.head.torque += this.muckParams.get("speed");
                 break;
             case Action.TONGUE_OUT:
-                this.tongueLength = clamp(this.tongueLength + this.muckParams.get("tongueMotionDelta"), 0, 1);
+                this.tongueLength += this.muckParams.get("tongueMotionDelta");
                 break;
             case Action.TONGUE_IN:
-                this.tongueLength = clamp(this.tongueLength - this.muckParams.get("tongueMotionDelta"), 0, 1);
+                this.tongueLength -= this.muckParams.get("tongueMotionDelta");
                 break;
             case Action.TONGUE_LEFT:
-                this.tongueAngle = clamp(this.tongueAngle - this.muckParams.get("tongueMotionDelta"), -Math.PI / 2, Math.PI / 2);
+                this.tongueAngle -= this.muckParams.get("tongueMotionDelta");
                 break;
             case Action.TONGUE_RIGHT:
-                this.tongueAngle = clamp(this.tongueAngle + this.muckParams.get("tongueMotionDelta"), -Math.PI / 2, Math.PI / 2);
+                this.tongueAngle += this.muckParams.get("tongueMotionDelta");
                 break;
             case Action.EAT:
                 var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
@@ -537,13 +555,22 @@ class PlayerSnake extends Snake {
         super.drawTongue(ctx);
         if (this.grabbing) dotAt(ctx, this.tongueTip, Snake.HEAD_WIDTH / 3, "red");
     }
-    get tongueTip() {
-        if (!this.grabbing) return super.tongueTip;
-        return new Vector(Matter.Constraint.pointBWorld(this.grabber));
-    }
     get tongueAngle() {
         if (!this.grabbing) return super.tongueAngle;
-        return this.tongueTip.minus(this.head.position).angle();
+        return new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(this.head.position).angle();
+    }
+    get tongueLength() {
+        if (!this.grabbing) return super.tongueLength;
+        var realLength = new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(this.head.position).length();
+        return map(realLength, Snake.HEAD_WIDTH, this.depthOfVision, 0, 1, false);
+    }
+    set tongueAngle(n) {
+        if (this.grabbing) super.tongueAngle = this.tongueAngle; // Run getter and then set it on parent
+        else super.tongueAngle = n; // Invoke parent setter (default)
+    }
+    set tongueLength(n) {
+        if (this.grabbing) super.tongueLength = this.tongueLength; // Run getter and then set it on parent
+        else super.tongueLength = n; // Invoke parent setter (default)
     }
     addReward(sig) {
         var amount = sig.rewardAmount;
