@@ -18,6 +18,12 @@ class ParasiteGame extends XEventEmitter {
          */
         this.dialogs = Object.assign({}, opts.dialogs);
         /**
+         * @type {Level[]}
+         */
+        this.levels = opts.levels;
+        // Patch in the prev, next, and index
+        for (var i = 0; i < this.levels.length; i++) this.levels[i].setInfo(this.levels[i - 1], i);
+        /**
          * @type {Dialog}
          */
         this.levelInfoDialog = new Dialog(null, "Play");
@@ -30,7 +36,20 @@ class ParasiteGame extends XEventEmitter {
         this.dialogs._levels.inside.innerHTML = "";
         var h1 = document.createElement("h1");
         h1.textContent = "Levels";
-        this.dialogs._levels.inside.append(h1, ...this.levels[i].map(l => l.levelListEntry));
+        this.dialogs._levels.inside.append(h1, ...this.levels.map((l, i) => {
+            var a = document.createElement("a");
+            a.href = "#level" + i;
+            a.append(l.levelListEntry);
+            a.addEventListener("click", e => {
+                e.preventDefault();
+                if (l.unlocked) {
+                    this.showDialog(false);
+                    this.openLevel(i);
+                }
+                else this.showToast("Level is locked!", "warning");
+            });
+            return a;
+        }));
         Object.keys(this.dialogs).forEach(name => this.dialogs[name].pipeTo("close", this, "dialogclose"));
         /**
          * @type {Toast}
@@ -40,14 +59,6 @@ class ParasiteGame extends XEventEmitter {
          * @type {Canvas}
          */
         this.canvas = opts.canvas;
-        /**
-         * @type {Level[]}
-         */
-        this.levels = opts.levels;
-        // Patch in the prev, next, and index
-        for (var i = 0; i < this.levels.length; i++) {
-            this.levels[i].setInfo(this.levels[i - 1], this.levels[i + 1], i);
-        }
         /**
          * @type {number}
          */
@@ -186,7 +197,7 @@ class ParasiteGame extends XEventEmitter {
      * @param {string[]} names
      */
     _makeSidebar(el, names) {
-        for (var name of names) {
+        names.forEach(name => {
             var a = document.createElement("a");
             a.href = "#" + name; // dummy, does nothing
             a.addEventListener("click", e => {
@@ -197,6 +208,6 @@ class ParasiteGame extends XEventEmitter {
             var p = document.createElement("p");
             p.append(a);
             el.append(p);
-        }
+        });
     }
 }

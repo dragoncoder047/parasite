@@ -11,7 +11,7 @@ class Block {
         /**
          * @type {Matter.Body}
          */
-        this.square = Matter.Bodies.rectangle(position.x, position.y, width, height, {
+        this.body = Matter.Bodies.rectangle(position.x, position.y, width, height, {
             plugin: {
                 block: this,
                 width,
@@ -22,23 +22,23 @@ class Block {
             render: { fillStyle },
             frictionAir: 0.1,
         });
-        /**
-         * @type {Matter.Composite}
-         */
-        this.body = Matter.Composite.create();
-        Matter.Composite.add(this.body, this.square);
+        // /**
+        //  * @type {Matter.Composite}
+        //  */
+        // this.body = Matter.Composite.create();
+        // Matter.Composite.add(this.body, this.body);
     }
     /**
      * @type {number}
      */
     get width() {
-        return this.square.plugin.width;
+        return this.body.plugin.width;
     }
     /**
      * @type {number}
      */
     get height() {
-        return this.square.plugin.height;
+        return this.body.plugin.height;
     }
     /**
      * @type {number}
@@ -46,9 +46,9 @@ class Block {
     set width(newVal) {
         if (typeof newVal !== "number") throw new Error("strange width");
         var ratio = newVal / this.width;
-        var v = new Vector(ratio, 1).rotate(this.square.angle);
-        Matter.Body.scale(this.square, v.x, v.y);
-        this.square.plugin.width = newVal;
+        var v = new Vector(ratio, 1).rotate(this.body.angle);
+        Matter.Body.scale(this.body, v.x, v.y);
+        this.body.plugin.width = newVal;
     }
     /**
      * @type {number}
@@ -56,18 +56,18 @@ class Block {
     set height(newVal) {
         if (typeof newVal !== "number") throw new Error("strange height");
         var ratio = newVal / this.height;
-        var v = new Vector(1, ratio).rotate(this.square.angle);
-        Matter.Body.scale(this.square, v.x, v.y);
-        this.square.plugin.height = newVal;
+        var v = new Vector(1, ratio).rotate(this.body.angle);
+        Matter.Body.scale(this.body, v.x, v.y);
+        this.body.plugin.height = newVal;
     }
     /**
      * @param {CanvasRenderingContext2D} ctx
      */
     renderTo(ctx) {
         ctx.save();
-        ctx.translate(this.square.position.x - this.width / 2, this.square.position.y - this.height / 2);
-        ctx.rotate(this.square.angle);
-        ctx.fillStyle = this.square.render.fillStyle;
+        ctx.translate(this.body.position.x - this.width / 2, this.body.position.y - this.height / 2);
+        ctx.rotate(this.body.angle);
+        ctx.fillStyle = this.body.render.fillStyle;
         ctx.globalAlpha = 0.8;
         ctx.fillRect(0, 0, this.width, this.height);
         ctx.restore();

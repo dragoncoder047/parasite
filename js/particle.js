@@ -1,5 +1,4 @@
 class Particle {
-    static COLLISION_GROUP = Matter.Body.nextGroup(true);
     /**
      * @param {number} size
      * @param {number} hue
@@ -11,7 +10,7 @@ class Particle {
          * @type {Matter.Body}
          */
         this.body = Matter.Bodies.circle(position.x, position.y, size, {
-            collisionFilter: Object.assign({ group: Particle.COLLISION_GROUP }, collisionFilter),
+            collisionFilter,
             render: { fillStyle: Color.hsv(hue, 1, 1).toCSSStr() },
             plugin: { particle: this },
             frictionAir: 0.01

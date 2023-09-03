@@ -142,7 +142,7 @@ function gauss(mu, sigma) {
  * @returns {string}
  */
 function camel2words(camel) {
-    var words = [...camel.matchAll(/(^|[A-Z])[a-z]+/g)].map(x => x[0]);
+    var words = [...camel.matchAll(/(?:^|_*)([A-Z]?[a-z]+)/g)].map(x => x[1]);
     var first = words[0];
     first = first[0].toUpperCase() + first.slice(1).toLowerCase();
     var rest = words.slice(1).map(x => x.toLowerCase());

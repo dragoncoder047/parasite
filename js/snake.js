@@ -449,7 +449,7 @@ class Snake {
                 var p = Matter.Query.point(level.foodParticles.map(p => p.body), this.tongueTip).map(b => b.plugin.particle);
                 if (p) p.forEach(p => {
                     this.energy += p.size;
-                    p.markEaten();
+                    p.setEaten();
                     this.autoLearn(true);
                 });
                 else this.autoLearn(false, "Nothing to eat.");
@@ -536,8 +536,8 @@ class Snake {
 
 class PlayerSnake extends Snake {
     static COLL_FILTER = { category: CollisionLayer.SNAKE, mask: CollisionLayer.PLAYER_MASK };
-    constructor(brain, pos, name) {
-        super(brain, pos, name);
+    constructor(brain, headPos, stack, control, name) {
+        super(brain, headPos, stack, control, name);
         /**
          * @type {Toast}
          */
@@ -630,38 +630,38 @@ class PlayerSnake extends Snake {
                 }
                 this.autoLearn("Not grabbing anything muckable.");
                 break;
-            case PUNISH:
-            case REWARD:
+            case Action.PUNISH:
+            case Action.REWARD:
                 level.addParticle(new RewardSignal(action === Action.REWARD ? 10 : -10, this.head.position, this.forward.rotate(this.tongueAngle).scale(10)));
                 break;
-            case WORLD_MOVE_L:
+            case Action.WORLD_MOVE_L:
                 this._worldEdit(new Vector(-1, 0), 0, 0, 0);
                 break;
-            case WORLD_MOVE_R:
+            case Action.WORLD_MOVE_R:
                 this._worldEdit(new Vector(1, 0), 0, 0, 0);
                 break;
-            case WORLD_MOVE_U:
+            case Action.WORLD_MOVE_U:
                 this._worldEdit(new Vector(0, -1), 0, 0, 0);
                 break;
-            case WORLD_MOVE_D:
+            case Action.WORLD_MOVE_D:
                 this._worldEdit(new Vector(0, 1), 0, 0, 0);
                 break;
-            case WORLD_TURN_CW:
+            case Action.WORLD_TURN_CW:
                 this._worldEdit(new Vector(0, 0), 1, 0, 0);
                 break;
-            case WORLD_TURN_CCW:
+            case Action.WORLD_TURN_CCW:
                 this._worldEdit(new Vector(0, 0), -1, 0, 0);
                 break;
-            case WORLD_INCREASE_WIDTH:
+            case Action.WORLD_INCREASE_WIDTH:
                 this._worldEdit(new Vector(0, 0), 0, 1, 0);
                 break;
-            case WORLD_DECREASE_WIDTH:
+            case Action.WORLD_DECREASE_WIDTH:
                 this._worldEdit(new Vector(0, 0), 0, -1, 0);
                 break;
-            case WORLD_INCREASE_HEIGHT:
+            case Action.WORLD_INCREASE_HEIGHT:
                 this._worldEdit(new Vector(0, 0), 0, 0, 1);
                 break;
-            case WORLD_DECREASE_HEIGHT:
+            case Action.WORLD_DECREASE_HEIGHT:
                 this._worldEdit(new Vector(0, 0), 0, 0, -1);
                 break;
             case Action.SAVE_SNAKE_MODEL:

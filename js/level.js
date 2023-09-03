@@ -72,6 +72,7 @@ class Level {
         this.index = i;
         this.levelListEntry.innerHTML = "";
         this.levelListEntry.append("Level " + i + ": " + this.title, this.beatenIndicator);
+        this.updateCompleteIndicator();
     }
     /**
      * @type {boolean}
@@ -107,14 +108,17 @@ class Level {
             }
             return true;
         });
-        // randomly add food
-        if (Math.random() < 0.01) {
+        var totalFoodAvailable = this.foodParticles.reduce((a, b) => a.size + b.size, 0);
+        // randomly add food, less as it accumulates (no idea what this converges to)
+        if (Math.random() < Math.pow(0.8, totalFoodAvailable)) {
             this.addParticle(new FoodParticle(
-                gauss(20, 20),
+                gauss(10, 3),
                 new Vector(gauss(0, 1000), gauss(0, 1000)),
-                new Vector(gauss(0, 5), gauss(0, 5))));
+                new Vector(gauss(0, 2), gauss(0, 2))));
         }
-        // update level complete indicator
+        this.updateCompleteIndicator();
+    }
+    updateCompleteIndicator() {
         if (this.complete) {
             this.beatenIndicator.style.color = "lime";
             this.beatenIndicator.textContent = "\u2713 Beaten!";

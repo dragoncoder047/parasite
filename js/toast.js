@@ -30,6 +30,9 @@ class Toast {
         if (type) this.dialog.dataset.information = type;
         else delete this.dialog.dataset.information;
         if (this.timeout) clearTimeout(this.timeout);
+        // move element to top
+        this.dialog.remove();
+        document.body.append(this.dialog);
         this.dialog.inert = true;
         this.dialog.show();
         this.dialog.inert = false;

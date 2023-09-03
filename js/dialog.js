@@ -5,7 +5,7 @@ class Dialog extends XEventEmitter {
      */
     constructor(elem, closeButtonMessage = "close") {
         super();
-        if (elem === null) {
+        if (!elem) {
             elem = document.createElement("dialog");
             elem.classList.add("big");
             document.body.append(elem);

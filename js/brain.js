@@ -116,7 +116,7 @@ class Brain {
         bin.snake = closest(this.snake.head.position, getHits(triangle, level.snakes.flatMap(s => s.segments)));
         bin.pheremone = closest(this.snake.head.position, getHits(triangle, level.activePheremones.map(s => s.body)));
         bin.food = closest(this.snake.head.position, getHits(triangle, level.foodParticles.map(s => s.body)));
-        bin.wall = closest(this.snake.head.position, getHits(triangle, level.blocks.flatMap(s => s.body)));
+        bin.wall = closest(this.snake.head.position, getHits(triangle, level.blocks.map(s => s.body)));
         this.bins[binNumber] = bin;
     }
     /**

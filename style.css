@@ -2,6 +2,10 @@
     color-scheme: light dark;
 }
 
+body {
+    overflow: hidden;
+}
+
 main {
     width: 100%;
     height: 100%;
@@ -16,6 +20,10 @@ main {
 
 #canvas_container {
     flex: 1;
+}
+
+#bottom_bar {
+    padding: 0.3em;
 }
 
 /* some from https://stackoverflow.com/a/64708195 */
@@ -44,7 +52,7 @@ dialog::backdrop {
     background-color: black;
 }
 
-dialog.big {
+dialog.bigg {
     width: 80%;
     height: 80%;
     padding: 2em;
