@@ -155,6 +155,11 @@ class Muckable {
             i.addEventListener("input", () => {
                 s.value = i.type === "checkbox" ? i.checked : i.value;
             });
+            // Allow the user to type in the box without controls being intercepted.
+            // this also disables escape key to get out of the modal and return to the game, but
+            // if they clicked in the box they can click out of it too :)
+            i.addEventListener("focus", () => this.ctx.enableCapture(false));
+            i.addEventListener("blur", () => this.ctx.enableCapture(true));
             var p2ind = document.createElement("span");
             p2ind.style.width = CSS.em(1);
             p2ind.style.setProperty("text-align", "right");
@@ -174,7 +179,7 @@ class Muckable {
                         this.p2i = clamp(this.p2i + 1, 0, this.p2.length - 1);
                         break;
                     case "prev":
-                        this.p2i = clamp(this.p2i - 1, 0, this.p2.length - 1 );
+                        this.p2i = clamp(this.p2i - 1, 0, this.p2.length - 1);
                         break;
                     case "inc":
                         this.changeValue(1);
