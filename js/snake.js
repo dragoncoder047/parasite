@@ -655,16 +655,16 @@ class PlayerSnake extends Snake {
                 this._worldEdit(new Vector(0, 0), -1, 0, 0);
                 break;
             case Action.WORLD_INCREASE_WIDTH:
-                this._worldEdit(new Vector(0, 0), 0, 1, 0, 6);
-                break;
-            case Action.WORLD_DECREASE_WIDTH:
-                this._worldEdit(new Vector(0, 0), 0, -1, 0, 6);
-                break;
-            case Action.WORLD_INCREASE_HEIGHT:
                 this._worldEdit(new Vector(0, 0), 0, 0, 1, 6);
                 break;
-            case Action.WORLD_DECREASE_HEIGHT:
+            case Action.WORLD_DECREASE_WIDTH:
                 this._worldEdit(new Vector(0, 0), 0, 0, -1, 6);
+                break;
+            case Action.WORLD_INCREASE_HEIGHT:
+                this._worldEdit(new Vector(0, 0), 0, 1, 0, 6);
+                break;
+            case Action.WORLD_DECREASE_HEIGHT:
+                this._worldEdit(new Vector(0, 0), 0, -1, 0, 6);
                 break;
             case Action.SAVE_SNAKE_MODEL:
             case Action.VIEW_SAVED_SNAKES:
