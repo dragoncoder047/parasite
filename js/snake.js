@@ -691,10 +691,12 @@ class PlayerSnake extends Snake {
             return;
         }
         var b = this.grabbing.body;
-        var offset = new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(b.position);
-        var rot = offset.rotate(turn * scaleFactor).minus(offset);
-        Matter.Body.rotate(b, turn * scaleFactor, false); // true here causes NaN ?!?!?!?
-        Matter.Body.translate(b, displacement.scale(scaleFactor).minus(rot), true);
+        var center = new Vector(Matter.Constraint.pointBWorld(this.grabber));
+        var offset = center.minus(b.position);
+        var diff = offset.rotate(turn * scaleFactor).minus(offset);
+        Matter.Body.rotate(b, turn * scaleFactor, center, false);
+        Matter.Body.translate(b, displacement.scale(scaleFactor), true);
+        this.grabber.pointB = diff.plus(this.grabber.pointB);
         this.grabbing.width += widthChange * scaleFactor;
         this.grabbing.height += heightChange * scaleFactor;
     }
