@@ -45,6 +45,7 @@ class Block {
      */
     set width(newVal) {
         if (typeof newVal !== "number") throw new Error("strange width");
+        if (newVal < 10) newVal = 10;
         var ratio = newVal / this.width;
         var angle = this.body.angle;
         Matter.Body.rotate(this.body, -angle);
@@ -58,6 +59,7 @@ class Block {
      */
     set height(newVal) {
         if (typeof newVal !== "number") throw new Error("strange height");
+        if (newVal < 10) newVal = 10;
         var ratio = newVal / this.height;
         var angle = this.body.angle;
         Matter.Body.rotate(this.body, -angle);

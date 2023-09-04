@@ -53,6 +53,10 @@ Key assignments:
         ["y", "while-held", Action.WORLD_MOVE_R],
         ["u", "while-held", Action.WORLD_TURN_CW],
         ["j", "while-held", Action.WORLD_TURN_CCW],
+        ["g", "while-held", Action.WORLD_INCREASE_HEIGHT],
+        ["b", "while-held", Action.WORLD_DECREASE_HEIGHT],
+        ["v", "while-held", Action.WORLD_INCREASE_WIDTH],
+        ["n", "while-held", Action.WORLD_DECREASE_WIDTH],
     ]),
 );
 
