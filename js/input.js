@@ -18,8 +18,11 @@ class IOStack {
     push(c) {
         this.stack.push(c);
     }
+    /**
+     * @returns {InputCtx}
+     */
     pop() {
-        this.stack.pop();
+        return this.stack.pop();
     }
 }
 
@@ -45,13 +48,16 @@ class InputCtx {
         return this.iostack.hasControl(this);
     }
     takeControl() {
+        var old = this.iostack.stack[this.iostack.stack.length - 1];
         this.iostack.push(this);
+        old.controls.forEach(c => c.enableCapture(false));
         this.controls.forEach(c => c.enableCapture(true));
     }
     returnControl() {
         if (this.hasControl()) {
-            this.iostack.pop();
             this.controls.forEach(c => c.enableCapture(false));
+            var old = this.iostack.pop();
+            old.controls.forEach(c => c.enableCapture(true));
         }
     }
     /**
