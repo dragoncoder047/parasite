@@ -46,8 +46,11 @@ class Block {
     set width(newVal) {
         if (typeof newVal !== "number") throw new Error("strange width");
         var ratio = newVal / this.width;
-        var v = new Vector(ratio, 1).rotate(this.body.angle);
-        Matter.Body.scale(this.body, v.x, v.y);
+        var angle = this.body.angle;
+        Matter.Body.rotate(this.body, -angle);
+        Matter.Body.scale(this.body, ratio, 1);
+        Matter.Body.rotate(this.body, angle);
+        Matter.Sleeping.set(this.body, false);
         this.body.plugin.width = newVal;
     }
     /**
@@ -56,8 +59,11 @@ class Block {
     set height(newVal) {
         if (typeof newVal !== "number") throw new Error("strange height");
         var ratio = newVal / this.height;
-        var v = new Vector(1, ratio).rotate(this.body.angle);
-        Matter.Body.scale(this.body, v.x, v.y);
+        var angle = this.body.angle;
+        Matter.Body.rotate(this.body, -angle);
+        Matter.Body.scale(this.body, 1, ratio);
+        Matter.Body.rotate(this.body, angle);
+        Matter.Sleeping.set(this.body, false);
         this.body.plugin.height = newVal;
     }
     /**
@@ -65,11 +71,17 @@ class Block {
      */
     renderTo(ctx) {
         ctx.save();
-        ctx.translate(this.body.position.x - this.width / 2, this.body.position.y - this.height / 2);
-        ctx.rotate(this.body.angle);
         ctx.fillStyle = this.body.render.fillStyle;
         ctx.globalAlpha = 0.8;
-        ctx.fillRect(0, 0, this.width, this.height);
+        ctx.beginPath();
+        var vl = this.body.parts[0].vertices;
+        for (var i = 0; i <= vl.length; i++) {
+            var v = vl[i % vl.length];
+            if (i === 0) ctx.moveTo(v.x, v.y);
+            else ctx.lineTo(v.x, v.y);
+        }
+        ctx.closePath();
+        ctx.fill();
         ctx.restore();
     }
     tickWorld() {

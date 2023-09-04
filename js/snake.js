@@ -471,7 +471,6 @@ class Snake {
                 if (this.energy > this.muckParams.get("growCost")) {
                     this.energy -= this.muckParams.get("growCost");
                     this.growBy(this.muckParams.get("growAmount"));
-                    this.autoLearn(true);
                 } else this.autoLearn(false, "Not enough energy to grow.");
             case Action.PHEREMONE_INC_COLOR:
                 this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta") + 1) % 1;
@@ -568,11 +567,11 @@ class PlayerSnake extends Snake {
         return map(realLength, Snake.HEAD_WIDTH, Snake.MAX_TONGUE, 0, 1, false);
     }
     set tongueAngle(n) {
-        if (this.grabbing) super.tongueAngle = this.tongueAngle; // Run getter and then set it on parent
+        if (this.grabbing) return;
         else super.tongueAngle = n; // Invoke parent setter (default)
     }
     set tongueLength(n) {
-        if (this.grabbing) super.tongueLength = this.tongueLength; // Run getter and then set it on parent
+        if (this.grabbing) return;
         else super.tongueLength = n; // Invoke parent setter (default)
     }
     addReward(sig) {
@@ -638,16 +637,16 @@ class PlayerSnake extends Snake {
                 level.addParticle(new RewardSignal(action === Action.REWARD ? 10 : -10, this.head.position, this.forward.rotate(this.tongueAngle).scale(5)));
                 break;
             case Action.WORLD_MOVE_L:
-                this._worldEdit(new Vector(-1, 0), 0, 0, 0);
+                this._worldEdit(new Vector(-1, 0), 0, 0, 0, 3);
                 break;
             case Action.WORLD_MOVE_R:
-                this._worldEdit(new Vector(1, 0), 0, 0, 0);
+                this._worldEdit(new Vector(1, 0), 0, 0, 0, 3);
                 break;
             case Action.WORLD_MOVE_U:
-                this._worldEdit(new Vector(0, -1), 0, 0, 0);
+                this._worldEdit(new Vector(0, -1), 0, 0, 0, 3);
                 break;
             case Action.WORLD_MOVE_D:
-                this._worldEdit(new Vector(0, 1), 0, 0, 0);
+                this._worldEdit(new Vector(0, 1), 0, 0, 0, 3);
                 break;
             case Action.WORLD_TURN_CW:
                 this._worldEdit(new Vector(0, 0), 1, 0, 0);
@@ -669,7 +668,7 @@ class PlayerSnake extends Snake {
                 break;
             case Action.SAVE_SNAKE_MODEL:
             case Action.VIEW_SAVED_SNAKES:
-                todo();
+                todo("saved snakes");
             default:
                 super.executeAction(action, level);
         }
@@ -691,9 +690,11 @@ class PlayerSnake extends Snake {
             this.autoLearn(false, "Can't modify a snake. Muck it instead.");
             return;
         }
-        var bounds = this.grabbing.body.bounds;
-        Matter.Body.rotate(this.grabbing.body, turn * scaleFactor, false, true);
-        Matter.Body.translate(this.grabbing.body, displacement.scale(scaleFactor), true);
+        var b = this.grabbing.body;
+        var offset = new Vector(Matter.Constraint.pointBWorld(this.grabber)).minus(b.position);
+        var rot = offset.rotate(turn * scaleFactor).minus(offset);
+        Matter.Body.rotate(b, turn * scaleFactor, false); // true here causes NaN ?!?!?!?
+        Matter.Body.translate(b, displacement.scale(scaleFactor).minus(rot), true);
         this.grabbing.width += widthChange * scaleFactor;
         this.grabbing.height += heightChange * scaleFactor;
     }

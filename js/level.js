@@ -3,7 +3,7 @@ class Level {
         /**
          * @type {Matter.Engine}
          */
-        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 }, enableSleeping: true });
+        this.physicsEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 }, enableSleeping: false }); // sleeping cause weird bugs with world edit
         Matter.Events.on(this.physicsEngine,
             "collisionStart collisionActive",
             e => e.pairs.forEach(pair => this.processCollision(pair)));
