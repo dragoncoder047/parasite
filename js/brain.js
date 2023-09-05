@@ -134,6 +134,23 @@ class Brain {
         if (position < 0) throw new Error("strange position");
         (isLeft ? this.leftTouches : this.rightTouches).push(position);
     }
+    /**
+     * @returns {{lf: number, lv: number, rf: number, rv: number}}
+     */
+    aggregateSound() {
+        var lv = 0, lsf = 0, rv = 0, rsf = 0;
+        for (var ss of this.soundSources) {
+            var pan = Math.sin(ss.angle);
+            var lf = ss.volume * clamp(1 - pan, 0, 1);
+            var rf = ss.volume * clamp(1 + pan, 0, 1);
+            lv += lf;
+            rv += rf;
+            lsf += ss.freq * lf;
+            rsf += ss.freq * rf;
+        }
+        var lf = lsf / lv, rf = rsf / rv;
+        return { lf, lv, rf, rv };
+    }
 }
 
 class NNBrain extends Brain {
@@ -208,17 +225,7 @@ class NNBrain extends Brain {
         ia[58] = this.headSnake ? 1 : 0;
         ia[59] = this.tailSnake ? 1 : 0;
         // sound
-        var lv = 0, lsf = 0, rv = 0, rsf = 0;
-        for (var ss of this.soundSources) {
-            var pan = Math.sin(ss.angle);
-            var lf = ss.volume * clamp(1 - pan, 0, 1);
-            var rf = ss.volume * clamp(1 + pan, 0, 1);
-            lv += lf;
-            rv += rf;
-            lsf += ss.freq * lf;
-            rsf += ss.freq * rf;
-        }
-        var lf = lsf / lv, rf = rsf / rv;
+        var { lf, lv, rf, rv } = this.aggregateSound();
         ia[60] = lf;
         ia[61] = lv;
         ia[62] = rf;
@@ -307,10 +314,19 @@ class PlayerBrain extends Brain {
          */
         this.pherSwatch = document.createElement("output");
         [this.headSwatch, this.tailSwatch, this.pherSwatch].forEach(s => s.classList.add("swatch"));
+        var hh = document.createElement("span");
+        hh.append("Head Hue: ", this.headSwatch, "Tail Hue: ", this.tailSwatch, "Pheremone Hue: ", this.pherSwatch);
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.sndL = document.createElement("output");
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.sndR = document.createElement("output");
         var r2 = document.createElement("div");
+        r2.append(hh, "Sound: ", this.sndL, " (left) ", this.sndR, " (right)");
         r2.style.flex = 1;
-        r2.classList.add("flex-row");
-        r2.append("Head Hue: ", this.headSwatch, "Tail Hue: ", this.tailSwatch, "Pheremone Hue: ", this.pherSwatch);
         this.column2.append(r2);
     }
     think() {
@@ -333,5 +349,8 @@ class PlayerBrain extends Brain {
         this.headSwatch.style.backgroundColor = Color.hsv(this.snake.headHue, 1, 1).toCSSStr();
         this.tailSwatch.style.backgroundColor = Color.hsv(this.snake.tailHue, 1, 1).toCSSStr();
         this.pherSwatch.style.backgroundColor = Color.hsv(this.snake.pheremoneHue, 1, 1).toCSSStr();
+        var { lf, lv, rf, rv } = this.aggregateSound();
+        this.sndL.textContent = lv.toFixed(2) + (lv > 0 ? " " + lf.toFixed(1) : "");
+        this.sndR.textContent = rv.toFixed(2) + (rv > 0 ? " " + rf.toFixed(1) : "");
     }
 }
