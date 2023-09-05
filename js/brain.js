@@ -183,22 +183,22 @@ class NNBrain extends Brain {
         for (var bn = 0; bn < 5; bn++) {
             var bbi = bn * 10;
             if (this.bins[bn].snake) {
-                ia[bbi + 0] = this.bins[bn].snake.body.plugin.snake.headHue;
-                ia[bbi + 1] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
-                ia[bbi + 2] = this.bins[bn].snake.body.plugin.snake.energy;
+                ia[bbi + 4] = this.bins[bn].snake.body.plugin.snake.headHue;
+                ia[bbi + 5] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
+                ia[bbi + 6] = this.bins[bn].snake.body.plugin.snake.energy;
             }
             if (this.bins[bn].pheremone) {
-                ia[bbi + 3] = this.bins[bn].pheremone.body.plugin.particle.hue;
-                ia[bbi + 4] = this.bins[bn].pheremone.point.minus(this.snake.head.position).length();
-                ia[bbi + 5] = this.bins[bn].pheremone.body.plugin.particle.size;
+                ia[bbi + 7] = this.bins[bn].pheremone.body.plugin.particle.hue;
+                ia[bbi + 8] = this.bins[bn].pheremone.point.minus(this.snake.head.position).length();
+                ia[bbi + 9] = this.bins[bn].pheremone.body.plugin.particle.size;
             }
             if (this.bins[bn].food) {
-                ia[bbi + 6] = this.bins[bn].food.point.minus(this.snake.head.position).length();
-                ia[bbi + 7] = this.bins[bn].food.body.plugin.particle.size;
+                ia[bbi + 10] = this.bins[bn].food.point.minus(this.snake.head.position).length();
+                ia[bbi + 11] = this.bins[bn].food.body.plugin.particle.size;
             }
             if (this.bins[bn].snake) {
-                ia[bbi + 8] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
-                ia[bbi + 9] = 1;
+                ia[bbi + 12] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
+                ia[bbi + 13] = 1;
             }
         }
         ia[54] = this.leftTouches.length ? 1 : 0;
