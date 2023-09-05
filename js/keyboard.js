@@ -45,7 +45,7 @@ class Key extends Control {
             if (e.key !== this.key) return;
             e.preventDefault();
             this.down = false;
-            this.emit("up");
+            this.emit("release");
         });
         this.result = result;
         /**

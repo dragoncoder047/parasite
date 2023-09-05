@@ -1,7 +1,7 @@
 class IOStack {
     constructor() {
         /**
-         * @type {InputCtx}
+         * @type {InputCtx[]}
          */
         this.stack = [];
     }
@@ -19,10 +19,16 @@ class IOStack {
         this.stack.push(c);
     }
     /**
-     * @returns {InputCtx}
+     * @returns {InputCtx | undefined}
      */
     pop() {
         return this.stack.pop();
+    }
+    /**
+     * @returns {InputCtx | undefined}
+     */
+    current() {
+        return this.stack[this.stack.length - 1];
     }
 }
 
@@ -48,17 +54,17 @@ class InputCtx {
         return this.iostack.hasControl(this);
     }
     takeControl() {
-        var old = this.iostack.stack[this.iostack.stack.length - 1];
+        var old = this.iostack.current();
         this.iostack.push(this);
-        old.controls.forEach(c => c.enableCapture(false));
-        this.controls.forEach(c => c.enableCapture(true));
+        if (old !== undefined) old.enableCapture(false);
+        this.enableCapture(true);
     }
     returnControl() {
-        if (this.hasControl()) {
-            this.controls.forEach(c => c.enableCapture(false));
-            var old = this.iostack.pop();
-            old.controls.forEach(c => c.enableCapture(true));
-        }
+        if (!this.hasControl()) throw new Error("weird state corruption");
+        this.enableCapture(false);
+        this.iostack.pop();
+        var old = this.iostack.current();
+        if (old !== undefined) old.enableCapture(true);
     }
     /**
      * @returns {any[]}
@@ -72,6 +78,12 @@ class InputCtx {
     sendOutput(o) {
         if (!this.hasControl()) return;
         this.controls.forEach(c => c.processOutput(o));
+    }
+    /**
+     * @param {boolean} x
+     */
+    enableCapture(x) {
+        this.controls.forEach(c => c.enableCapture(x));
     }
 }
 
