@@ -472,6 +472,7 @@ class Snake {
                     this.energy -= this.muckParams.get("growCost");
                     this.growBy(this.muckParams.get("growAmount"));
                 } else this.autoLearn(false, "Not enough energy to grow.");
+                break;
             case Action.PHEREMONE_INC_COLOR:
                 this.pheremoneHue = (this.pheremoneHue + this.muckParams.get("colorDelta") + 1) % 1;
                 break;
