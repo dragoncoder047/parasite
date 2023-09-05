@@ -324,8 +324,12 @@ class PlayerBrain extends Brain {
          * @type {HTMLOutputElement}
          */
         this.sndR = document.createElement("output");
+        /**
+         * @type {HTMLOutputElement}
+         */
+        this.sndS = document.createElement("output");
         var r2 = document.createElement("div");
-        r2.append(hh, "Sound: ", this.sndL, " (left) ", this.sndR, " (right)");
+        r2.append(hh, "Sound: ", this.sndL, " (left) ", this.sndR, " (right) ", this.sndS, " (self)");
         r2.style.flex = 1;
         this.column2.append(r2);
     }
@@ -352,5 +356,6 @@ class PlayerBrain extends Brain {
         var { lf, lv, rf, rv } = this.aggregateSound();
         this.sndL.textContent = lv.toFixed(2) + (lv > 0 ? " " + lf.toFixed(1) : "");
         this.sndR.textContent = rv.toFixed(2) + (rv > 0 ? " " + rf.toFixed(1) : "");
+        this.sndS.textContent = this.snake.soundVolume.toFixed(2) + " " + this.snake.soundFreq.toFixed(1);
     }
 }
