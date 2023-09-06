@@ -1,3 +1,9 @@
+window.addEventListener("beforeunload", e => {
+    e.preventDefault();
+    e.returnValue = "foo"; // it doesn't matter what this is except that it isn't ""
+    return e.returnValue;
+});
+
 /**
  * @param {string} selector
  * @returns {HTMLElement}
