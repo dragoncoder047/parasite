@@ -155,7 +155,7 @@ class Muckable {
             }
             i.style.flex = 1;
             i.addEventListener("input", () => {
-                s.value = i.type === "checkbox" ? i.checked : i.value;
+                s.value = i.type === "checkbox" ? i.checked : i.type === "number" ? +i.value : i.value;
             });
             // Allow the user to type in the box without controls being intercepted.
             // this also disables escape key to get out of the modal and return to the game, but

@@ -116,7 +116,7 @@ form[method=dialog] {
 .flex-row {
     display: flex;
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
     vertical-align: middle;
 }
 
@@ -144,6 +144,9 @@ form[method=dialog] {
 
 .swatch {
     padding: 0.2em;
-    margin: 0.2em;
     color: black;
+}
+
+output {
+    margin: 0.25em;
 }

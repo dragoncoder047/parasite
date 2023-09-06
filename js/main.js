@@ -17,9 +17,96 @@ function safe$(selector) {
 function noop() { }
 
 const pt = new Pretrainer(
-    new PretrainPhase("seekFood", noop, noop),
-    new PretrainPhase("avoidWalls", noop, noop),
+    new PretrainPhase("seekFood", noop, (l, b, s) => {
+        s.energy = Math.random() * 300 + 200;
+        var mult = 200 / s.energy;
+        // place food randomly
+        // check to see if snake responds:
+        // farther away: move self or tongue
+        // turn self or tongue depeding on side
+        // eat it if it is close enough
+        var sz = gauss(30, 10);
+        var theta = gauss(0, Math.PI / 2);
+        var dist = gauss(20, 5);
+        var pos = Vector.polar(dist, Math.PI / 2 + theta);
+        l.addParticle(new FoodParticle(sz, pos, Vector.zero()));
+        b.scan(l);
+        var action = b.think();
+        var distanceToFood = s.tongueTip.minus(pos).length();
+        switch (action) {
+            case Action.FORWARD:
+                b.learn(mult * Math.atan(dist - s.tongueLength));
+                s.energy--;
+                break;
+            case Action.LEFT:
+            case Action.RIGHT:
+                b.learn(mult * Math.abs(theta) * 5 * (theta < 0 ? -1 : 1) * (action === Action.LEFT ? -1 : 1));
+                break;
+            case Action.TONGUE_IN:
+            case Action.TONGUE_OUT:
+            case Action.TONGUE_LEFT:
+            case Action.TONGUE_RIGHT:
+                s.executeAction(action);
+                break;
+            case Action.EAT:
+                b.learn(mult * sz * (1 / Math.atan(sz - distanceToFood)));
+                if (sz > distanceToFood) s.energy += sz;
+                break;
+            default:
+                b.learn(-1);
+                // other things are not as desirable
+                break;
+        }
+        // remove old particle
+        l.particles = [];
+    }),
+    // new PretrainPhase("avoidWalls", noop, (l, b, s) => {
+    //     // TODO
+    // }),
+    new PretrainPhase("seekFoodAtAllCostsWhenOutOfEnergy", noop, (l, b, s) => {
+        s.energy = clamp(gauss(100, 75), 0, 200);
+        var sz = gauss(30, 10);
+        var theta = gauss(0, Math.PI / 2);
+        var dist = gauss(20, 5);
+        var pos = Vector.polar(dist, Math.PI / 2 + theta);
+        l.addParticle(new FoodParticle(sz, pos, Vector.zero()));
+        b.scan(l);
+        var action = b.think();
+        var distanceToFood = s.tongueTip.minus(pos).length();
+        switch (action) {
+            case Action.FORWARD:
+                b.learn(-100);
+                break;
+            case Action.LEFT:
+            case Action.RIGHT:
+                b.learn(-100);
+                break;
+            case Action.TONGUE_IN:
+            case Action.TONGUE_OUT:
+            case Action.TONGUE_LEFT:
+            case Action.TONGUE_RIGHT:
+                s.executeAction(action);
+                break;
+            case Action.EAT:
+                b.learn(sz * sz * (1 / Math.atan(sz - distanceToFood)));
+                break;
+            default:
+                b.learn(-50);
+                break;
+        }
+        // remove old particle
+        l.particles = [];
+    }),
 );
+
+function makeBigBox(sz = 5000) {
+    return [
+        new Wall(10, sz, new Vector(-sz / 2, 0)),
+        new Wall(10, sz, new Vector(sz / 2, 0)),
+        new Wall(sz, 10, new Vector(0, -sz / 2)),
+        new Wall(sz, 10, new Vector(0, sz / 2)),
+    ];
+}
 
 // TODO: add more IO sources
 const io = new IOStack();
@@ -102,11 +189,15 @@ const game = new ParasiteGame({
                 new Snake(new NNBrain(), new Vector(0, 400), io, muck_controls, "Leonard"),
             ],
             blocks: [
-                new Wall(20, 1000, new Vector(-30, 500)),
+                ...makeBigBox(),
+                new Glass(100, 100, new Vector(200, 0)),
+                new Grate(100, 100, new Vector(100, 0)),
             ],
-            goal: null,
+            goal: new Goal(level => {
+                return level.snakes.some(snake => snake.length > Snake.INITIAL_LENGTH + 10);
+            }),
             title: "Foo Bar",
-            objective: "This is a TEST level. ",
+            objective: "This is a TEST level. The goal is to cause any snake to grow by 10 units. (On a good day this usually happens by itself.)",
         }),
         new Level({
             snakes: [
@@ -117,20 +208,24 @@ const game = new ParasiteGame({
                 new Snake(new NNBrain(), new Vector(200, 100), io, muck_controls, "Chandler"),
                 new Snake(new NNBrain(), new Vector(225, 100), io, muck_controls, "Ross"),
             ],
+            blocks: [
+                ...makeBigBox(),
+            ],
             goal: null,
             title: "Bar Baz",
             objective: "This is another TEST LEVEL. ",
         }),
     ],
-    player: new PlayerSnake(new PlayerBrain(io, player_controls, safe$("#bottom_bar")), new Vector(0, 0), io, muck_controls, "Player (you)"),
+    player: new PlayerSnake(new PlayerBrain(io, player_controls, safe$("#bottom_bar")), Vector.zero(), io, muck_controls, "Player (you)"),
 });
 
 async function main() {
-
     game.showDialog("welcome");
     await game.dialogs.welcome.waitFor("close");
-    await pt.run();
-    // TODO: load trained model into snakes
+    await pt.run(1000); // TODO: make this more training
+    // load trained model into snakes
+    var model = JSON.stringify(pt.brain.agent.toJSON());
+    game.levels.forEach(level => level.snakes.forEach(snake => snake.brain.agent.fromJSON(JSON.parse(model))));
     game.openLevel(0);
     await game.mainLoop();
     throw new Error("Main loop returned (unreachable!!)");

@@ -74,7 +74,7 @@ class Block {
     renderTo(ctx) {
         ctx.save();
         ctx.fillStyle = this.body.render.fillStyle;
-        ctx.globalAlpha = 0.8;
+        ctx.globalAlpha = 0.5;
         ctx.beginPath();
         var vl = this.body.parts[0].vertices;
         for (var i = 0; i <= vl.length; i++) {
@@ -98,7 +98,7 @@ class Wall extends Block {
      * @param {Vector} position
      */
     constructor(width, height, position) {
-        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, true, "darkblue");
+        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, true, "blue");
     }
 }
 
@@ -109,7 +109,7 @@ class Glass extends Block {
      * @param {Vector} position
      */
     constructor(width, height, position) {
-        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, false, "brickred");
+        super(width, height, position, { category: CollisionLayer.WALL, mask: CollisionLayer.WALL_MASK }, false, "red");
     }
 }
 
@@ -120,6 +120,6 @@ class Grate extends Block {
      * @param {Vector} position
      */
     constructor(width, height, position) {
-        super(width, height, position, { category: CollisionLayer.GRATE, mask: CollisionLayer.GRATE_MASK }, true, "darkgreen");
+        super(width, height, position, { category: CollisionLayer.GRATE, mask: CollisionLayer.GRATE_MASK }, true, "lime");
     }
 }

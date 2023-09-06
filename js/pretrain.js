@@ -32,7 +32,7 @@ class PretrainPhase {
      * @param {Dialog} dialog
      */
     async train(brain, rounds, dialog) {
-        var s = new Snake(brain, new Vector(0, 0), null, null, "pretrainer");
+        var s = new Snake(brain, Vector.zero(), null, null, "pretrainer");
         var l = new Level({ snakes: [s] });
         var bar = document.createElement("progress");
         bar.max = rounds;
@@ -45,7 +45,7 @@ class PretrainPhase {
         for (var i = 0; i < rounds; i++) {
             await this.run(l, brain, s);
             bar.value = i;
-            if (i % 1000 === 0) await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
         }
         bar.remove();
         row.append("\u2713 DONE");
@@ -73,7 +73,7 @@ class Pretrainer {
     /**
      * @param {number} rounds
      */
-    async run(rounds = 100000) {
+    async run(rounds = 1000) {
         this.dialog.setContent("<h1>Pretraining neural network...</h1>");
         this.dialog.show();
         for (var t of this.trainers) {

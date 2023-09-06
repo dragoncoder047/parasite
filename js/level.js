@@ -44,7 +44,7 @@ class Level {
         /**
          * @type {{position: Vector, angle: number}}
          */
-        this.entry = options.entry || { position: new Vector(0, 0), angle: 0 };
+        this.entry = options.entry || { position: Vector.zero(), angle: 0 };
         // Make level info element
         /**
          * @type {HTMLLIElement}
@@ -54,6 +54,7 @@ class Level {
          * @type {HTMLSpanElement}
          */
         this.beatenIndicator = document.createElement("span");
+        this.beatenIndicator.style.marginLeft = CSS.em(1);
         /**
          * @type {Level?}
          */

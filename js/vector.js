@@ -89,4 +89,18 @@ class Vector {
         var cosine = Math.cos(theta), sine = Math.sin(theta);
         return new Vector(this.x * cosine - this.y * sine, this.x * sine + this.y * cosine);
     }
+    /**
+     * @returns {Vector}
+     */
+    static zero() {
+        return new Vector(0, 0);
+    }
+    /**
+     * @param {number} r
+     * @param {number} theta
+     * @returns {Vector}
+     */
+    static polar(r, theta) {
+        return new Vector(r, 0).rotate(theta);
+    }
 }

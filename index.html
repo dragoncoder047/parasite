@@ -32,19 +32,27 @@
     <body>
         <main>
             <div id="canvas_container"></div>
-            <div id="bottom_bar" class="flex-row"></div>
+            <div id="bottom_bar" class="flex-row"></div> <!-- filled in by code -->
         </main>
         <section class="sidebar">
             <h3>Menu</h3>
-            <div id="menuitems"></div>
+            <div id="menuitems"></div> <!-- filled in by code -->
         </section>
         <dialog id="welcome" class="big">
             <h1>PARASITE</h1>
-            <p>The game that doesn't exist yet.</p>
+            <p>You are a snake.</p>
+            <p>There are other snakes.</p>
+            <p>The other snakes are stupid. They don't even know they are snakes.</p>
+            <p>Your job is to teach the other snakes who they are.</p>
         </dialog>
         <dialog id="help" class="big">
             <h1>Help</h1>
-            <p>Not written yet :)</p>
+            <h2>Controls</h2>
+            <p>Use the mouse whell to zoom in and out.</p>
+            <p>Use the arrow keys to move around.</p>
+            <p>Use WASD to move your tongue.</p>
+            <p>Press ` (backtick) to grab or release something.</p>
+            <p>TODO: explain more of this.</p>
         </dialog>
     </body>
     <script src="js/lib/matter.js"></script>
@@ -70,4 +78,5 @@
     <script src="js/level.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
+
 </html>

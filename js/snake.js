@@ -81,7 +81,7 @@ class Snake {
         m.define("moveCost", { type: "number", value: 0.1, limits: [0, 10], step: 0.01, description: "Energy cost required to move forward." });
         m.define("tongueMotionDelta", { type: "number", value: 0.03, limits: [0, 0.2], step: 0.001, description: "Delta used to move tongue left/right/in/out." });
         m.define("colorDelta", { type: "number", value: 1 / 360, limits: [0, 1 / 6], step: 1 / 3600, description: "Delta used to change colors (head, tail, pheremone)." });
-        m.define("growCost", { type: "number", value: 10, limits: [0, 100], description: "Energy cost of growing." });
+        m.define("growCost", { type: "number", value: 50, limits: [0, 100], description: "Energy cost of growing." });
         m.define("growAmount", { type: "number", value: 1, limits: [1, 10], description: "Number of segments to add when growing." });
         m.define("pheremoneCost", { type: "number", value: 2, limits: [0, 100], description: "Energy cost of emitting a pheremone." });
         m.define("mateCost", { type: "number", value: 15, limits: [0, 100], description: "Energy cost of mating with another snake." });
@@ -250,6 +250,7 @@ class Snake {
      */
     listenTo(other) {
         if (other === this) return;
+        if (other.soundVolume === 0) return;
         var sourcePosition = new Vector(0, Snake.HEAD_WIDTH * 2).rotate(other.head.angle).plus(other.head.position);
         var displacementFromSelf = new Vector(this.head.position).minus(sourcePosition).rotate(-this.head.angle);
         this.brain.pushSoundSource({ angle: displacementFromSelf.angle(), freq: other.soundFreq, volume: other.soundVolume * (0.6 ** displacementFromSelf.length()) });
@@ -405,7 +406,7 @@ class Snake {
             Matter.Body.set(b, {
                 position: new Vector(position),
                 angle: angle,
-                velocity: new Vector(0, 0),
+                velocity: Vector.zero(),
                 angularVelocity: 0,
             });
         }
@@ -650,22 +651,22 @@ class PlayerSnake extends Snake {
                 this._worldEdit(new Vector(0, 1), 0, 0, 0, 3);
                 break;
             case Action.WORLD_TURN_CW:
-                this._worldEdit(new Vector(0, 0), 1, 0, 0);
+                this._worldEdit(Vector.zero(), 1, 0, 0);
                 break;
             case Action.WORLD_TURN_CCW:
-                this._worldEdit(new Vector(0, 0), -1, 0, 0);
+                this._worldEdit(Vector.zero(), -1, 0, 0);
                 break;
             case Action.WORLD_INCREASE_WIDTH:
-                this._worldEdit(new Vector(0, 0), 0, 0, 1, 6);
+                this._worldEdit(Vector.zero(), 0, 0, 1, 6);
                 break;
             case Action.WORLD_DECREASE_WIDTH:
-                this._worldEdit(new Vector(0, 0), 0, 0, -1, 6);
+                this._worldEdit(Vector.zero(), 0, 0, -1, 6);
                 break;
             case Action.WORLD_INCREASE_HEIGHT:
-                this._worldEdit(new Vector(0, 0), 0, 1, 0, 6);
+                this._worldEdit(Vector.zero(), 0, 1, 0, 6);
                 break;
             case Action.WORLD_DECREASE_HEIGHT:
-                this._worldEdit(new Vector(0, 0), 0, -1, 0, 6);
+                this._worldEdit(Vector.zero(), 0, -1, 0, 6);
                 break;
             case Action.SAVE_SNAKE_MODEL:
             case Action.VIEW_SAVED_SNAKES:

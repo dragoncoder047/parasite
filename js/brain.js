@@ -102,7 +102,7 @@ class Brain {
         var binCenterAngle = Math.PI / 4 * (binNumber - 2);
         var forward = new Vector(0, this.snake.depthOfVision).rotate(binCenterAngle);
         var triangle = Matter.Bodies.fromVertices(this.snake.head.position.x, this.snake.head.position.y, [[
-            new Vector(0, 0),
+            Vector.zero(),
             forward.rotate(-Math.PI / 8),
             forward,
             forward.rotate(Math.PI / 8),
@@ -358,8 +358,8 @@ class PlayerBrain extends Brain {
         this.tailSwatch.style.backgroundColor = Color.hsv(this.snake.tailHue, 1, 1).toCSSStr();
         this.pherSwatch.style.backgroundColor = Color.hsv(this.snake.pheremoneHue, 1, 1).toCSSStr();
         var { lf, lv, rf, rv } = this.aggregateSound();
-        this.sndL.textContent = lv.toFixed(2) + (lv > 0.1 ? " " + lf.toFixed(1) : "");
-        this.sndR.textContent = rv.toFixed(2) + (rv > 0.1 ? " " + rf.toFixed(1) : "");
+        this.sndL.textContent = lv.toFixed(2) + " " + lf.toFixed(1);
+        this.sndR.textContent = rv.toFixed(2) + " " + rf.toFixed(1);
         this.sndS.textContent = this.snake.soundVolume.toFixed(2) + " " + this.snake.soundFreq.toFixed(1);
     }
 }

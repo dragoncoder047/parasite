@@ -38,15 +38,15 @@ class Canvas extends XEventEmitter {
         /**
          * @type {Vector}
          */
-        this.panxy = new Vector(0, 0);
+        this.panxy = Vector.zero();
         /**
          * @type {Vector}
          */
-        this.downxy = new Vector(0, 0);
+        this.downxy = Vector.zero();
         /**
          * @type {Vector}
          */
-        this.lastxy = new Vector(0, 0);
+        this.lastxy = Vector.zero();
         /**
          * @type {number}
          */
