@@ -314,8 +314,11 @@ class PlayerBrain extends Brain {
          */
         this.pherSwatch = document.createElement("output");
         [this.headSwatch, this.tailSwatch, this.pherSwatch].forEach(s => s.classList.add("swatch"));
-        var hh = document.createElement("span");
-        hh.append("Head Hue: ", this.headSwatch, "Tail Hue: ", this.tailSwatch, "Pheremone Hue: ", this.pherSwatch);
+        var r2 = document.createElement("div");
+        r2.append("Head Hue: ", this.headSwatch, "Tail Hue: ", this.tailSwatch, "Pheremone Hue: ", this.pherSwatch);
+        r2.style.flex = 1;
+        r2.classList.add("flex-row");
+        this.column2.append(r2);
         /**
          * @type {HTMLOutputElement}
          */
@@ -328,10 +331,11 @@ class PlayerBrain extends Brain {
          * @type {HTMLOutputElement}
          */
         this.sndS = document.createElement("output");
-        var r2 = document.createElement("div");
-        r2.append(hh, "Sound: ", this.sndL, " (left) ", this.sndR, " (right) ", this.sndS, " (self)");
-        r2.style.flex = 1;
-        this.column2.append(r2);
+        var r3 = document.createElement("div");
+        r3.append("Sound: ", this.sndL, " (left) ", this.sndR, " (right) ", this.sndS, " (self)");
+        r3.style.flex = 1;
+        r3.classList.add("flex-row");
+        this.column2.append(r3);
     }
     think() {
         this.showPlayerStatus();
@@ -354,8 +358,8 @@ class PlayerBrain extends Brain {
         this.tailSwatch.style.backgroundColor = Color.hsv(this.snake.tailHue, 1, 1).toCSSStr();
         this.pherSwatch.style.backgroundColor = Color.hsv(this.snake.pheremoneHue, 1, 1).toCSSStr();
         var { lf, lv, rf, rv } = this.aggregateSound();
-        this.sndL.textContent = lv.toFixed(2) + (lv > 0 ? " " + lf.toFixed(1) : "");
-        this.sndR.textContent = rv.toFixed(2) + (rv > 0 ? " " + rf.toFixed(1) : "");
+        this.sndL.textContent = lv.toFixed(2) + (lv > 0.1 ? " " + lf.toFixed(1) : "");
+        this.sndR.textContent = rv.toFixed(2) + (rv > 0.1 ? " " + rf.toFixed(1) : "");
         this.sndS.textContent = this.snake.soundVolume.toFixed(2) + " " + this.snake.soundFreq.toFixed(1);
     }
 }
