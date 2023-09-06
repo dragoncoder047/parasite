@@ -120,10 +120,11 @@ const game = new ParasiteGame({
 });
 
 async function main() {
-    await pt.run();
-    // TODO: load trained model into snakes
+
     game.showDialog("welcome");
     await game.dialogs.welcome.waitFor("close");
+    await pt.run();
+    // TODO: load trained model into snakes
     game.openLevel(0);
     await game.mainLoop();
     throw new Error("Main loop returned (unreachable!!)");

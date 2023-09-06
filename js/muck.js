@@ -98,8 +98,10 @@ class Muckable {
                 desc.append(s.description);
                 desc.style.fontStyle = "italic";
                 desc.style.opacity = CSS.percent(50);
-                desc.style.setProperty("font-style", "italic");
+                desc.style.marginLeft = CSS.em(3);
+                desc.style.fontStyle = "italic";
                 var top = document.createElement("div");
+                top.style.padding = 0;
                 r.append(top, desc);
                 r = top;
             }
