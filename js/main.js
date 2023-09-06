@@ -11,16 +11,18 @@ function safe$(selector) {
 // TODO: add more IO sources
 const io = new IOStack();
 const player_controls = new MultiControl(
+
 /*
 
 Key assignments:
 
-`=grab  1=reward 2=punish              4          6 7
+`=grab  1=reward 2=punish    3         4          6 7            8 9 0 - =
         q=grow                e=eat        5rty=move uj=turn      iop=pheremones
                  wasd=tongue             f            h            kl;'=colors
          z=mate      x=muck    c=mate       gvbn=size  m            ,./=sound
 
 */
+
     new Keymap([
         ["ArrowUp", "while-held", Action.FORWARD],
         ["ArrowLeft", "while-held", Action.LEFT],
