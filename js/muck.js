@@ -198,7 +198,7 @@ class Muckable {
             this.p2.forEach((p, i) => {
                 p.p2.textContent = i === this.p2i ? "\u2b9e" : "";
             });
-            this.p2[this.p2i].p2.scrollIntoViewIfNeeded();
+            this.p2[this.p2i].p2.scrollIntoView();
         }
         this.ctx.returnControl();
         for (var p in this.v) delete this.v[p]._p2ind;

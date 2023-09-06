@@ -1,5 +1,5 @@
 class Level {
-    constructor(options) {
+    constructor(options = {}) {
         /**
          * @type {Matter.Engine}
          */

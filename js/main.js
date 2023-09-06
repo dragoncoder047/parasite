@@ -8,20 +8,27 @@ function safe$(selector) {
     return elem;
 }
 
+function noop() { }
+
+const pt = new Pretrainer(
+    new PretrainPhase("seekFood", noop, noop),
+    new PretrainPhase("avoidWalls", noop, noop),
+);
+
 // TODO: add more IO sources
 const io = new IOStack();
 const player_controls = new MultiControl(
 
-/*
+    /*
 
-Key assignments:
+    Key assignments:
 
-`=grab  1=reward 2=punish    3         4          6 7            8 9 0 - =
-        q=grow                e=eat        5rty=move uj=turn      iop=pheremones
-                 wasd=tongue             f            h            kl;'=colors
-         z=mate      x=muck    c=mate       gvbn=size  m            ,./=sound
+    `=grab  1=reward 2=punish    3         4          6 7            8 9 0 - =
+            q=grow                e=eat        5rty=move uj=turn      iop=pheremones
+                     wasd=tongue             f            h            kl;'=colors
+             z=mate      x=muck    c=mate       gvbn=size  m            ,./=sound
 
-*/
+    */
 
     new Keymap([
         ["ArrowUp", "while-held", Action.FORWARD],
@@ -113,6 +120,8 @@ const game = new ParasiteGame({
 });
 
 async function main() {
+    await pt.run();
+    // TODO: load trained model into snakes
     game.showDialog("welcome");
     await game.dialogs.welcome.waitFor("close");
     game.openLevel(0);
