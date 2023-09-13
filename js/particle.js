@@ -102,5 +102,13 @@ class RewardSignal extends Particle {
          */
         this.rewardAmount = rewardAmount;
         this.body.render.fillStyle = this.rewardAmount > 0 ? "lime" : "red";
+        /**
+         * @type {Number}
+         */
+        this.timeCreated = Date.now();
+    }
+    tickWorld() {
+        // Limit max age of a particle to 10 seconds.
+        if (Date.now() - this.timeCreated > 10000) this.setEaten();
     }
 }
