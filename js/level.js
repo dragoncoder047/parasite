@@ -54,7 +54,6 @@ class Level {
          * @type {HTMLSpanElement}
          */
         this.beatenIndicator = document.createElement("span");
-        this.beatenIndicator.style.marginLeft = CSS.em(1);
         /**
          * @type {Level?}
          */
@@ -122,12 +121,12 @@ class Level {
     updateCompleteIndicator() {
         if (this.complete) {
             this.beatenIndicator.style.color = "lime";
-            this.beatenIndicator.textContent = "\u2713 Beaten!";
+            this.beatenIndicator.textContent = "\u2003\u2713 Beaten!";
         } else if (!this.prevLevel || this.prevLevel.complete) {
             this.beatenIndicator.textContent = "";
         } else {
             this.beatenIndicator.style.color = "gray";
-            this.beatenIndicator.textContent = "\u{1f512} Locked";
+            this.beatenIndicator.textContent = "\u2003\u{1f512} Locked";
         }
     }
     /**
