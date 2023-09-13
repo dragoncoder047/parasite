@@ -20,6 +20,7 @@ function safe$(selector) {
 function noop() { }
 
 // TODO: redo all this pretrain stuff.
+/** /
 const pt = new Pretrainer(
     new PretrainPhase("seekFood", noop, (l, b, s) => {
         s.energy = Math.random() * 300 + 200;
@@ -103,6 +104,8 @@ const pt = new Pretrainer(
     }),
 );
 
+/**/
+
 function makeBigBox(sz = 5000) {
     return [
         new Wall(10, sz, new Vector(-sz / 2, 0)),
@@ -163,6 +166,8 @@ const player_controls = new MultiControl(
         ["b", "while-held", Action.WORLD_DECREASE_HEIGHT],
         ["v", "while-held", Action.WORLD_INCREASE_WIDTH],
         ["n", "while-held", Action.WORLD_DECREASE_WIDTH],
+        // ["[", "once", Action.SAVE_SNAKE_MODEL],
+        // ["]", "once", Action.VIEW_SAVED_SNAKES],
     ]),
 );
 
@@ -181,9 +186,10 @@ const game = new ParasiteGame({
     dialogs: {
         welcome: new Dialog(safe$("#welcome"), "Play"),
         help: new Dialog(safe$("#help")),
+        devNotes: new Dialog(safe$("#devNotes")),
     },
     sidebar: safe$("#menuitems"),
-    sidebarDialogNames: ["help", "_levels"],
+    sidebarDialogNames: ["help", "_levels", "devNotes"],
     levels: [
         new Level({
             snakes: [
@@ -227,9 +233,9 @@ async function main() {
     game.showDialog("welcome");
     await game.dialogs.welcome.waitFor("close");
     // await pt.run(1000); // TODO: make this more training
-    // load trained model into snakes
-    var model = JSON.stringify(pt.brain.agent.toJSON());
-    game.levels.forEach(level => level.snakes.forEach(snake => snake.brain.agent.fromJSON(JSON.parse(model))));
+    // // load trained model into snakes
+    // var model = JSON.stringify(pt.brain.agent.toJSON());
+    // game.levels.forEach(level => level.snakes.forEach(snake => snake.brain.agent.fromJSON(JSON.parse(model))));
     game.openLevel(0);
     await game.mainLoop();
     throw new Error("Main loop returned (unreachable!!)");

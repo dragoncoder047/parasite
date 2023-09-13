@@ -16,9 +16,11 @@
                     );
                     fetch("/report_error/" + encodeURIComponent(err));
                     document.documentElement.innerHTML = "Fatal error: please copy and <a href=\"https://github.com/dragoncoder047/langton-music/issues\">report</a>: <pre>" + err + "</pre>";
+                    window.onbeforeunload = null;
                 }
                 catch (e) {
                     document.documentElement.innerHTML = "Double fatal error: please copy and <a href=\"https://github.com/dragoncoder047/langton-music/issues\">report</a>: <pre>" + e.stack + "</pre>";
+                    window.onbeforeunload = null;
                     throw e;
                 }
                 throw error;
@@ -48,13 +50,35 @@
             The other snakes are stupid. They don't even know they are snakes.
 
             Your job is to teach the other snakes who they are.
+
+            *Note: The game is in a bit of a "shell" state right now. There really aren't any useful levels yet. You are welcome to play around and report any bugs, nit-picks, or ovservations, [here](https://github.com/dragoncoder047/parasite/issues).*
         </dialog>
         <dialog id="help" class="big">
             # Help
 
+            ## Snakes
+
+            All of the snakes other than the one controlled by you are controlled by AI neural networks. They are fed information about their surroundings and then choose 1 of 22 different things to try to execute in the world.
+
+            Snakes can see, in 5 directions around their head (straight ahead, 45 degrees left and right, and 90 degrees left and right) the distance, hue, and energy level of the closest snake in that direction, the distance, hue, and size of the closest pheremone particle, and the distance to the wall.
+
+            Snakes can also sense whether something is touching them, and where (left/right side of body, and position along the length of their body).
+
+            As well as the environment, snakes' brains are also fed their own energy level, length, and velocity.
+
+            Based on that information, snakes can choose to do a number of different things: move around, eat, release pheremones or make noise (which could be used to communicate among multiple snakes), or grow themselves <!--, or mate with another snake (creating more of them)-->.
+
+            ### You (the player)
+
+            The player snake is given a few special abilities. As well of any of the actions a normal snake is capable of, the player snake can also meddle around with the parameters of the world itself.
+
+            You can grab onto a wall or a block and move it around, resize it, turn it, etc. You can also grab a snake and modify its physical properties, such as the energy cost for moving.
+
             ## Controls
 
-            * Use the mouse wheel to zoom in and out.
+            ### Keyboard
+
+            * Use the mouse wheel to zoom in and out. (The camera automatically follows you around.)
             * Use the arrow keys to move around.
             * Use `w`/`a`/`s`/`d` to move your tongue.
             * Press `` ` `` (backtick) to grab or release something.
@@ -65,6 +89,23 @@
             * Press `,`, `.`, and `/` to make noise.
 
             **TODO finish this**
+
+            ### Gamepad
+
+            ***TODO***
+        </dialog>
+        <dialog id="devNotes" class="big">
+            # Development Notes
+
+            ## Things to do
+
+            * [ ] Make more useful levels.
+            * [ ] Make sure error toasts still go on top of the level complete toast.
+            * [ ] Train the snake AIs to actually act like snakes.
+              * [ ] Export and save a pretrained model somewhere and then fetch JSON and load it onto all the snakes.
+            * [ ] Add a plugin/modding mechanism for users to add new things.
+            * [ ] Finish implementing last 2 actions for snakes -- creating more snakes other than the ones already added.
+            * [ ] Everything else marked `TODO`.
         </dialog>
     </body>
     <script src="js/lib/matter.js"></script>
