@@ -213,8 +213,8 @@ class NNBrain extends Brain {
                 ia[bbi + 10] = this.bins[bn].food.point.minus(this.snake.head.position).length();
                 ia[bbi + 11] = this.bins[bn].food.body.plugin.particle.size;
             }
-            if (this.bins[bn].snake) {
-                ia[bbi + 12] = this.bins[bn].snake.point.minus(this.snake.head.position).length();
+            if (this.bins[bn].wall) {
+                ia[bbi + 12] = this.bins[bn].wall.point.minus(this.snake.head.position).length();
                 ia[bbi + 13] = 1;
             }
         }
