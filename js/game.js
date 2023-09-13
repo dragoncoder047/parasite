@@ -32,11 +32,10 @@ class ParasiteGame extends XEventEmitter {
          * @type {Dialog}
          */
         this.levelsDialog = new Dialog(null, false);
-        this.dialogs._levels = this.levelsDialog;
-        this.dialogs._levels.inside.innerHTML = "";
+        this.levelsDialog.inside.innerHTML = "";
         var h1 = document.createElement("h1");
         h1.textContent = "Levels";
-        this.dialogs._levels.inside.append(h1, ...this.levels.map((l, i) => {
+        this.levelsDialog.inside.append(h1, ...this.levels.map((l, i) => {
             var a = document.createElement("a");
             a.href = "#level" + i;
             a.append(l.levelListEntry);
@@ -151,17 +150,15 @@ class ParasiteGame extends XEventEmitter {
      * @param {number} index
      */
     openLevel(index) {
-        if (this.currentLevelIndex !== index) {
-            // remove player snake from current level
-            this.currentLevel.removeSnake(this.playerSnake);
-            // modify the exit point so the player can't cheat by opening and
-            // closing the levels picker to be teleported back to the origin
-            this.currentLevel.entry.position = new Vector(this.playerSnake.head.position);
-            // switch level
-            this.currentLevelIndex = index;
-            this.currentLevel.addSnake(this.playerSnake);
-            this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
-        }
+        // remove player snake from current level
+        this.currentLevel.removeSnake(this.playerSnake);
+        // modify the exit point so the player can't cheat by opening and
+        // closing the levels picker to be teleported back to the origin
+        this.currentLevel.entry.position = new Vector(this.playerSnake.head.position);
+        // switch level
+        this.currentLevelIndex = index;
+        this.currentLevel.addSnake(this.playerSnake);
+        this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
         // display level introduction dialog
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
@@ -206,6 +203,20 @@ class ParasiteGame extends XEventEmitter {
      * @param {string[]} names
      */
     _makeSidebar(el, names) {
+        // do levels picker
+        var a = document.createElement("a");
+        a.href = "#levels"
+        a.addEventListener("click", e => {
+            e.preventDefault();
+            this.showDialog(false);
+            this.levels.forEach(level => level.updateCompleteIndicator());
+            this.levelInfoDialog.show();
+        });
+        a.append("Levels");
+        var p = document.createElement("p");
+        p.append(a);
+        el.append(p);
+        // do ones fo options
         names.forEach(name => {
             var a = document.createElement("a");
             a.href = "#" + name; // dummy, does nothing

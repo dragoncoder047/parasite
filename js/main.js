@@ -189,7 +189,7 @@ const game = new ParasiteGame({
         devNotes: new Dialog(safe$("#devNotes")),
     },
     sidebar: safe$("#menuitems"),
-    sidebarDialogNames: ["help", "_levels", "devNotes"],
+    sidebarDialogNames: ["help", "devNotes"],
     levels: [
         new Level({
             snakes: [
