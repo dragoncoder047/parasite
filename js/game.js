@@ -151,15 +151,23 @@ class ParasiteGame extends XEventEmitter {
      * @param {number} index
      */
     openLevel(index) {
-        // remove player snake from current level
-        this.currentLevel.removeSnake(this.playerSnake);
-        this.currentLevelIndex = index;
-        this.currentLevel.addSnake(this.playerSnake);
-        this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
+        if (this.currentLevelIndex !== index) {
+            // remove player snake from current level
+            this.currentLevel.removeSnake(this.playerSnake);
+            // modify the exit point so the player can't cheat by opening and
+            // closing the levels picker to be teleported back to the origin
+            this.currentLevel.entry.position = new Vector(this.playerSnake.head.position);
+            // switch level
+            this.currentLevelIndex = index;
+            this.currentLevel.addSnake(this.playerSnake);
+            this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
+        }
+        // display level introduction dialog
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
         this.levelInfoDialog.setContent(`# Level ${name}\n\n${cl.objective}`);
         this.showDialog("_levelInfo");
+        // reset the view box
         this.canvas.zoom = 1;
         this.canvas.panxy = new Vector(this.playerSnake.head.position).plus(this.canvas.center);
     }
