@@ -74,7 +74,7 @@ class Pretrainer {
      * @param {number} rounds
      */
     async run(rounds = 1000) {
-        this.dialog.setContent("<h1>Pretraining neural network...</h1>");
+        this.dialog.setContent("# Pretraining neural network...");
         this.dialog.show();
         for (var t of this.trainers) {
             await t.train(this.brain, rounds, this.dialog);

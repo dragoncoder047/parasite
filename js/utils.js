@@ -150,6 +150,32 @@ function camel2words(camel) {
 }
 
 /**
+ * adapted from https://github.com/dmnd/dedent/blob/main/dedent.ts
+ * @param {TemplateStringsArray | string} strs
+ * @param {any[]} vals
+ * @returns {string}
+ */
+function dedent(strs, vals) {
+	var strings = strs.raw ? strs.raw : [strs];
+	var indented = "";
+	for (var i = 0; i < strings.length; i++) {
+		indented += strings[i];
+		if (vals && i < vals.length) indented += vals[i].toString();
+	}
+	var lines = indented.split("\n");
+	var min = Infinity;
+	for (var line of lines) {
+		var m = line.match(/^(\s+)\S+/);
+		if (m) min = Math.min(min, m[1].length);
+	}
+	var result = indented;
+	if (min !== Infinity) {
+		result = lines.map(l => /\s/.test(l[0]) ? l.slice(min) : l).join("\n");
+	}
+	return result.trim().replace(/\\n/g, "\n");
+}
+
+/**
  * @param {string} foo
  * @return {never}
  */

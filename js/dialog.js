@@ -21,7 +21,19 @@ class Dialog extends XEventEmitter {
          * @type {HTMLDivElement}
          */
         this.inside = document.createElement("div");
-        this.inside.append(...this.elem.childNodes);
+        if (this.elem.childNodes.length > 0 && ![].some.call(this.elem.childNodes, e => ["#comment", "#text"].indexOf(e.nodeName) == -1)) {
+            // Only a text/comment node!
+            if ('marked' in window) {
+                try {
+                    this.inside.innerHTML = marked.parse(dedent(this.elem.textContent));
+                } catch (e) {
+                    this.inside.innerHTML = `<pre style="color: red">Markdown Parse Error:\n${e.stack}</pre>${content}`;
+                }
+            }
+            this.elem.childNodes.forEach(e => e.remove());
+        } else {
+            this.inside.append(...this.elem.childNodes);
+        }
         this.elem.append(this.inside);
         if (closeButtonMessage) {
             var form = document.createElement("form");
@@ -45,9 +57,19 @@ class Dialog extends XEventEmitter {
     }
     /**
      * @param {string | HTMLElement} content
+     * @param {boolean} parseMD
      */
-    setContent(content) {
-        if (typeof content == "string") this.inside.innerHTML = content;
+    setContent(content, parseMD = true) {
+        if (typeof content == "string") {
+            if (parseMD && 'marked' in window) {
+                try {
+                    content = marked.parse(dedent(content));
+                } catch (e) {
+                    content = `<pre style="color: red">Markdown Parse Error:\n${e.stack}</pre>${content}`;
+                }
+            }
+            this.inside.innerHTML = content;
+        }
         else {
             this.inside.innerHTML = "";
             this.inside.append(content);

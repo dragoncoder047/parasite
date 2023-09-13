@@ -4,6 +4,9 @@ window.addEventListener("beforeunload", e => {
     return e.returnValue;
 });
 
+// setup markdown
+marked.use({ gfm: true });
+
 /**
  * @param {string} selector
  * @returns {HTMLElement}
@@ -16,6 +19,7 @@ function safe$(selector) {
 
 function noop() { }
 
+// TODO: redo all this pretrain stuff.
 const pt = new Pretrainer(
     new PretrainPhase("seekFood", noop, (l, b, s) => {
         s.energy = Math.random() * 300 + 200;
@@ -108,7 +112,7 @@ function makeBigBox(sz = 5000) {
     ];
 }
 
-// TODO: add more IO sources
+// TODO: add more IO sources (gamepad, etc.)
 const io = new IOStack();
 const player_controls = new MultiControl(
 
@@ -222,7 +226,7 @@ const game = new ParasiteGame({
 async function main() {
     game.showDialog("welcome");
     await game.dialogs.welcome.waitFor("close");
-    await pt.run(1000); // TODO: make this more training
+    // await pt.run(1000); // TODO: make this more training
     // load trained model into snakes
     var model = JSON.stringify(pt.brain.agent.toJSON());
     game.levels.forEach(level => level.snakes.forEach(snake => snake.brain.agent.fromJSON(JSON.parse(model))));

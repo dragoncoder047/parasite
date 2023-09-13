@@ -158,7 +158,7 @@ class ParasiteGame extends XEventEmitter {
         this.playerSnake.scrunch(this.currentLevel.entry.position, this.currentLevel.entry.angle);
         var cl = this.currentLevel;
         var name = (this.currentLevelIndex + 1) + (cl.title ? ": " + cl.title : "");
-        this.levelInfoDialog.setContent(`<h1>Level ${name}</h1><div>${cl.objective}</div>`);
+        this.levelInfoDialog.setContent(`# Level ${name}\n\n${cl.objective}`);
         this.showDialog("_levelInfo");
         this.canvas.zoom = 1;
         this.canvas.panxy = new Vector(this.playerSnake.head.position).plus(this.canvas.center);
