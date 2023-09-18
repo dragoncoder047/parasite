@@ -110,6 +110,8 @@ class ParasiteGame extends XEventEmitter {
             if (popName === name) pop.show();
             else pop.close();
         }
+        this.levelsDialog.close();
+        this.levelInfoDialog.close();
     }
     /**
      * @type {boolean}
